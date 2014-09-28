@@ -1,14 +1,14 @@
 Engage Web Services
 ===================
 
-# PreRequisits 
+### Pre requisits 
 
 You need to have MySQL running locally
 
 	docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=pwd -d mysql
 
 
-# Build the  container
+### Build the  container
 
 First you need to checkout the git repo
 	
@@ -18,11 +18,13 @@ Then Build the container
 	
 	docker build -t yaelle/engage-ws .
 
-# Fetch the Container
+### Fetch the container
 
 To download the latest version of the app:
 	
 	docker pull yaelle/engage-ws
+
+### Run the container
 
 To start the web-services
 
