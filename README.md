@@ -1,94 +1,34 @@
-# Installation
+Engage Web Services
+===================
 
-1. Install docker using Boot2Docker
+# PreRequisits 
 
-	You will need docker to run Runway into a container.
+You need to have MySQL running locally
 
-	https://github.com/boot2docker/boot2docker
-
-2. Make a volume container (only need to do this once)
-	
-	On the DockerVM
-	
-	```
-	docker run -v /opt --name engage_data busybox true
-	```
-
-3. Share it using Samba (Windows file sharing)
-
-	On the DockerVM
-
-	```
-	docker run --rm -v /usr/local/bin/docker:/docker -v /var/run/docker.sock:/docker.sock svendowideit/samba engage_data
-	```
-
-4. Mount the samba drive on linux 
-	
-	On the DockerVM
-
-	```
-	sudo mkdir /mnt/data
-	sudo mount -t cifs //192.168.59.103/opt /mnt/data -o gid=1000,uid=1000,username=guest
-	```
-
-5. Checkout your code in your container
-	
-	On Windows 
-
-	Open \\192.168.59.103\opt
-	Using Tortoise, checkout trunk of WebService in \\192.168.59.103\opt\WebService
-
-# Install MySQL
-
-	On the DockerVM
-
-	```
-	docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysecretpassword123 -d mysql
-	```
-
-	On windows 
-	
-	The best way to manage mysql is to use MySQL workbench
-	http://www.mysql.com/products/workbench/
+	docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=pwd -d mysql
 
 
 # Build the  container
+
+First you need to checkout the git repo
 	
-	On the DockerVM
+	git clone https://github.com/yaelleUWS/engage_ws.git
 
-	```
-	cd /mnt/data/WebService/
-	docker build -t webservice_img .
-	```
-
-# Run the Container
+Then Build the container
 	
-	On the DockerVM
+	docker build -t yaelle/engage-ws .
 
-	Solution 1: Run without any command and display output
+# Fetch the Container
 
-	```
-	docker run -it -p 8080:8080 --link mysql:mysql --name=webservice webservice_img
-	```
+To download the latest version of the app:
+	
+	docker pull yaelle/engage-ws
 
+To start the web-services
 
-	Solution 2: Run in background (when you want to run on the server)
+	docker run -it -p 8080:8080 --link mysql:mysql --name=webservice yaelle/engage-ws
 
-	```
-	docker run -d -p 8080:8080 --link mysql:mysql --name=webservice webservice_img
-	```
+Or run in background
+	
+	docker run -d -p 8080:8080 --link mysql:mysql --name=webservice yaelle/engage-ws
 
-
-	Solution 3: Run bash shell 
-
-	```
-	docker run -d -p 8080:8080 --link mysql:mysql --name=webservice webservice_img /bin/bash
-	mvn clean install exec:exec
-	```
-
-	Solution 4: Share the code between container and host 
-
-	```
-	docker run -ti -p 8080:8080 --link mysql:mysql --name=webservice --rm --volumes-from engage_data webservice_img /bin/bash
-	mvn clean install exec:exec
-	```
