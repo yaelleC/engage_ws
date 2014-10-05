@@ -1,0 +1,15 @@
+ws:
+  image: yaelle/engage-ws:0.9
+  ports:
+  - "8080:8080"
+  volumes:
+  - /home/engagevm/.m2/settings.xml:/root/.m2/settings.xml
+  links:
+  - "mysql:mysql"
+
+mysql:
+  image: mysql
+  ports:
+  - "3306:3306"
+  environment:
+    MYSQL_ROOT_PASSWORD: 123
