@@ -1,5 +1,5 @@
 ws:
-  image: yaelle/engage-ws:0.9
+  image: yaelle/engage-ws:latest
   ports:
   - "8080:8080"
   volumes:
