@@ -28,4 +28,4 @@ RUN cd /opt/WebService; mvn clean install
 EXPOSE 8080
 WORKDIR /opt/WebService
 
-CMD mvn clean install exec:exec
+CMD mvn exec:exec

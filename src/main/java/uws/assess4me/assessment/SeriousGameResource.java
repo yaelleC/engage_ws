@@ -38,7 +38,7 @@ public class SeriousGameResource {
         }
         catch( Exception e )
         {
-            return null;
+            return "{'error':'"+e+"'}";
         }
     }
 
