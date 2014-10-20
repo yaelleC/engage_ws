@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assess4me>
+    <evidenceModel>
+        <action>
+            <name>select</name>
+            <parameters>
+                <param type="String">product</param>
+                <param type="String">client</param>
+            </parameters>
+            <reaction>
+                <outcome>assoc</outcome>
+                <params>
+                    <value param="product">touchScreen</value>
+                    <value param="client">cellPhoneManufacturer</value>
+                </params>
+                <params>
+                    <value param="product">birthDayCard</value>
+                    <value param="client">retailer</value>
+                </params>
+                <params>
+                    <value param="product">potatoes</value>
+                    <value param="client">supermarket</value>
+                </params>
+                <params>
+                    <value param="product">pacemaker</value>
+                    <value param="client">medicalDevices</value>
+                </params>
+                <params>
+                    <value param="product">antibiotics</value>
+                    <value param="client">hospital</value>
+                </params>
+                <params>
+                    <value param="product">tablets</value>
+                    <value param="client">softwareDeveloper</value>
+                </params>
+                <params>
+                    <value param="product">software</value>
+                    <value param="client">government</value>
+                </params>
+                <points>+5</points>
+            </reaction>
+            <reaction others="true">
+                <outcome>assoc</outcome>
+                <points>-2</points>
+            </reaction>
+            <when>
+                <trigger key="any">rightAssoc</trigger>
+                <trigger key="any">wrongAssoc</trigger>
+            </when>
+        </action>
+    </evidenceModel>
+    <feedbackMessages>
+        <feedback final="false" type="positive">
+            <message>[client] needed exactly [product].</message>
+            <name>rightAssoc</name>
+        </feedback>
+        <feedback final="false" type="negative">
+            <message>[client] didn't need [product], try again.</message>
+            <name>wrongAssoc</name>
+        </feedback>
+        <feedback final="true" type="neutral">
+            <message>Game over! You associated every product to a client!</message>
+            <name>associatedEverything</name>
+        </feedback>
+        <feedback final="false" type="neutral">
+            <message>Are you lost? Check the map by pressing the 'm' key!</message>
+            <name>userConfused</name>
+        </feedback>
+        <feedback final="false" type="neutral">
+            <message>Are you really considering what to sell to clients? Try asking them all the question before you make your choice.</message>
+            <name>userNeedsHelp</name>
+        </feedback>
+    </feedbackMessages>
+    <learningOutcomes>
+        <learningOutcome type="">
+            <desc>Being able to sell the appropriate product to a client</desc>
+            <name>assoc</name>
+            <value>25</value>
+        </learningOutcome>
+    </learningOutcomes>
+    <seriousGame>
+        <language>EN</language>
+        <name>challenge 3</name>
+    </seriousGame>
+    <feedbackModel>
+        <trigger limit="60" repeat="false" type="inactivity">
+            <feedback>userConfused</feedback>
+        </trigger>
+        <trigger limit="20" type="outcome">
+            <feedback>userNeedsHelp</feedback>
+            <outcome>assoc</outcome>
+        </trigger>
+    </feedbackModel>
+</assess4me>

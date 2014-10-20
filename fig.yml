@@ -4,7 +4,8 @@ ws:
     - "mysql:mysql"
   ports:
     - "8080:8080"
-  # volumes:
+  volumes:
+  - .:/opt/WebService
   # - /PATH_TO_GIT_REPO/settings.xml:/root/.m2/settings.xml
 
 mysql:

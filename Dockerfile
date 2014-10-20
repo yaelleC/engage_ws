@@ -12,15 +12,14 @@ ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
 
 # Install maven dependencies
 ADD lib /opt/WebService/lib
-RUN mvn install:install-file -Dfile=/opt/WebService/lib/engage.jar -DgroupId=uws.engage -DartifactId=xtext -Dversion=1.0 -Dpackaging=jar
+ADD install.sh /opt/WebService/install.sh
+RUN cd /opt/WebService; ./install.sh
 
-ADD pom.xml /opt/WebService/
-RUN cd /opt/WebService; mvn clean install
+#ADD pom.xml /opt/WebService/
+#RUN cd /opt/WebService; mvn clean install
 
 # Add code inside the container
 ADD . /opt/WebService
-
-# Install engage jar 
 
 RUN cd /opt/WebService; mvn clean install
 
@@ -28,4 +27,4 @@ RUN cd /opt/WebService; mvn clean install
 EXPOSE 8080
 WORKDIR /opt/WebService
 
-CMD mvn exec:exec
+CMD mvn clean install exec:exec
