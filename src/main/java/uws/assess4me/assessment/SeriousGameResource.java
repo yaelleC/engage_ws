@@ -45,16 +45,16 @@ public class SeriousGameResource {
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public int createSeriousGame(String configFile)
+    public String createSeriousGame(String configFile)
     {
     	uws.chaudy.generator.Engage engage = new uws.chaudy.generator.Engage();
         try
         {
-            return engage.createSG(configFile);
+            return "{ id: '" + engage.createSG(configFile + "' }");
         }
         catch( Exception e )
         {
-            return -10;
+            return "'error':'"+e+"'";
         }
     }
 
