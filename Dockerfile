@@ -13,6 +13,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
 # Install maven dependencies
 ADD lib /opt/WebService/lib
 ADD install.sh /opt/WebService/install.sh
+RUN chmod 777 /opt/WebService/install.sh
 RUN cd /opt/WebService; ./install.sh
 
 #ADD pom.xml /opt/WebService/
