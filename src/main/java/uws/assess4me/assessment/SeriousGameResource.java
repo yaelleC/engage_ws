@@ -50,7 +50,7 @@ public class SeriousGameResource {
     	uws.chaudy.generator.Engage engage = new uws.chaudy.generator.Engage();
         try
         {
-            return "{ id: '" + engage.createSG(configFile + "' }");
+            return engage.createSG(configFile) + "";
         }
         catch( Exception e )
         {
