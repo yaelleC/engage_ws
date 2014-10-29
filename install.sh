@@ -1,4 +1,5 @@
  mvn install:install-file -Dfile=lib/sengage.jar -DgroupId=uws.engage -DartifactId=uws.engage -Dversion=1.0 -Dpackaging=jar
+ mvn install:install-file -Dfile=lib/engageParser.jar -DgroupId=uws.engage.parser -DartifactId=uws.engage.parser -Dversion=1.0 -Dpackaging=jar
  mvn install:install-file -Dfile=lib/sengage_lib/json-simple-1.1.1.jar -DgroupId=com.googlecode.json-simple -DartifactId=json-simple -Dversion=1.1.1 -Dpackaging=jar;
  mvn install:install-file -Dfile=lib/sengage_lib/com.google.guava_15.0.0.v201403281430.jar -DgroupId=com.google.guava -DartifactId=com.google.guava -Dversion=1 -Dpackaging=jar;
  mvn install:install-file -Dfile=lib/sengage_lib/com.google.inject_3.0.0.v201312141243.jar -DgroupId=com.google.inject -DartifactId=com.google.inject -Dversion=1 -Dpackaging=jar;

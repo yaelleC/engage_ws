@@ -57,6 +57,12 @@
     </dependency>
 
     <dependency>
+        <groupId>uws.engage.parser</groupId>
+        <artifactId>uws.engage.parser</artifactId>
+        <version>1.0</version>
+    </dependency>
+
+    <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>com.google.guava</artifactId>
         <version>1</version>

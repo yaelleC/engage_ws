@@ -10,6 +10,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import java.util.ArrayList;
+
+import org.eclipse.xtext.validation.Issue;
+
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 /**
@@ -51,6 +55,34 @@ public class SeriousGameResource {
         try
         {
             return engage.createSG(configFile) + "";
+        }
+        catch( Exception e )
+        {
+            return "'error':'"+e+"'";
+        }
+    }
+
+    @PUT
+    @Path("/check")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String checkDSL(String configFile)
+    {
+        uws.engage.dsl.generator.Parser engageParser = new uws.engage.dsl.generator.Parser();
+        try
+        {
+            ArrayList<JSONObject> errors = new ArrayList<JSONObject>();
+            uws.engage.dsl.generator.ParseResult result = engageParser.parse(configFile);
+            if (!result.issues.isEmpty()) {
+               for (Issue issue : result.issues) {
+                    JSONObject errorLog = new JSONObject(); 
+                    errorLog.put("line", issue.getLineNumber());
+                    errorLog.put("offset", issue.getOffset());
+                    errorLog.put("message", issue.getMessage());
+                    errors.add(errorLog);
+                }
+            }
+            return errors.toString();
         }
         catch( Exception e )
         {
