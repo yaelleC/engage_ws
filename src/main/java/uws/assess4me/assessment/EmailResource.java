@@ -10,7 +10,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import java.util.ArrayList;
 import java.util.Properties;
  
 import javax.mail.Message;
@@ -20,50 +19,30 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.eclipse.xtext.validation.Issue;
-
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 /**
- * Root resource (exposed at "seriousgame" path)
+ * Root resource (exposed at "school" path)
  */
-@Path("seriousgame")
+@Path("email")
 /**
- * This class allows CRUD actions on a seriousgame
+ * This class allows CRUD actions on a school
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
  * @version 2014.07
  *
  */
-public class SeriousGameResource {
+public class EmailResource {
 
-// TODO: To decomment when Xtext project is updated
-
-	@GET
-    @Path("/{idSG}/version/{idVersion}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String getSeriousGame(@PathParam("idSG") int idSeriousGame, 
-                                        @PathParam("idVersion") int version) {
-    	uws.chaudy.generator.Engage engage = new uws.chaudy.generator.Engage();
-        try
-        {
-            return engage.getConfigFile(idSeriousGame, version).toString();
-        }
-        catch( Exception e )
-        {
-            return "{'error':'"+e+"'}";
-        }
-    }
-
-    @PUT
+	@PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public String createSeriousGame(String configFile)
+    public String sendEmail(String text) 
     {
-    	uws.chaudy.generator.Engage engage = new uws.chaudy.generator.Engage();
         try
         {
-            sendEmail(configFile, "EngAGe - CreateSeriousGame");
-            return engage.createSG(configFile) + "";
+            
+            sendEmail(text, "EngAGe - email WS");
+            return "ok";
         }
         catch( Exception e )
         {
@@ -71,50 +50,8 @@ public class SeriousGameResource {
         }
     }
 
-    @PUT
-    @Path("/check")
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String checkDSL(String configFile)
-    {
-        uws.engage.dsl.generator.Parser engageParser = new uws.engage.dsl.generator.Parser();
-        try
-        {
-            ArrayList<JSONObject> errors = new ArrayList<JSONObject>();
-            uws.engage.dsl.generator.ParseResult result = engageParser.parse(configFile);
-            if (!result.issues.isEmpty()) {
-               for (Issue issue : result.issues) {
-                    JSONObject errorLog = new JSONObject(); 
-                    errorLog.put("line", issue.getLineNumber());
-                    errorLog.put("offset", issue.getOffset());
-                    errorLog.put("message", issue.getMessage());
-                    errors.add(errorLog);
-                }
-            }
-            return errors.toString();
-        }
-        catch( Exception e )
-        {
-            return "'error':'"+e+"'";
-        }
-    }
+    
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
-    public int updateSeriousGame(String seriousgame)
-    {
-    	uws.chaudy.generator.Engage engage = new uws.chaudy.generator.Engage();
-        try
-        {
-            JSONObject sg =(JSONObject) JSONValue.parse(seriousgame);
-            return engage.updateSG(sg);
-        }
-        catch( Exception e )
-        {
-            return -10;
-        }
-    }
 
     /**
      * Send the email via SMTP using StartTLS and SSL
@@ -155,7 +92,7 @@ public class SeriousGameResource {
             // Set sender
             message.setFrom(new InternetAddress("engage.assess@gmail.com"));
             // Set the recipients
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("yaelle.chaudy@uws.ac.uk"));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("engage.assess@gmail.com"));
             // Set message subject
             message.setSubject(subject);
             // Set message text
