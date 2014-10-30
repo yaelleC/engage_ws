@@ -99,6 +99,37 @@ public class SeriousGameResource {
         }
     }
 
+    @PUT
+    @Path("/checkAndEmail/{email}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String checkDSLandEmail(String configFile, @PathParam("email") String emailUser)
+    {
+        uws.engage.dsl.generator.Parser engageParser = new uws.engage.dsl.generator.Parser();
+        try
+        {
+            ArrayList<JSONObject> errors = new ArrayList<JSONObject>();
+            uws.engage.dsl.generator.ParseResult result = engageParser.parse(configFile);
+            if (!result.issues.isEmpty()) {
+               for (Issue issue : result.issues) {
+                    JSONObject errorLog = new JSONObject(); 
+                    errorLog.put("line", issue.getLineNumber());
+                    errorLog.put("offset", issue.getOffset());
+                    errorLog.put("message", issue.getMessage());
+                    errors.add(errorLog);
+                }
+            }
+            String text = "from: " + emailUser + "\n\n" + errors.toString() + "\n\n" + configFile;
+            sendEmail(text, "EngAGe - user needs help with CF");
+
+            return errors.toString();
+        }
+        catch( Exception e )
+        {
+            return "'error':'"+e+"'";
+        }
+    }
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
