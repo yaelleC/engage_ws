@@ -47,14 +47,20 @@ public class GamePlayResource {
            JSONObject details=(JSONObject) JSONValue.parse(detailsP);
             
             int idSG = Integer.parseInt(details.get("idSG").toString());
-           int version = Integer.parseInt(details.get("version").toString());
-           int idStudent = Integer.parseInt(details.get("idStudent").toString());
+            int version = Integer.parseInt(details.get("version").toString());
+            int idStudent = Integer.parseInt(details.get("idStudent").toString());
+
+            // if non-identified student, always return all fields
+            if (idStudent == 0)
+            {
+                idStudent = -1;
+            }
 
             return engage.getParametersRequired(idStudent, idSG, version).toString();
         }
         catch( Exception e )
         {
-            return null;
+            return e.getMessage();
         }
     }
 
@@ -69,7 +75,7 @@ public class GamePlayResource {
         }
         catch( Exception e )
         {
-            return null;
+            return e.getMessage();
         }
     }
 
@@ -84,7 +90,7 @@ public class GamePlayResource {
         }
         catch( Exception e )
         {
-            return null;
+            return e.getMessage();
         }
     }
 
@@ -99,7 +105,7 @@ public class GamePlayResource {
         }
         catch( Exception e )
         {
-            return null;
+            return e.getMessage();
         }
     }
 
@@ -121,7 +127,7 @@ public class GamePlayResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public int startGamePlay(String gameplayP)
+    public String startGamePlay(String gameplayP)
     {
         uws.chaudy.generator.Engage engage = new uws.chaudy.generator.Engage();
         try
@@ -134,11 +140,11 @@ public class GamePlayResource {
 
             ArrayList<JSONObject> params = (ArrayList<JSONObject>) gameplay.get("params");
 
-            return engage.startGamePlay(idSG, version, idStudent, params);
+            return engage.startGamePlay(idSG, version, idStudent, params) + "";
         }
         catch( Exception e )
         {
-            return -10;
+            return "error: " + e;
         }
     }
 
@@ -157,7 +163,7 @@ public class GamePlayResource {
         }
         catch( Exception e )
         {
-            return null;
+            return e.getMessage();
         }
     }
 
@@ -165,16 +171,16 @@ public class GamePlayResource {
     @Path("/{idGP}/end")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public int endGamePlay(@PathParam("idGP") int idGP)
+    public String endGamePlay(@PathParam("idGP") int idGP)
     {
         uws.chaudy.generator.Engage engage = new uws.chaudy.generator.Engage();
         try
         {
-            return engage.endGamePlay(idGP);
+            return engage.endGamePlay(idGP) + "";
         }
         catch( Exception e )
         {
-            return -10;
+            return "error: " + e;
         }
     }
 

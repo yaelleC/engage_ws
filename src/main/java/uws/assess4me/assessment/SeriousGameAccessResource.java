@@ -26,15 +26,19 @@ public class SeriousGameAccessResource {
 	@GET
     @Path("/{idSG}/student/{idStudent}")
     @Produces(MediaType.TEXT_PLAIN)
-    public int getVersion(@PathParam("idSG") int idSG, @PathParam("idStudent") int idStudent) {
+    public String getVersion(@PathParam("idSG") int idSG, @PathParam("idStudent") int idStudent) {
     	uws.chaudy.generator.Engage engage = new uws.chaudy.generator.Engage();
         try
         {
-            return engage.getStudentVersionOfSG(idSG, idStudent);
+            if (idStudent == 0)
+            {
+                return "0";
+            }
+            return engage.getStudentVersionOfSG(idSG, idStudent) + "";
         }
         catch( Exception e )
         {
-            return -10;
+            return "error: " + e;
         }
     }
 
@@ -42,16 +46,16 @@ public class SeriousGameAccessResource {
     @Path("/{idSG}/school/{idSchool}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public int giveAccessToSchool(@PathParam("idSG") int idSG, @PathParam("idSchool") int idSchool)
+    public String giveAccessToSchool(@PathParam("idSG") int idSG, @PathParam("idSchool") int idSchool)
     {
     	uws.chaudy.generator.Engage engage = new uws.chaudy.generator.Engage();
         try
         {
-            return engage.giveSGaccessToSchool(idSG, idSchool);
+            return engage.giveSGaccessToSchool(idSG, idSchool) + "";
         }
         catch( Exception e )
         {
-            return -10;
+            return "error: " + e;
         }
     }
 
@@ -59,16 +63,16 @@ public class SeriousGameAccessResource {
     @Path("/{idSG}/student/{idStudent}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public int giveAccessToStudent(@PathParam("idSG") int idSG, int version, @PathParam("idStudent") int idStudent)
+    public String giveAccessToStudent(@PathParam("idSG") int idSG, int version, @PathParam("idStudent") int idStudent)
     {
         uws.chaudy.generator.Engage engage = new uws.chaudy.generator.Engage();
         try
         {
-            return engage.giveSGaccessToStudent(idSG, idStudent, version);
+            return engage.giveSGaccessToStudent(idSG, idStudent, version) + "";
         }
         catch( Exception e )
         {
-            return -10;
+            return "error: " + e;
         }
     }
 
