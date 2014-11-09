@@ -1,4 +1,4 @@
-package uws.assess4me.assessment;
+package uws.engage.assessment;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;

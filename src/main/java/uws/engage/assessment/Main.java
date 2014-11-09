@@ -1,9 +1,9 @@
-package uws.assess4me.assessment;
+package uws.engage.assessment;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import uws.assess4me.assessment.CORSResponseFilter;
+import uws.engage.assessment.CORSResponseFilter;
 import java.io.IOException;
 import java.net.URI;
 
@@ -21,8 +21,8 @@ public class Main {
      */
     public static HttpServer startServer() {
         // create a resource config that scans for JAX-RS resources and providers
-        // in uws.assess4me.assessment package
-        final ResourceConfig rc = new ResourceConfig().packages("uws.assess4me.assessment");
+        // in uws.engage.assessment package
+        final ResourceConfig rc = new ResourceConfig().packages("uws.engage.assessment");
         rc.register(CORSResponseFilter.class);
         // create and start a new instance of grizzly http server
         // exposing the Jersey application at BASE_URI
