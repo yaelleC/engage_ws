@@ -110,6 +110,11 @@ public class GamePlayResource {
             JSONObject logs = new JSONObject();
         
             // add action logs
+            GamePlayController gpController = new GamePlayController();
+            ArrayList<JSONObject> scores = gpController.getScores(idGP);
+            logs.put("scores", scores);
+        
+            // add action logs
             ActionLogController actionLogController = new ActionLogController();
             ArrayList<JSONObject> actionLogs = actionLogController.getActionLog(idGP);
             logs.put("actionLog", actionLogs);

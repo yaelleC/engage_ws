@@ -9,6 +9,9 @@ import java.sql.ResultSet;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.util.ArrayList;
+import java.util.Set;
+
 
 /**
  * This class allows access to the serious game table of the database
@@ -289,5 +292,100 @@ public class SeriousGameController {
 		}
 	}
 
-	
+	public int createSG (JSONObject configFile) throws Exception
+	{
+		
+		
+		// ##################### SERIOUS GAME TABLE ######################		
+		// Create a row in the seriousgame table
+				
+		SeriousGameController SGcontroller = new SeriousGameController();
+		JSONObject sg = (JSONObject)configFile.get("seriousGame");
+		int idSG = SGcontroller.createSeriousGame(sg);
+		int version = 0;
+		if (sg.containsKey("id"))
+		{
+			idSG = Integer.parseInt(sg.get("id").toString());
+			version = Integer.parseInt(sg.get("version").toString());
+		}
+		
+		System.out.println(idSG);
+		System.out.println(version);
+		
+		if (idSG > 0)
+		{			
+			// ##################### PLAYER TABLE ######################		
+			// Create a table player based on the SG player's characteristics
+			
+
+			PlayerController playerController = new PlayerController();
+			if (configFile.get("player") != null)
+			{
+				playerController.createTablePlayer((ArrayList<JSONObject>)configFile.get("player"), idSG, version);
+			}
+			else
+			{
+				playerController.createTablePlayer(new ArrayList<JSONObject>(), idSG, version);
+			}
+					
+			
+			// ##################### FEEDBACK MESSAGES TABLE ######################
+			// Creates rows in table feedback message linked to this SG
+						
+			JSONObject feedback = new JSONObject() ;
+			if (configFile.get("feedback") != null) { feedback = (JSONObject) configFile.get("feedback"); }
+			FeedbackController fdbckController = new FeedbackController();
+			
+			Set<String> keys = feedback.keySet();
+			for (String key : keys)
+			{
+				fdbckController.createFeedback(key, (JSONObject)feedback.get(key), idSG, version);
+			}
+			
+			
+			// ##################### FEEDBACK_TRIGGER TABLE ######################
+			// Creates rows in table feedback_trigger describing the feedback model of this SG
+
+			FeedbackTriggerController triggerController = new FeedbackTriggerController();
+
+			ArrayList<JSONObject> triggersInactivity = new ArrayList<JSONObject>() ;
+			if (configFile.get("inactivityFeedback") != null) { triggersInactivity = (ArrayList<JSONObject>) configFile.get("inactivityFeedback"); }
+			
+			for (JSONObject t : triggersInactivity) {
+				triggerController.addFeedbackTriggerInactivity(idSG, t, version);
+			}
+			
+			
+			
+			// ##################### LEARNING_OUTCOME / FEEDBACK_TRIGGER TABLES ######################
+			// Creates rows in table learning outcome linked to the SG
+			
+			JSONObject los = (JSONObject) configFile.get("learningOutcomes");
+			LearningOutcomeController LOController = new LearningOutcomeController();
+			
+			keys = los.keySet();
+			for (String key : keys) 
+			{
+				JSONObject lo = (JSONObject) los.get(key);
+				int idLO = LOController.createLearningOutcome(key, lo, idSG, version);
+				
+				if (lo.containsKey("feedbackTriggered"))
+				{
+					// create rows in table feedback_trigger 
+					ArrayList<JSONObject> triggers = (ArrayList<JSONObject>) lo.get("feedbackTriggered");
+					for (JSONObject t : triggers) {
+						triggerController.addFeedbackTriggerOutcome(idSG, idLO, t, version);
+					}
+				}
+			}
+			
+			// ##################### SAVE CONFIG FILE ######################
+			// Update SG table to save config file
+			
+			SGcontroller.saveCF(configFile.toJSONString(), idSG);
+				
+		}
+		
+		return idSG;
+	}
 }

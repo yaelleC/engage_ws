@@ -49,7 +49,7 @@ public class SeriousGameResource {
      * @param idVersion = an integer, id of the version of the SG to retrieve
      * @return a json, representing the SG assessment configuration
      */
-	@GET
+    @GET
     @Path("/{idSG}/version/{idVersion}")
     @Produces(MediaType.APPLICATION_JSON)
     public String getSeriousGame(@PathParam("idSG") int idSeriousGame, 
@@ -59,6 +59,30 @@ public class SeriousGameResource {
         {
             SeriousGameController sgController = new SeriousGameController();
             return sgController.getConfigFile(idSeriousGame, version).toString();
+        }
+        catch( Exception e )
+        {
+            return "{'error':'"+e+"'}";
+        }
+    }
+
+    /**
+     * Method handling HTTP GET requests on path "seriousgame/info/{idSG}/version/{idVersion}"
+     * 
+     * @param idSG = an integer id of the SG to retrieve
+     * @param idVersion = an integer, id of the version of the SG to retrieve
+     * @return a json with name, desc... of the SG
+     */
+    @GET
+    @Path("info/{idSG}/version/{idVersion}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getSeriousGameInfo(@PathParam("idSG") int idSeriousGame, 
+                                        @PathParam("idVersion") int version) 
+    {
+        try
+        {
+            SeriousGameController sgController = new SeriousGameController();
+            return sgController.getConfigFile(idSeriousGame, version).get("seriousGame").toString();
         }
         catch( Exception e )
         {
@@ -77,10 +101,13 @@ public class SeriousGameResource {
     @Produces(MediaType.TEXT_PLAIN)
     public String createSeriousGame(String configFile)
     {
-    	uws.chaudy.generator.Engage engage = new uws.chaudy.generator.Engage();
-        try
+    	try
         {
-            return engage.createSG(configFile) + "";
+            uws.engage.dsl.generator.Parser engageParser = new uws.engage.dsl.generator.Parser();
+            JSONObject configFileJSON = engageParser.getJSONfromDSL(configFile);
+
+            SeriousGameController sgController = new SeriousGameController();
+            return sgController.createSG(configFileJSON) + "";
         }
         catch( Exception e )
         {
@@ -131,13 +158,13 @@ public class SeriousGameResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public String updateSeriousGame(String seriousgame)
+    public String updateSeriousGame(String seriousGameCF)
     {
-    	uws.chaudy.generator.Engage engage = new uws.chaudy.generator.Engage();
-        try
+    	try
         {
-            JSONObject sg =(JSONObject) JSONValue.parse(seriousgame);
-            return engage.updateSG(sg) + "";
+            JSONObject configFileJSON=(JSONObject) JSONValue.parse(seriousGameCF);
+            SeriousGameController sgController = new SeriousGameController();
+            return sgController.createSG(configFileJSON) + "";
         }
         catch( Exception e )
         {

@@ -228,8 +228,42 @@ public class GamePlayController {
 		}
 	}
 
+	public float resetScore(int idGamePlay, int idOutcome, float value)
+	{
+		if (g.DEBUG)
+		{
+			System.out.println("*** resetScore ***");
+		}
+		try
+		{
+			PreparedStatement stUpdateOutcomeScore = 
+					conn.prepareStatement("UPDATE  "+ g.TABLE_GAMEPLAY_OUTCOME + " SET " +  g.G_O_FIELD_VALUE + " = ?" + 
+											" WHERE " + g.G_O_FIELD_ID_GP + " = ? AND " + g.G_O_FIELD_ID_O + " = ?");
+
+			stUpdateOutcomeScore.setFloat(1, value);
+			stUpdateOutcomeScore.setInt(2, idGamePlay);
+			stUpdateOutcomeScore.setInt(3, idOutcome);
+			
+			if (g.DEBUG_SQL)
+			{
+				System.out.println(stUpdateOutcomeScore.toString());
+			}
+			
+			stUpdateOutcomeScore.executeUpdate();
+						
+			return g.CST_RETURN_SUCCESS;			
+		}
+		catch (Exception e)
+		{		
+			System.err.println("ERROR (updateScore): " + e.getMessage());
+			return g.CST_RETURN_SQL_ERROR;
+		}
+	}
+
 	public ArrayList<JSONObject> assess (int idGamePlay, JSONObject action) throws Exception
 	{
+		ArrayList<JSONObject> errors = new ArrayList<JSONObject>();
+		Boolean valuesMatchFound = false;
 		if (g.DEBUG)
 		{
 			System.out.println("*** assess ***");
@@ -251,6 +285,25 @@ public class GamePlayController {
 		
 		SeriousGameController sgController = new SeriousGameController();
 		JSONObject configFile = sgController.getConfigFile(idSG, version);
+
+		if (action.get("values") == null)
+		{
+			JSONObject errorValuesNull = new JSONObject();
+			errorValuesNull.put("error", "'values' were not found in json sent");
+			errorValuesNull.put("json", action);
+			errors.add(errorValuesNull);
+			return errors;
+		}
+
+		if (action.get("action") == null)
+		{
+			JSONObject errorActionNull = new JSONObject();
+			errorActionNull.put("error", "'action' was not found in json sent");
+			errorActionNull.put("json", action);
+			errors.add(errorActionNull);
+			return errors;
+		}
+
 		String actionName = action.get("action").toString();
 		JSONObject values = (JSONObject) action.get("values");
 		
@@ -260,9 +313,18 @@ public class GamePlayController {
 		}
 		
 		JSONObject evidenceModel = (JSONObject) configFile.get("evidenceModel");
+		
+		if (evidenceModel.get(actionName) == null)
+		{
+			JSONObject errorActionName = new JSONObject();
+			errorActionName.put("error", "name of action '"+ actionName +"' was not found in the database");
+			errors.add(errorActionName);
+			return errors;
+		}
+
 		JSONObject assessment = (JSONObject) evidenceModel.get(actionName);
 		ArrayList<JSONObject> reactions = (ArrayList<JSONObject>) assessment.get("reactions");
-		
+
 		if (g.DEBUG)
 		{
 			System.out.println("Action found : " + actionName);
@@ -276,6 +338,7 @@ public class GamePlayController {
 			for (JSONObject v : valuesSupported) {
 				if (v.equals(values))
 				{
+					valuesMatchFound = true;
 					if (g.DEBUG)
 					{
 						System.out.println("Values match : " + values.toJSONString());
@@ -283,18 +346,23 @@ public class GamePlayController {
 					// get learning outcome to update
 					JSONObject updateScore = (JSONObject) reaction.get("mark");
 					String outcome = updateScore.get("learningOutcome").toString();
+					System.out.println("Reset: " + updateScore.get("reset"));
+					Boolean reset = (updateScore.get("reset") != null);
 					float mark = Float.parseFloat(updateScore.get("mark").toString());
 					
 					LearningOutcomeController loController = new LearningOutcomeController();
 					int idOutcome = loController.getOutcomeIdByName(outcome, idSG, version);
 
-					updateScore(idGamePlay, idOutcome, mark);
+					if (reset) { resetScore(idGamePlay, idOutcome, mark); }
+					else { updateScore(idGamePlay, idOutcome, mark); }
+
 					actionLogController.logAction(action, idGamePlay, idOutcome, mark);
 					updateLastActionTimestamp(idGamePlay);
 					
 					// get feedback to trigger
-					ArrayList<String> feedbackList = (ArrayList<String>) reaction.get("feedback");
-					
+					ArrayList<String> feedbackList = new  ArrayList<String>() ;
+					if (reaction.get("feedback") != null) {feedbackList=(ArrayList<String>) reaction.get("feedback");}
+
 					for (String f : feedbackList) {
 						FeedbackController feedbackController = new FeedbackController();
 						JSONObject feedback = feedbackController.getFeedbackByName(f, idSG, version);
@@ -319,6 +387,7 @@ public class GamePlayController {
 						
 						feedbackTriggered.add(feedback);
 					}
+
 					return feedbackTriggered;
 				}
 			}
@@ -327,6 +396,8 @@ public class GamePlayController {
 		// if nothing was returned, check for a 'else' case
 		for (JSONObject reaction : reactions) {
 			if (reaction.containsKey("else")) { 
+
+				valuesMatchFound = true;
 				if (g.DEBUG)
 				{
 					System.out.println("Else case");
@@ -334,18 +405,23 @@ public class GamePlayController {
 				
 				// get learning outcome to update
 				JSONObject updateScore = (JSONObject) reaction.get("mark");
+				System.out.println("Reset: " + updateScore.get("reset"));
+				Boolean reset = (updateScore.get("reset") != null);
 				String outcome = updateScore.get("learningOutcome").toString();
 				float mark = Float.parseFloat(updateScore.get("mark").toString());
 				
 				LearningOutcomeController loController = new LearningOutcomeController();
 				int idOutcome = loController.getOutcomeIdByName(outcome, idSG, version);
 
-				updateScore(idGamePlay, idOutcome, mark);
+				if (reset) { resetScore(idGamePlay, idOutcome, mark); }
+				else { updateScore(idGamePlay, idOutcome, mark); }
+
 				actionLogController.logAction(action, idGamePlay, idOutcome, mark);
 				updateLastActionTimestamp(idGamePlay);
 				
 				// get feedback to trigger
-				ArrayList<String> feedbackList = (ArrayList<String>) reaction.get("feedback");
+				ArrayList<String> feedbackList = new ArrayList<String>();
+				if ( reaction.get("feedback") != null ) { feedbackList = (ArrayList<String>) reaction.get("feedback"); }
 				
 				for (String f : feedbackList) {
 					FeedbackController feedbackController = new FeedbackController();
@@ -375,6 +451,14 @@ public class GamePlayController {
 			}
 		}
 		
+		if (!valuesMatchFound)
+		{
+			JSONObject errorValuesMatch = new JSONObject();
+			errorValuesMatch.put("values", values);
+			errorValuesMatch.put("error", "no match was found in the database for the values received");
+			errors.add(errorValuesMatch);
+			return errors;
+		}
 		// return empty list
 		return feedbackTriggered;
 	}

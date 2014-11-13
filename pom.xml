@@ -71,12 +71,6 @@
     </dependency>
 
     <dependency>
-        <groupId>uws.engage</groupId>
-        <artifactId>uws.engage</artifactId>
-        <version>1.0</version>
-    </dependency>
-
-    <dependency>
         <groupId>uws.engage.parser</groupId>
         <artifactId>uws.engage.parser</artifactId>
         <version>1.0</version>
