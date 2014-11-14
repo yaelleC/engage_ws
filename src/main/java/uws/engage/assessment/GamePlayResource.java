@@ -107,10 +107,16 @@ public class GamePlayResource {
     public String getLog(@PathParam("idGP") int idGP) {
         try
         {
+            // if gameplay of id idGP not found, return error
+            GamePlayController gpController = new GamePlayController();
+            if (gpController.getGamePlay(idGP) == null)
+            {
+                return "{ error: \"Gameplay of id: "+ idGP +" was not found in the database.\" }";
+            }
+
             JSONObject logs = new JSONObject();
         
             // add action logs
-            GamePlayController gpController = new GamePlayController();
             ArrayList<JSONObject> scores = gpController.getScores(idGP);
             logs.put("scores", scores);
         
