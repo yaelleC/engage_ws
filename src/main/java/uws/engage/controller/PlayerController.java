@@ -112,7 +112,7 @@ public class PlayerController {
 			}
 
 			
-			sqlQuery += ", PRIMARY KEY ("+g.P_FIELD_ID+"), UNIQUE KEY `"+g.P_FIELD_ID_STUDENT+"` (`"+g.P_FIELD_ID_STUDENT+"`))";
+			sqlQuery += ", PRIMARY KEY ("+g.P_FIELD_ID+") )";
 			
 			System.out.println(sqlQuery);
 			
