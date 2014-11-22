@@ -207,11 +207,21 @@ public class GamePlayResource {
 
             // use or create player                 -> idPlayer 
             PlayerController playerController = new PlayerController();
-            int idPlayer = playerController.getPlayerFromIdStudent(idStudent, idSG, version);
-            if (idPlayer == 0)
+            int idPlayer;
+
+            if (idStudent == 0)
             {
                 // create a player
                 idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
+            }
+            else
+            {
+                idPlayer = playerController.getPlayerFromIdStudent(idStudent, idSG, version);
+                if (idPlayer == 0)
+                {
+                    // create a player
+                    idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
+                }
             }
             
             // create row in gameplay table         -> idGameplay

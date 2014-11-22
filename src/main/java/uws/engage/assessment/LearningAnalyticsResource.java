@@ -92,6 +92,8 @@ public class LearningAnalyticsResource {
             // ---------------------------- PLAYERS ---------------------------- //
             ArrayList<JSONObject> players = new ArrayList<JSONObject>();
 
+            
+
             infoLA.put("players", players);
 
             return infoLA.toString();

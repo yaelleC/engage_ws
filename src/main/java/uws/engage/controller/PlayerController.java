@@ -205,6 +205,33 @@ public class PlayerController {
 	}
 	
 	/**
+	 * get the player from its id 
+	 * @param idPlayer
+	 * @param idSG
+	 * @param version
+	 * @return the player if there is one
+	 */
+	public JSONObject getPlayerFromId(int idPlayer, int idSG, int version) throws Exception
+	{
+		PreparedStatement stGetStudent = 
+				conn.prepareStatement("SELECT * FROM " + g.TABLE_PLAYER + idSG + "_" + version + 
+										" WHERE "+ g.P_FIELD_ID +" = ?" );
+
+		stGetStudent.setInt(1, idPlayer);
+		
+		ResultSet results = stGetStudent.executeQuery();
+		
+		if (results.next())
+		{
+			return results.getInt(1);
+		}
+		else
+		{
+			return null
+		}
+	}
+
+	/**
 	 * get the id of the player associated to the student for an SG and a version
 	 * @param idStudent
 	 * @param idSG
