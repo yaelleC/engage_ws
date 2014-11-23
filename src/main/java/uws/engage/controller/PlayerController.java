@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
@@ -220,10 +221,23 @@ public class PlayerController {
 		stGetStudent.setInt(1, idPlayer);
 		
 		ResultSet results = stGetStudent.executeQuery();
+
+		ResultSetMetaData rsmd = results.getMetaData();
+		int columnCount = rsmd.getColumnCount();
+		ArrayList<String> columnNames = new ArrayList<String>();
 		
 		if (results.next())
 		{
-			return results.getInt(1);
+			JSONObject player = new JSONObject();
+
+			player.put(g.P_FIELD_ID, results.getInt(1));
+			player.put(g.P_FIELD_ID_STUDENT, results.getInt(2));
+
+			for (int i = 3; i < columnCount + 1; i++ ) {
+			  String name = rsmd.getColumnName(i);
+			  player.put(name, results.getString(i));
+			}
+			return player;
 		}
 		else
 		{
@@ -248,14 +262,14 @@ public class PlayerController {
 		
 		ResultSet results = stGetStudentParams.executeQuery();
 		
-		if (results.next())
+		int idPlayer = 0;
+		// in case idStudent = 0, there can be more than one, so take last.
+		while (results.next())
 		{
-			return results.getInt(1);
+			idPlayer = results.getInt(1);
 		}
-		else
-		{
-			return 0;
-		}
+		
+		return idPlayer;
 	}
 
 	public ArrayList<JSONObject> getParametersRequired(int idStudent, int idSG, int version) throws Exception
