@@ -220,15 +220,14 @@ public class PlayerController {
 		stGetStudentParams.setInt(1, idStudent);
 		
 		ResultSet results = stGetStudentParams.executeQuery();
-		
-		if (results.next())
+		int idPlayer = 0;
+
+		// if idStudent is '0', there might be more than one player, return the last one.
+		while (results.next())
 		{
-			return results.getInt(1);
+			idPlayer = results.getInt(1);
 		}
-		else
-		{
-			return 0;
-		}
+		return idPlayer;
 	}
 
 	public ArrayList<JSONObject> getParametersRequired(int idStudent, int idSG, int version) throws Exception
