@@ -497,9 +497,9 @@ public class GamePlayController {
 				gameplay.put(g.GP_FIELD_ID, idGamePlay);
 				gameplay.put(g.GP_FIELD_ID_SG, results.getInt(1));
 				gameplay.put(g.GP_FIELD_VERSION, results.getInt(2));
-				gameplay.put(g.GP_FIELD_CREATED, results.getDate(3));
-				gameplay.put(g.GP_FIELD_LASTACTION, results.getDate(4));
-				gameplay.put(g.GP_FIELD_ENDED, results.getDate(5));
+				gameplay.put(g.GP_FIELD_CREATED, results.getTimestamp(3).toString());
+				gameplay.put(g.GP_FIELD_LASTACTION, results.getTimestamp(4).toString());
+				gameplay.put(g.GP_FIELD_ENDED, results.getTimestamp(5).toString());
 				gameplay.put(g.GP_FIELD_ID_PLAYER, results.getInt(6));
 				
 				if (g.DEBUG)
@@ -616,5 +616,64 @@ public class GamePlayController {
 		}
 		
 		return g.CST_RETURN_SUCCESS;
+	}
+
+	public ArrayList<JSONObject> getGameplaysByGame (int idSG, int version) throws Exception
+	{
+		if (g.DEBUG)
+		{
+			System.out.println("*** getGameplaysByGame ***");
+		}
+		try
+		{
+			PreparedStatement stGetGameplays = 
+					conn.prepareStatement("SELECT "+ g.GP_FIELD_ID + ", " + g.GP_FIELD_CREATED + ", " + 
+											g.GP_FIELD_LASTACTION + ", " + g.GP_FIELD_ENDED + ", " + g.GP_FIELD_ID_PLAYER + 
+											" FROM " + g.TABLE_GAMEPLAY + 
+											" WHERE " + g.GP_FIELD_ID_SG + " = ? AND " + g.GP_FIELD_VERSION + " = ?");
+
+			stGetGameplays.setInt(1, idSG);
+			stGetGameplays.setInt(2, version);
+			
+			if (g.DEBUG_SQL)
+			{
+				System.out.println(stGetGameplays.toString());
+			}
+			
+			ResultSet results = stGetGameplays.executeQuery();
+
+			ArrayList<JSONObject> gps = new ArrayList<JSONObject>();
+			
+			while (results.next())
+			{
+				if (g.DEBUG_SQL)
+				{
+					System.out.println();
+				}
+				
+				JSONObject gameplay = new JSONObject();
+
+				gameplay.put(g.GP_FIELD_ID, results.getInt(1));
+				gameplay.put(g.GP_FIELD_ID_SG, idSG);
+				gameplay.put(g.GP_FIELD_VERSION, version);
+				gameplay.put(g.GP_FIELD_CREATED, results.getTimestamp(2).toString());
+				gameplay.put(g.GP_FIELD_LASTACTION, results.getTimestamp(3).toString());
+				gameplay.put(g.GP_FIELD_ENDED, results.getTimestamp(4).toString());
+				gameplay.put(g.GP_FIELD_ID_PLAYER, results.getInt(5));
+				
+				if (g.DEBUG)
+				{
+					System.out.println(gameplay.toJSONString());
+				}
+				
+				gps.add(gameplay);
+			}
+			return gps;			
+		}
+		catch (Exception e)
+		{		
+			System.err.println("ERROR (getGamePlaysByGame): " + e.getMessage());
+			return null;
+		}
 	}
 }
