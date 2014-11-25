@@ -106,11 +106,15 @@ public class LearningAnalyticsResource {
 
             ArrayList<JSONObject> gps = gpController.getGameplaysByGame(idSeriousGame, version);
 
+            // TODO: deal with gps null case -> error when gameplay was not ended? check
+
             System.out.println(gps);
 
             for (JSONObject gp : gps) {
                 JSONObject playerJson = playerController.getPlayerFromId(Integer.parseInt(gp.get("idPlayer").toString()), 
                                             idSeriousGame, version);
+                playerJson.put("idPlayer", playerJson.get("id"));
+                playerJson.remove("id");
                 if (!players.contains(playerJson))  
                 {
                     players.add(playerJson);
