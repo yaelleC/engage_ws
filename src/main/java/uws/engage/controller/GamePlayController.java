@@ -499,7 +499,7 @@ public class GamePlayController {
 				gameplay.put(g.GP_FIELD_VERSION, results.getInt(2));
 				gameplay.put(g.GP_FIELD_CREATED, results.getTimestamp(3).toString());
 				gameplay.put(g.GP_FIELD_LASTACTION, results.getTimestamp(4).toString());
-				gameplay.put(g.GP_FIELD_ENDED, results.getTimestamp(5).toString());
+				if (results.getTimestamp(5) != null) { gameplay.put(g.GP_FIELD_ENDED, results.getTimestamp(5).toString()); }
 				gameplay.put(g.GP_FIELD_ID_PLAYER, results.getInt(6));
 				
 				if (g.DEBUG)
