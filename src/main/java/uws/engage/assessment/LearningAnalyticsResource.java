@@ -51,6 +51,94 @@ import uws.engage.controller.General;
  *
  */
 public class LearningAnalyticsResource {
+
+    /**
+     * Method handling HTTP GET requests on path "learninganalytics/leaderBoard/{idSG}/version/{idVersion}"
+     * 
+     * @param idSG = an integer id of the SG to retrieve
+     * @param idVersion = an integer, id of the version of the SG to retrieve
+     * @param maxNum = an integer, number of rows to retrieve (top x)
+     * @return a json, representing the leaderboard of the gameplays formatted as follows:
+     *            {
+     *                  1: {score:<score>, date:<date>, timeSpent:<time>, player:{playerInfo}}
+     *                  2: {score:<score>, date:<date>, timeSpent:<time>, player:{playerInfo}}
+     *                  ...
+     *                  maxNum: {score:<score>, date:<date>, timeSpent:<time>, player:{playerInfo}}
+     *       }
+     **/
+    @GET
+    @Path("leaderBoard/{idSG}/version/{idVersion}/top/{maxNum}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getLeaderBoard(@PathParam("idSG") int idSeriousGame, 
+                                        @PathParam("idVersion") int version, 
+                                        @PathParam("maxNum") int maxNum) 
+    {
+        try
+        {
+            General g = new General();
+            JSONObject leaderBoard = new JSONObject();
+            
+           // ---------------------------- GAMEPLAYS ---------------------------- //
+            GamePlayController gpController = new GamePlayController();
+            PlayerController playerController = new PlayerController();
+
+            ArrayList<JSONObject> gameplays = new ArrayList<JSONObject>();
+
+            ArrayList<JSONObject> gps = gpController.getBestGameplaysByGame(idSeriousGame, version, maxNum);
+            int rank = 1;
+
+            for (JSONObject gp : gps) {
+                
+                JSONObject gameplay = new JSONObject();
+                int idGP = Integer.parseInt(gp.get(g.GP_FIELD_ID).toString());
+                gameplay.put("id", idGP);
+                gameplay.put("idPlayer", gp.get(g.GP_FIELD_ID_PLAYER));
+
+                // "2014-11-22 21:04:09.0"
+                String target = gp.get(g.GP_FIELD_CREATED).toString();
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss.S");
+                Date start =  df.parse(target);  
+    
+                gameplay.put("timeStarted", gp.get(g.GP_FIELD_CREATED));
+
+                System.out.println(start);
+
+                if (gp.get(g.GP_FIELD_ENDED) != null)
+                {
+                    String target2 = gp.get(g.GP_FIELD_ENDED).toString();
+                    Date end =  df.parse(target2);  
+    
+                    long timeSpent = (end.getTime() - start.getTime()) / 1000;
+
+                    gameplay.put("timeSpent", timeSpent);
+                }
+
+                // ---------------------------- Final scores ---------------------------- //
+                
+                JSONObject finalScores = new JSONObject();
+
+                ArrayList<JSONObject> scores = gpController.getScores(idGP);
+
+                for (JSONObject score : scores) {
+                    finalScores.put(score.get("name"), score.get("value"));
+                }
+
+                gameplay.put("finalScores", finalScores);  
+
+
+                leaderBoard.put(rank+"", gameplay);
+                rank++;
+                gameplays.add(gameplay); 
+            }       
+
+            return leaderBoard.toString();
+        }
+        catch( Exception e )
+        {
+            return "{'error':'"+e+"'}";
+        }
+    }
+
     /**
      * Method handling HTTP GET requests on path "learninganalytics/seriousgame/{idSG}/version/{idVersion}"
      * 
