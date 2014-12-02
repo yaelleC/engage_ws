@@ -113,7 +113,7 @@ public class PlayerController {
 			}
 
 			
-			sqlQuery += ", PRIMARY KEY ("+g.P_FIELD_ID+"), UNIQUE KEY `"+g.P_FIELD_ID_STUDENT+"` (`"+g.P_FIELD_ID_STUDENT+"`))";
+			sqlQuery += ", PRIMARY KEY ("+g.P_FIELD_ID+") )";
 			
 			System.out.println(sqlQuery);
 			
@@ -261,14 +261,13 @@ public class PlayerController {
 		stGetStudentParams.setInt(1, idStudent);
 		
 		ResultSet results = stGetStudentParams.executeQuery();
-		
 		int idPlayer = 0;
-		// in case idStudent = 0, there can be more than one, so take last.
+
+		// if idStudent is '0', there might be more than one player, return the last one.
 		while (results.next())
 		{
 			idPlayer = results.getInt(1);
 		}
-		
 		return idPlayer;
 	}
 
