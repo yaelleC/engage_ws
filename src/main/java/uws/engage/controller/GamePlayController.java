@@ -348,8 +348,20 @@ public class GamePlayController {
 					String outcome = updateScore.get("learningOutcome").toString();
 					System.out.println("Reset: " + updateScore.get("reset"));
 					Boolean reset = (updateScore.get("reset") != null);
-					float mark = Float.parseFloat(updateScore.get("mark").toString());
 					
+					// get mark to be added / reset in LO 
+	                float mark=0;
+	                if (updateScore.get("markVar") != null)
+	                {
+	                    String markVar = values.get(updateScore.get("markVar").toString()).toString();
+	                    mark = Float.parseFloat(markVar);
+	                }
+	                else if (updateScore.get("mark") != null)
+	                {
+	                    mark = Float.parseFloat(updateScore.get("mark").toString());
+	                }
+
+
 					LearningOutcomeController loController = new LearningOutcomeController();
 					int idOutcome = loController.getOutcomeIdByName(outcome, idSG, version);
 
@@ -408,7 +420,22 @@ public class GamePlayController {
 				System.out.println("Reset: " + updateScore.get("reset"));
 				Boolean reset = (updateScore.get("reset") != null);
 				String outcome = updateScore.get("learningOutcome").toString();
-				float mark = Float.parseFloat(updateScore.get("mark").toString());
+
+				//float mark = Float.parseFloat(updateScore.get("mark").toString());
+
+			    // get mark to be added / reset in LO 
+                float mark=0;
+                if (updateScore.get("markVar") != null)
+                {
+                    String markVar = values.get(updateScore.get("markVar").toString()).toString();
+                    mark = Float.parseFloat(markVar);
+                }
+                else if (updateScore.get("mark") != null)
+                {
+                    mark = Float.parseFloat(updateScore.get("mark").toString());
+                }
+
+
 				
 				LearningOutcomeController loController = new LearningOutcomeController();
 				int idOutcome = loController.getOutcomeIdByName(outcome, idSG, version);
