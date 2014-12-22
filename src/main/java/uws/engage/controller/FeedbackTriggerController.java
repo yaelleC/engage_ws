@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Set;
 
 import org.json.simple.JSONObject;
@@ -163,8 +165,12 @@ public class FeedbackTriggerController {
 
 		int idSG = Integer.parseInt(gameplay.get(g.GP_FIELD_ID_SG).toString());
 		int version = Integer.parseInt(gameplay.get(g.GP_FIELD_VERSION).toString());
-		
-		Date lastAction = (Date) gameplay.get(g.GP_FIELD_LASTACTION);
+				
+		// "2014-11-22 21:04:09.0"
+        String target = gameplay.get(g.GP_FIELD_LASTACTION).toString();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss.S");
+        Date lastAction =  df.parse(target); 
+
 		if (g.DEBUG)
 		{
 			System.out.println("lastAction : " + lastAction);
