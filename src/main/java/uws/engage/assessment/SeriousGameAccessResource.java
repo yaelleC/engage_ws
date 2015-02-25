@@ -14,7 +14,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import uws.engage.controller.StudentController;
-
+import uws.engage.controller.PlayerController;
+import uws.engage.controller.SeriousGameController;
 /**
  * Root resource (exposed at "SGaccess" path)
  */
@@ -84,17 +85,35 @@ public class SeriousGameAccessResource {
                 int idStudent = Integer.parseInt(student.get("id").toString());
                 int version = stdtController.getStudentVersionOfSG(idSG, idStudent);
 
-                System.out.println("version : " + version);
-
                 returnData.put("loginSuccess", true);
                 returnData.put("student", student);
                 returnData.put("version", version);
+
+                PlayerController playerController = new PlayerController();
+
+                int idPlayer = playerController.getPlayerFromIdStudent(idStudent, idSG, version);
+                if (idPlayer != 0)
+                {
+                    returnData.put("idPlayer", idPlayer);
+                }
 
                 System.out.println(returnData.toString());
             }
             else
             {
-                returnData.put("loginSuccess", false);
+                //if the serious game is public
+                SeriousGameController sgController = new SeriousGameController();
+                JSONObject sg = sgController.getSGById(idSG, 0);
+                if ((Boolean) sg.get("public"))
+                {
+                    returnData.put("loginSuccess", true);
+                    returnData.put("version", 0);
+                }
+                // else
+                else
+                {
+                    returnData.put("loginSuccess", false);
+                }
             }
 
             return returnData.toString();

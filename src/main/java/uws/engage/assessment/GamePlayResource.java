@@ -237,6 +237,39 @@ public class GamePlayResource {
     }
 
     /**
+    * Method handling HTTP PUT requests on path "gameplay/"
+     * 
+     * @param gameplayP = a JSON object containing 3 Integers "idSG", "version" and "idStudent"; 
+     * amd an array of characteristics for the player "params"
+     * @return the id of the gameplay created if successful, 
+     */
+    @PUT
+    @Path("/start")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String startGamePlayWithPlayerId(String gameplayP)
+    {
+        try
+        {
+            JSONObject gameplay=(JSONObject) JSONValue.parse(gameplayP);
+           
+            int idSG = Integer.parseInt(gameplay.get("idSG").toString());
+            int version = Integer.parseInt(gameplay.get("version").toString());
+            int idPlayer = Integer.parseInt(gameplay.get("idPlayer").toString());
+            
+            // create row in gameplay table         -> idGameplay
+            GamePlayController gpController = new GamePlayController();
+            int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
+                    
+            return idGamePlay + "";
+        }
+        catch( Exception e )
+        {
+            return "{ error: \"" + e + "\"}";
+        }
+    }
+
+    /**
      * Method handling HTTP PUT requests on path "gameplay/{idGP}/assess"
      * 
      * @param idGP = an integer id of the current gameplay

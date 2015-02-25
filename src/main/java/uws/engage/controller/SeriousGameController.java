@@ -273,7 +273,7 @@ public class SeriousGameController {
 				sg.put(g.SG_FIELD_AGEMAX, results.getInt(5));
 				sg.put(g.SG_FIELD_LANG, results.getString(6));
 				sg.put(g.SG_FIELD_COUNTRY, results.getString(7));
-				sg.put(g.SG_FIELD_PUBLIC, results.getString(8));
+				sg.put(g.SG_FIELD_PUBLIC, results.getBoolean(8));
 				sg.put(g.SG_FIELD_COMMENTS, results.getString(9));
 				
 				return sg;
