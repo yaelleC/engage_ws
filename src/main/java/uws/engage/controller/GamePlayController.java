@@ -659,6 +659,61 @@ public class GamePlayController {
 		return g.CST_RETURN_SUCCESS;
 	}
 
+
+	public int endGamePlay(int idGamePlay, Boolean gameWon) throws Exception
+	{
+		if (g.DEBUG)
+		{
+			System.out.println("*** endGamePlay ***");
+		}
+
+		// check gameplay exists
+		JSONObject gp = getGamePlay(idGamePlay);
+		if (gp == null)
+		{
+			return g.CST_RETURN_WRONG_ID;
+		}
+		// check if gameplay already ended
+		else if (gp.get(g.GP_FIELD_ENDED) != null)
+		{
+			return g.CST_RETURN_ALREADY_ENDED;
+		}
+
+		PreparedStatement stEndGamePlay = 
+				conn.prepareStatement("UPDATE  "+ g.TABLE_GAMEPLAY + " SET " + 
+									g.GP_FIELD_ENDED + " = ? , " + g.GP_FIELD_WIN + " = ?"+
+									" WHERE " + g.GP_FIELD_ID + " = ?");
+
+		// 1) create a java calendar instance
+		Calendar calendar = Calendar.getInstance();
+		 
+		// 2) get a java.util.Date from the calendar instance.
+		// this date will represent the current instant, or "now".
+		java.util.Date now = calendar.getTime();
+		 
+		// 3) a java current time (now) instance
+		java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
+		
+		stEndGamePlay.setTimestamp(1, currentTimestamp);
+		stEndGamePlay.setBoolean(2, gameWon);
+		stEndGamePlay.setInt(3, idGamePlay);
+		
+		if (g.DEBUG_SQL)
+		{
+			System.out.println(stEndGamePlay.toString());
+		}
+		
+		stEndGamePlay.executeUpdate();
+		
+		if (g.DEBUG)
+		{
+			System.out.println("SUCCESS");
+			System.out.println();
+		}
+		
+		return g.CST_RETURN_SUCCESS;
+	}
+
 	public ArrayList<JSONObject> getGameplaysByGame (int idSG, int version) throws Exception
 	{
 		if (g.DEBUG)

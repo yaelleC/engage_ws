@@ -255,8 +255,43 @@ public class GamePlayResource {
            
             int idSG = Integer.parseInt(gameplay.get("idSG").toString());
             int version = Integer.parseInt(gameplay.get("version").toString());
-            int idPlayer = Integer.parseInt(gameplay.get("idPlayer").toString());
-            
+            int idPlayer;
+
+            if (gameplay.get("idPlayer") != null)
+            {
+                idPlayer = Integer.parseInt(gameplay.get("idPlayer").toString());
+            }
+            else
+            {
+                int idStudent = (gameplay.get("idStudent") != null)? Integer.parseInt(gameplay.get("idStudent").toString()) : 0;
+                ArrayList<JSONObject> params = (ArrayList<JSONObject>) gameplay.get("params");
+
+                PlayerController playerController = new PlayerController();
+
+                if (idStudent == 0)
+                {
+                    if (params == null)
+                    {
+                        return "Error: The field parameters is missing";
+                    }
+                    // create a player
+                    idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
+                }
+                else
+                {
+                    idPlayer = playerController.getPlayerFromIdStudent(idStudent, idSG, version);
+                    if (idPlayer == 0)
+                    {
+                        if (params == null)
+                        {
+                            return "Error: The field parameters is missing";
+                        }
+                        // create a player
+                        idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
+                    }
+                }
+            }
+
             // create row in gameplay table         -> idGameplay
             GamePlayController gpController = new GamePlayController();
             int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
@@ -311,7 +346,36 @@ public class GamePlayResource {
         try
         {
             GamePlayController gpController = new GamePlayController();
+           
             return gpController.endGamePlay(idGP) + "";
+
+        }
+        catch( Exception e )
+        {
+            return "{ error: \"" + e + "\"}";
+        }
+    }
+
+    /**
+     * Method handling HTTP POST requests on path "gameplay/{idGP}/end"
+     * 
+     * @param idGP = an integer id of the current gameplay
+     * @return 1 if the gameplay successfully ended, -1 if the gameplay id doesn't exist in the database
+     * 0 if the id exists but corresponds to a gameplay already ended
+     */
+    @POST
+    @Path("/{idGP}/end/{win}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String endGamePlay(@PathParam("idGP") int idGP, @PathParam("win") String win)
+    {
+        try
+        {
+            GamePlayController gpController = new GamePlayController();
+            Boolean gameWon = win.equals("win");
+           
+            return gpController.endGamePlay(idGP, gameWon) + "";
+
         }
         catch( Exception e )
         {

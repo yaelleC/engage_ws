@@ -350,5 +350,78 @@ public class PlayerController {
 		}
 		return params;			
 	}
+
+	public ArrayList<JSONObject> getParametersRequired(int idSG, int version) throws Exception
+	{
+		if (g.DEBUG)
+		{
+			System.out.println("*** getParametersRequired ***");
+		}
+		
+		ArrayList<JSONObject> params = new ArrayList<JSONObject>();
+		
+		
+		PreparedStatement stGetParams = 
+				conn.prepareStatement("SELECT column_name, data_type, column_type"+ 
+										" FROM information_schema.columns WHERE table_name = ?" );
+
+		stGetParams.setString(1, g.TABLE_PLAYER + idSG + "_" + version);
+		
+		if (g.DEBUG_SQL)
+		{
+			System.out.println(stGetParams.toString());
+		}
+		
+		ResultSet results = stGetParams.executeQuery();
+		
+		while (results.next())
+		{
+			if (g.DEBUG_SQL)
+			{
+				System.out.println();
+			}
+			
+			if (!results.getString(1).equals(g.P_FIELD_ID) && !results.getString(1).equals(g.P_FIELD_ID_STUDENT))
+			{
+				JSONObject param = new JSONObject();
+				param.put("name", results.getString(1));
+				
+				String type;
+				switch (results.getString(2).toUpperCase()) {
+				case "INT":
+					type = "Int";
+					break;
+				case "FLOAT":
+					type = "Float";
+					break;
+				case "BOOLEAN":
+					type = "Bool";
+					break;
+				case "CHAR":
+					type = "Char";
+					break;
+				case "TEXT":
+					type = "Text";
+					break;
+				case "VARCHAR":
+					type = "String";
+					break;
+				default:
+					type = results.getString(2);
+					break;
+				}
+				
+				param.put("type", type);
+				
+				params.add(param);
+			}
+		}
+		
+		if (g.DEBUG_SQL)
+		{
+			System.out.println(params.toString());
+		}
+		return params;			
+	}
 }
 

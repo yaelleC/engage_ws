@@ -13,6 +13,8 @@ import javax.ws.rs.core.MediaType;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import java.util.ArrayList;
+
 import uws.engage.controller.StudentController;
 import uws.engage.controller.PlayerController;
 import uws.engage.controller.SeriousGameController;
@@ -76,6 +78,11 @@ public class SeriousGameAccessResource {
             String password = loginParamsJson.get("password").toString();
             int idSG = Integer.parseInt(loginParamsJson.get("idSG").toString());
 
+
+            PlayerController playerController = new PlayerController();
+            ArrayList<JSONObject> params = new ArrayList<JSONObject>();
+          
+
             StudentController stdtController = new StudentController();
             JSONObject student = stdtController.checkStudentUsernameAndPassword(username, password);
 
@@ -89,13 +96,14 @@ public class SeriousGameAccessResource {
                 returnData.put("student", student);
                 returnData.put("version", version);
 
-                PlayerController playerController = new PlayerController();
-
                 int idPlayer = playerController.getPlayerFromIdStudent(idStudent, idSG, version);
                 if (idPlayer != 0)
                 {
                     returnData.put("idPlayer", idPlayer);
                 }
+                
+                params = playerController.getParametersRequired(idStudent,idSG, version);
+                returnData.put("params", params);
 
                 System.out.println(returnData.toString());
             }
@@ -106,8 +114,10 @@ public class SeriousGameAccessResource {
                 JSONObject sg = sgController.getSGById(idSG, 0);
                 if ((Boolean) sg.get("public"))
                 {
-                    returnData.put("loginSuccess", true);
+                    returnData.put("loginSuccess", false);
                     returnData.put("version", 0);
+                    params = playerController.getParametersRequired(idSG, 0);
+                    returnData.put("params", params);
                 }
                 // else
                 else
