@@ -36,6 +36,15 @@ public class General {
 		public String FT_FIELD_LIMIT = "limitValue";
 		public String FT_FIELD_INFERIOR = "inferior";
 		public String FT_FIELD_REPEAT = "repeatBool";
+				
+		public String TABLE_BADGES_TRIGGER = "badges_trigger";
+		public String BT_FIELD_ID_SG = "idSG";
+		public String BT_FIELD_SG_VERSION = "version";
+		public String BT_FIELD_ID_FDBK = "idFeedback";
+		public String BT_FIELD_FUNCTION = "function";
+		public String BT_FIELD_LIMIT = "limitValue";
+		public String BT_FIELD_INFERIOR = "inferior";
+		public String BT_FIELD_ID_OUTCOME = "idOutcome";
 		
 		// --------------------------- Table outcome --------------------------- //
 		public String TABLE_OUTCOME = "learningoutcome";
@@ -78,6 +87,7 @@ public class General {
 		public String GP_FIELD_VERSION = "version";
 		public String GP_FIELD_CREATED = "created";
 		public String GP_FIELD_ENDED = "ended";
+		public String GP_FIELD_WIN = "win";
 		public String GP_FIELD_ID_PLAYER = "idPlayer";
 		public String GP_FIELD_LASTACTION = "lastAction";
 		

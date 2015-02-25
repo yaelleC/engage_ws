@@ -604,7 +604,7 @@ public class StudentController {
 					student.put(g.STDT_FIELD_AGE, results.getString(2));
 					student.put(g.STDT_FIELD_GENDER, results.getString(3));
 					student.put(g.STDT_FIELD_ID_SCHOOL, results.getInt(4));
-					student.put(g.STDT_FIELD_PASSWORD, password);
+					//student.put(g.STDT_FIELD_PASSWORD, password);
 					
 					if (g.DEBUG_SQL)
 					{

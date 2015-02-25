@@ -38,7 +38,7 @@ import uws.engage.controller.SeriousGameController;
  * 3. Check a DSL config file grammar
  * 4. update an SG configuration from a config file (JSON format)
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
- * @version 1.0
+ * @version 2.0
  *
  */
 public class SeriousGameResource {

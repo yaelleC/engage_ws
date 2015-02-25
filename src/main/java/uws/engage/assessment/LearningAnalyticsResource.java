@@ -15,6 +15,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Collections;
+import java.util.Comparator;
  
 import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
@@ -32,6 +34,7 @@ import uws.engage.controller.SeriousGameController;
 import uws.engage.controller.LearningOutcomeController;
 import uws.engage.controller.GamePlayController;
 import uws.engage.controller.PlayerController;
+import uws.engage.controller.StudentController;
 import uws.engage.controller.ActionLogController;
 import uws.engage.controller.General;
 
@@ -238,5 +241,100 @@ public class LearningAnalyticsResource {
             "idOutcome": 72
     */
 
-    
+    /**
+     * Method handling HTTP GET requests on path "learninganalytics/leaderboard/seriousgame/{idSG}/version/{idVersion}"
+     * 
+     * @param idSG = an integer id of the SG to retrieve
+     * @param idVersion = an integer, id of the version of the SG to retrieve
+     * @return a json, representing the leaderboard 
+     */
+    @GET
+    @Path("leaderboard/seriousgame/{idSG}/version/{idVersion}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getLeaderBoard(@PathParam("idSG") int idSeriousGame, 
+                                        @PathParam("idVersion") int version) 
+    {
+        try
+        {
+            JSONObject infoLeaderboard = new JSONObject();
+
+            LearningOutcomeController loController = new LearningOutcomeController();
+            GamePlayController gpController = new GamePlayController();
+            PlayerController playerController = new PlayerController();
+            StudentController studentController = new StudentController();
+
+            // ************** Get learning Outcomes ************** //
+
+            ArrayList<JSONObject> los = loController.getOutcomeListByGame(idSeriousGame, version);
+
+            ArrayList<JSONObject> gps = gpController.getGameplaysByGame(idSeriousGame, version);
+
+            for (JSONObject lo : los ) {
+                ArrayList<JSONObject> listPlayers = new ArrayList<JSONObject>();
+
+                for (JSONObject gp : gps) {
+
+                    int idGP = Integer.parseInt(gp.get("id").toString());
+                    ArrayList<JSONObject> scores = gpController.getScores(idGP);
+                    int idPlayer = Integer.parseInt(gp.get("idPlayer").toString());
+                    JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
+                    String playerName = "Anonymous";
+                    JSONObject leader = new JSONObject();
+
+                    // get player's name
+                    if (player.get("idStudent") != 0)
+                    {
+                        JSONObject student = studentController.getStudentsByID(Integer.parseInt(player.get("idStudent").toString()));
+                        playerName = student.get("username").toString();
+                    }
+                    else
+                    {
+                        if (player.get("name") != null)
+                        {
+                            playerName = player.get("name").toString();
+                        }
+                        else if (player.get("username") != null)
+                        {
+                            playerName = player.get("username").toString();
+                        }
+                    }
+
+                    leader.put("name", playerName);
+
+                    
+                    for (JSONObject score : scores) {
+                        if (score.get("name").toString().equals(lo.get("name").toString()))
+                        {
+                            leader.put("score", score.get("value"));
+                        }
+                    }
+
+                    System.out.println(leader.toString());
+                    listPlayers.add(leader);
+                }
+
+                Collections.sort(listPlayers, new LeadersCompare());
+
+                infoLeaderboard.put(lo.get("name"), listPlayers);
+            }
+            return infoLeaderboard.toString();
+        }
+        catch(Exception e)
+        {
+            JSONObject error = new JSONObject();
+            error.put("error", e);
+            return error.toString();
+        }
+    }    
+}
+
+class LeadersCompare implements Comparator<JSONObject>
+{
+    @Override
+    public int compare(JSONObject o1, JSONObject o2)
+    {
+        Float o1Score = Float.parseFloat(o1.get("score").toString());
+        Float o2Score = Float.parseFloat(o2.get("score").toString());
+        return (o2Score.compareTo(o1Score));
+    }
 }

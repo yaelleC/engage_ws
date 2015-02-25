@@ -343,41 +343,47 @@ public class GamePlayController {
 					{
 						System.out.println("Values match : " + values.toJSONString());
 					}
-					// get learning outcome to update
-					JSONObject updateScore = (JSONObject) reaction.get("mark");
-					String outcome = updateScore.get("learningOutcome").toString();
-					System.out.println("Reset: " + updateScore.get("reset"));
-					Boolean reset = (updateScore.get("reset") != null);
-					
-					// get mark to be added / reset in LO 
-	                float mark=0;
-	                if (updateScore.get("markVar") != null)
-	                {
-	                    String markVar = values.get(updateScore.get("markVar").toString()).toString();
-	                    mark = Float.parseFloat(markVar);
-	                }
-	                else if (updateScore.get("mark") != null)
-	                {
-	                    mark = Float.parseFloat(updateScore.get("mark").toString());
-	                }
+					// get learning outcomes to update
+					ArrayList<JSONObject> updateScores = (ArrayList<JSONObject>) reaction.get("marks");
 
+					// foreach - update score
+					for (JSONObject updateScore : updateScores)
+					{
+						String outcome = updateScore.get("learningOutcome").toString();
+						System.out.println("Reset: " + updateScore.get("reset"));
+						Boolean reset = (updateScore.get("reset") != null);
+						
+						// get mark to be added / reset in LO 
+		                float mark=0;
+		                if (updateScore.get("markVar") != null)
+		                {
+		                    String markVar = values.get(updateScore.get("markVar").toString()).toString();
+		                    mark = Float.parseFloat(markVar);
+		                }
+		                else if (updateScore.get("mark") != null)
+		                {
+		                    mark = Float.parseFloat(updateScore.get("mark").toString());
+		                }
 
-					LearningOutcomeController loController = new LearningOutcomeController();
-					int idOutcome = loController.getOutcomeIdByName(outcome, idSG, version);
+						LearningOutcomeController loController = new LearningOutcomeController();
+						int idOutcome = loController.getOutcomeIdByName(outcome, idSG, version);
 
-					if (reset) { resetScore(idGamePlay, idOutcome, mark); }
-					else { updateScore(idGamePlay, idOutcome, mark); }
+						if (reset) { resetScore(idGamePlay, idOutcome, mark); }
+						else { updateScore(idGamePlay, idOutcome, mark); }
 
-					actionLogController.logAction(action, idGamePlay, idOutcome, mark);
-					updateLastActionTimestamp(idGamePlay);
+						actionLogController.logAction(action, idGamePlay, idOutcome, mark);
+						updateLastActionTimestamp(idGamePlay);
+					}
 					
 					// get feedback to trigger
-					ArrayList<String> feedbackList = new  ArrayList<String>() ;
-					if (reaction.get("feedback") != null) {feedbackList=(ArrayList<String>) reaction.get("feedback");}
+					ArrayList<JSONObject> feedbackList = new  ArrayList<JSONObject>() ;
+					if (reaction.get("feedback") != null) {feedbackList=(ArrayList<JSONObject>) reaction.get("feedback");}
 
-					for (String f : feedbackList) {
+					for (JSONObject f : feedbackList) {
 						FeedbackController feedbackController = new FeedbackController();
-						JSONObject feedback = feedbackController.getFeedbackByName(f, idSG, version);
+						JSONObject feedback = feedbackController.getFeedbackByName(f.get("name").toString(), idSG, version);
+
+						Boolean immediteTrigger = (Boolean)f.get("immediate");
 						
 						// modify message to parameters selected
 						String message = feedback.get(g.F_FIELD_MESSAGE).toString();
@@ -397,7 +403,11 @@ public class GamePlayController {
 
 						feedbackLogController.logFeedback(feedback, idGamePlay);
 						
-						feedbackTriggered.add(feedback);
+						// if need to trigger feedback (immediate)
+						if (immediteTrigger)
+						{
+							feedbackTriggered.add(feedback);
+						}
 					}
 
 					return feedbackTriggered;
@@ -415,44 +425,47 @@ public class GamePlayController {
 					System.out.println("Else case");
 				}
 				
-				// get learning outcome to update
-				JSONObject updateScore = (JSONObject) reaction.get("mark");
-				System.out.println("Reset: " + updateScore.get("reset"));
-				Boolean reset = (updateScore.get("reset") != null);
-				String outcome = updateScore.get("learningOutcome").toString();
+				ArrayList<JSONObject> updateScores = (ArrayList<JSONObject>) reaction.get("marks");
 
-				//float mark = Float.parseFloat(updateScore.get("mark").toString());
+				// foreach - update score
+				for (JSONObject updateScore : updateScores)
+				{
+					// get learning outcome to update
+					System.out.println("Reset: " + updateScore.get("reset"));
+					Boolean reset = (updateScore.get("reset") != null);
+					String outcome = updateScore.get("learningOutcome").toString();
 
-			    // get mark to be added / reset in LO 
-                float mark=0;
-                if (updateScore.get("markVar") != null)
-                {
-                    String markVar = values.get(updateScore.get("markVar").toString()).toString();
-                    mark = Float.parseFloat(markVar);
-                }
-                else if (updateScore.get("mark") != null)
-                {
-                    mark = Float.parseFloat(updateScore.get("mark").toString());
-                }
+					//float mark = Float.parseFloat(updateScore.get("mark").toString());
 
-
+				    // get mark to be added / reset in LO 
+	                float mark=0;
+	                if (updateScore.get("markVar") != null)
+	                {
+	                    String markVar = values.get(updateScore.get("markVar").toString()).toString();
+	                    mark = Float.parseFloat(markVar);
+	                }
+	                else if (updateScore.get("mark") != null)
+	                {
+	                    mark = Float.parseFloat(updateScore.get("mark").toString());
+	                }
 				
-				LearningOutcomeController loController = new LearningOutcomeController();
-				int idOutcome = loController.getOutcomeIdByName(outcome, idSG, version);
+					LearningOutcomeController loController = new LearningOutcomeController();
+					int idOutcome = loController.getOutcomeIdByName(outcome, idSG, version);
 
-				if (reset) { resetScore(idGamePlay, idOutcome, mark); }
-				else { updateScore(idGamePlay, idOutcome, mark); }
+					if (reset) { resetScore(idGamePlay, idOutcome, mark); }
+					else { updateScore(idGamePlay, idOutcome, mark); }
 
-				actionLogController.logAction(action, idGamePlay, idOutcome, mark);
-				updateLastActionTimestamp(idGamePlay);
+					actionLogController.logAction(action, idGamePlay, idOutcome, mark);
+					updateLastActionTimestamp(idGamePlay);
+				}
 				
 				// get feedback to trigger
-				ArrayList<String> feedbackList = new ArrayList<String>();
-				if ( reaction.get("feedback") != null ) { feedbackList = (ArrayList<String>) reaction.get("feedback"); }
+				ArrayList<JSONObject> feedbackList = new ArrayList<JSONObject>();
+				if ( reaction.get("feedback") != null ) { feedbackList = (ArrayList<JSONObject>) reaction.get("feedback"); }
 				
-				for (String f : feedbackList) {
+				for (JSONObject f : feedbackList) {
 					FeedbackController feedbackController = new FeedbackController();
-					JSONObject feedback = feedbackController.getFeedbackByName(f, idSG, version);
+					JSONObject feedback = feedbackController.getFeedbackByName(f.get("name").toString(), idSG, version);
 					
 					// modify message to parameters selected
 					String message = feedback.get(g.F_FIELD_MESSAGE).toString();
@@ -472,6 +485,7 @@ public class GamePlayController {
 
 					feedbackLogController.logFeedback(feedback, idGamePlay);
 					
+					if ((Boolean) f.get("immediate"))
 					feedbackTriggered.add(feedback);
 				}
 				return feedbackTriggered;
@@ -656,6 +670,7 @@ public class GamePlayController {
 			PreparedStatement stGetGameplays = 
 					conn.prepareStatement("SELECT "+ g.GP_FIELD_ID + ", " + g.GP_FIELD_CREATED + ", " + 
 											g.GP_FIELD_LASTACTION + ", " + g.GP_FIELD_ENDED + ", " + g.GP_FIELD_ID_PLAYER + 
+											 ", " + g.GP_FIELD_WIN +
 											" FROM " + g.TABLE_GAMEPLAY + 
 											" WHERE " + g.GP_FIELD_ID_SG + " = ? AND " + g.GP_FIELD_VERSION + " = ?");
 
@@ -687,6 +702,7 @@ public class GamePlayController {
 				gameplay.put(g.GP_FIELD_LASTACTION, results.getTimestamp(3).toString());
 				if (results.getTimestamp(4) != null) { gameplay.put(g.GP_FIELD_ENDED, results.getTimestamp(4).toString()); }
 				gameplay.put(g.GP_FIELD_ID_PLAYER, results.getInt(5));
+				if (results.getTimestamp(6) != null) { gameplay.put(g.GP_FIELD_WIN, results.getBoolean(6)); }
 				
 				if (g.DEBUG)
 				{
@@ -700,6 +716,130 @@ public class GamePlayController {
 		catch (Exception e)
 		{		
 			System.err.println("ERROR (getGamePlaysByGame): " + e.getMessage());
+			return null;
+		}
+	}
+
+	public ArrayList<JSONObject> getGameplaysByGameAndPlayer (int idSG, int version, int idPlayer) throws Exception
+	{
+		if (g.DEBUG)
+		{
+			System.out.println("*** getGameplaysByGameAndPlayer ***");
+		}
+		try
+		{
+			PreparedStatement stGetGameplays = 
+					conn.prepareStatement("SELECT "+ g.GP_FIELD_ID + ", " + g.GP_FIELD_CREATED + ", " + 
+											g.GP_FIELD_LASTACTION + ", " + g.GP_FIELD_ENDED + ", " + g.GP_FIELD_WIN + 
+											" FROM " + g.TABLE_GAMEPLAY + 
+											" WHERE " + g.GP_FIELD_ID_SG + " = ? AND " + g.GP_FIELD_VERSION + 
+											" = ?	AND " + g.GP_FIELD_ID_PLAYER + " = ?");
+
+			stGetGameplays.setInt(1, idSG);
+			stGetGameplays.setInt(2, version);
+			stGetGameplays.setInt(3, idPlayer);
+			
+			if (g.DEBUG_SQL)
+			{
+				System.out.println(stGetGameplays.toString());
+			}
+			
+			ResultSet results = stGetGameplays.executeQuery();
+
+			ArrayList<JSONObject> gps = new ArrayList<JSONObject>();
+			
+			while (results.next())
+			{
+				if (g.DEBUG_SQL)
+				{
+					System.out.println();
+				}
+				
+				JSONObject gameplay = new JSONObject();
+
+				gameplay.put(g.GP_FIELD_ID, results.getInt(1));
+				gameplay.put(g.GP_FIELD_ID_SG, idSG);
+				gameplay.put(g.GP_FIELD_VERSION, version);
+				gameplay.put(g.GP_FIELD_CREATED, results.getTimestamp(2).toString());
+				gameplay.put(g.GP_FIELD_LASTACTION, results.getTimestamp(3).toString());
+				if (results.getTimestamp(4) != null) { gameplay.put(g.GP_FIELD_ENDED, results.getTimestamp(4).toString()); }
+				gameplay.put(g.GP_FIELD_WIN, results.getBoolean(5));
+				gameplay.put(g.GP_FIELD_ID_PLAYER, idPlayer);
+				
+				if (g.DEBUG)
+				{
+					System.out.println(gameplay.toJSONString());
+				}
+				
+				gps.add(gameplay);
+			}
+			return gps;			
+		}
+		catch (Exception e)
+		{		
+			System.err.println("ERROR (getGamePlaysByGameAndPlayer): " + e.getMessage());
+			return null;
+		}
+	}
+
+	public ArrayList<JSONObject> getGameplaysWonByGameAndPlayer (int idSG, int version, int idPlayer) throws Exception
+	{
+		if (g.DEBUG)
+		{
+			System.out.println("*** getGameplaysByGameAndPlayer ***");
+		}
+		try
+		{
+			PreparedStatement stGetGameplays = 
+					conn.prepareStatement("SELECT "+ g.GP_FIELD_ID + ", " + g.GP_FIELD_CREATED + ", " + 
+											g.GP_FIELD_LASTACTION + ", " + g.GP_FIELD_ENDED +
+											" FROM " + g.TABLE_GAMEPLAY + 
+											" WHERE " + g.GP_FIELD_ID_SG + " = ? AND " + g.GP_FIELD_VERSION + 
+											" = ? AND " + g.GP_FIELD_ID_PLAYER + " = ? AND " + g.GP_FIELD_WIN + " = true");
+
+			stGetGameplays.setInt(1, idSG);
+			stGetGameplays.setInt(2, version);
+			stGetGameplays.setInt(3, idPlayer);
+			
+			if (g.DEBUG_SQL)
+			{
+				System.out.println(stGetGameplays.toString());
+			}
+			
+			ResultSet results = stGetGameplays.executeQuery();
+
+			ArrayList<JSONObject> gps = new ArrayList<JSONObject>();
+			
+			while (results.next())
+			{
+				if (g.DEBUG_SQL)
+				{
+					System.out.println();
+				}
+				
+				JSONObject gameplay = new JSONObject();
+
+				gameplay.put(g.GP_FIELD_ID, results.getInt(1));
+				gameplay.put(g.GP_FIELD_ID_SG, idSG);
+				gameplay.put(g.GP_FIELD_VERSION, version);
+				gameplay.put(g.GP_FIELD_CREATED, results.getTimestamp(2).toString());
+				gameplay.put(g.GP_FIELD_LASTACTION, results.getTimestamp(3).toString());
+				if (results.getTimestamp(4) != null) { gameplay.put(g.GP_FIELD_ENDED, results.getTimestamp(4).toString()); }
+				gameplay.put(g.GP_FIELD_WIN, true);
+				gameplay.put(g.GP_FIELD_ID_PLAYER, idPlayer);
+				
+				if (g.DEBUG)
+				{
+					System.out.println(gameplay.toJSONString());
+				}
+				
+				gps.add(gameplay);
+			}
+			return gps;			
+		}
+		catch (Exception e)
+		{		
+			System.err.println("ERROR (getGamePlaysByGameAndPlayer): " + e.getMessage());
 			return null;
 		}
 	}
