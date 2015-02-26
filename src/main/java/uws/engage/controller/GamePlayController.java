@@ -757,7 +757,7 @@ public class GamePlayController {
 				gameplay.put(g.GP_FIELD_LASTACTION, results.getTimestamp(3).toString());
 				if (results.getTimestamp(4) != null) { gameplay.put(g.GP_FIELD_ENDED, results.getTimestamp(4).toString()); }
 				gameplay.put(g.GP_FIELD_ID_PLAYER, results.getInt(5));
-				if (results.getTimestamp(6) != null) { gameplay.put(g.GP_FIELD_WIN, results.getBoolean(6)); }
+				if (results.getString(6) != null) { gameplay.put(g.GP_FIELD_WIN, results.getBoolean(6)); }
 				
 				if (g.DEBUG)
 				{
@@ -818,7 +818,7 @@ public class GamePlayController {
 				gameplay.put(g.GP_FIELD_CREATED, results.getTimestamp(2).toString());
 				gameplay.put(g.GP_FIELD_LASTACTION, results.getTimestamp(3).toString());
 				if (results.getTimestamp(4) != null) { gameplay.put(g.GP_FIELD_ENDED, results.getTimestamp(4).toString()); }
-				gameplay.put(g.GP_FIELD_WIN, results.getBoolean(5));
+				if (results.getString(5) != null) { gameplay.put(g.GP_FIELD_WIN, results.getBoolean(5)); }
 				gameplay.put(g.GP_FIELD_ID_PLAYER, idPlayer);
 				
 				if (g.DEBUG)
