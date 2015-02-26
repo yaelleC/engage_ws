@@ -16,7 +16,7 @@ import java.util.Set;
 /**
  * This class allows access to the serious game table of the database
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
- * @version 14.06
+ * @version 2.0
  *
  */
 public class SeriousGameController {

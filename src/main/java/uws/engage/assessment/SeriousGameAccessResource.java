@@ -26,7 +26,7 @@ import uws.engage.controller.SeriousGameController;
  * This class is the SeriousGameAccess class of the web services, it allows
  * 1. To retrieve the verion to be player by a student
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
- * @version 1.0
+ * @version 2.0
  *
  */
 public class SeriousGameAccessResource {

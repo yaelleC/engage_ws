@@ -14,7 +14,7 @@ import org.json.simple.JSONObject;
 /**
  * This class allows access to the student table of the database
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
- * @version 14.06
+ * @version 2.0
  *
  */
 public class StudentController {

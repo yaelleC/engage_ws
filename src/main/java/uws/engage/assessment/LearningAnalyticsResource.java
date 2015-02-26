@@ -44,13 +44,10 @@ import uws.engage.controller.General;
 @Path("learninganalytics")
 
 /**
- * This class is the SeriousGame class of the web services, it allows
- * 1. To retrieve a serious game configuration (json format)
- * 2. create an SG configuration from a config file (DSL format)
- * 3. Check a DSL config file grammar
- * 4. update an SG configuration from a config file (JSON format)
+ * This class is the Learning analytics class of the web services, it allows 
+ * to retrieve LA info and leaderboard (JSON format)
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
- * @version 1.0
+ * @version 2.0
  *
  */
 public class LearningAnalyticsResource {

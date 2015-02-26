@@ -17,7 +17,7 @@ import org.json.simple.JSONObject;
 /**
  * This class allows access to the gameplay tables of the database, it is able to create a new player table
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
- * @version 13.11.11
+ * @version 2.0
  *
  */
 public class GamePlayController {

@@ -3,7 +3,7 @@ package uws.engage.controller;
 /**
  * This class contains the main keyWords of the DB
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
- * @version 0.1
+ * @version 2.0
  */
 public class General {
 	

@@ -22,7 +22,7 @@ import uws.engage.controller.LearningOutcomeController;
 /**
  * This class allows access to the table feedback of the database
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
- * @version 0.1
+ * @version 2.0
  *
  */
 public class BadgesController {

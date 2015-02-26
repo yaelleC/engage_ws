@@ -36,7 +36,7 @@ import uws.engage.controller.ActionLogController;
  * 6. End a gameplay
  * 7. Get logs (actions and feedback) of a gameplay
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
- * @version 1.0
+ * @version 2.0
  *
  */
 public class GamePlayResource {

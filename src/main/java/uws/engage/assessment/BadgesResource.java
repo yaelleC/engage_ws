@@ -36,22 +36,20 @@ import uws.engage.controller.BadgesController;
 @Path("badges")
 
 /**
- * This class is the SeriousGame class of the web services, it allows
- * 1. To retrieve a serious game configuration (json format)
- * 2. create an SG configuration from a config file (DSL format)
- * 3. Check a DSL config file grammar
- * 4. update an SG configuration from a config file (JSON format)
+ * This class is the Badges class of the web services, it allows
+ * to retrieve the badges achieved by a player for a certain game (JSON format)
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
- * @version 1.0
+ * @version 2.0
  *
  */
 public class BadgesResource {
     /**
-     * Method handling HTTP GET requests on path "learninganalytics/seriousgame/{idSG}/version/{idVersion}"
+     * Method handling HTTP GET requests on path "learninganalytics/seriousgame/{idSG}/version/{idVersion}/player/{idP}"
      * 
      * @param idSG = an integer id of the SG to retrieve
      * @param idVersion = an integer, id of the version of the SG to retrieve
-     * @return a json, representing the SG assessment configuration
+     * @param idPlayer = an integer, id of the player
+     * @return a json, representing the badges the player has
      */
     @GET
     @Path("seriousgame/{idSG}/version/{version}/player/{idPlayer}")
