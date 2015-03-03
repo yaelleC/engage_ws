@@ -36,6 +36,7 @@ public class General {
 		public String FT_FIELD_LIMIT = "limitValue";
 		public String FT_FIELD_INFERIOR = "inferior";
 		public String FT_FIELD_REPEAT = "repeatBool";
+		public String FT_FIELD_IMMEDIATE = "immediate";
 				
 		public String TABLE_BADGES_TRIGGER = "badges_trigger";
 		public String BT_FIELD_ID_SG = "idSG";

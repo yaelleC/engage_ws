@@ -103,36 +103,43 @@ public class FeedbackTriggerController {
 		}
 		try
 		{
-			String sqlQueryIdFeedback = "SELECT "+ g.F_FIELD_ID +" FROM "+ g.TABLE_FEEDBACK +
-					" WHERE "+ g.F_FIELD_NAME +" = ? AND " + g.F_FIELD_ID_SG + " = ? AND " + g.F_FIELD_VERSION_SG + " = ?" ;
+
+			ArrayList<JSONObject> feedback = (ArrayList<JSONObject>) trigger.get("feedback");
+
+			for (JSONObject f : feedback) {
+						
+				String sqlQueryIdFeedback = "SELECT "+ g.F_FIELD_ID +" FROM "+ g.TABLE_FEEDBACK +
+						" WHERE "+ g.F_FIELD_NAME +" = ? AND " + g.F_FIELD_ID_SG + " = ? AND " + g.F_FIELD_VERSION_SG + " = ?" ;
+				
+
+				PreparedStatement stInsertTrigger = 
+					conn.prepareStatement("INSERT INTO "+ g.TABLE_FEEDBACK_TRIGGER + "("+ g.FT_FIELD_ID_SG + 
+											", " + g.FT_FIELD_ID_FDBK + ", " + g.FT_FIELD_SG_VERSION + 
+											", " + g.FT_FIELD_ID_OUTCOME + ", " + g.FT_FIELD_INACTIVITY + 
+											", " + g.FT_FIELD_LIMIT + ", " + g.FT_FIELD_INFERIOR + 
+											", " + g.FT_FIELD_REPEAT + ", " + g.FT_FIELD_IMMEDIATE +
+											") VALUES (?, ("+ sqlQueryIdFeedback +"), ?, ?, ?, ?, ?, ?, ?); ");
+
+				stInsertTrigger.setInt(1, idSG);
+				stInsertTrigger.setString(2, f.get("name").toString() );
+				stInsertTrigger.setInt(3, idSG);
+				stInsertTrigger.setInt(4, version);
+				stInsertTrigger.setInt(5, version);
+				stInsertTrigger.setInt(6, idLO);
+				stInsertTrigger.setBoolean(7, false);
+				stInsertTrigger.setInt(8, Integer.parseInt(trigger.get("limit").toString()));
+				Boolean inferior = trigger.get("sign").toString().equals("<");
+				stInsertTrigger.setBoolean(9, inferior);
+				stInsertTrigger.setBoolean(10, trigger.containsKey("repeat"));
+				stInsertTrigger.setBoolean(11, (Boolean) f.get("immediate"));
 			
-
-			PreparedStatement stInsertTrigger = 
-				conn.prepareStatement("INSERT INTO "+ g.TABLE_FEEDBACK_TRIGGER + "("+ g.FT_FIELD_ID_SG + 
-										", " + g.FT_FIELD_ID_FDBK + ", " + g.FT_FIELD_SG_VERSION + 
-										", " + g.FT_FIELD_ID_OUTCOME + ", " + g.FT_FIELD_INACTIVITY + 
-										", " + g.FT_FIELD_LIMIT + ", " + g.FT_FIELD_INFERIOR + ", " + g.FT_FIELD_REPEAT +
-										") VALUES (?, ("+ sqlQueryIdFeedback +"), ?, ?, ?, ?, ?, ?); ");
-
-			stInsertTrigger.setInt(1, idSG);
-			ArrayList<String> feedback = (ArrayList<String>) trigger.get("feedback");
-			stInsertTrigger.setString(2, (String) feedback.get(0) );
-			stInsertTrigger.setInt(3, idSG);
-			stInsertTrigger.setInt(4, version);
-			stInsertTrigger.setInt(5, version);
-			stInsertTrigger.setInt(6, idLO);
-			stInsertTrigger.setBoolean(7, false);
-			stInsertTrigger.setInt(8, Integer.parseInt(trigger.get("limit").toString()));
-			Boolean inferior = trigger.get("sign").toString().equals("<");
-			stInsertTrigger.setBoolean(9, inferior);
-			stInsertTrigger.setBoolean(10, trigger.containsKey("repeat"));
-		
-			if (g.DEBUG_SQL)
-			{
-				System.out.println(stInsertTrigger.toString());
+				if (g.DEBUG_SQL)
+				{
+					System.out.println(stInsertTrigger.toString());
+				}
+				
+				stInsertTrigger.executeUpdate();
 			}
-			
-			stInsertTrigger.executeUpdate();
 			
 			return g.CST_RETURN_SUCCESS;
 		}
@@ -180,7 +187,7 @@ public class FeedbackTriggerController {
 		PreparedStatement stGetFeedback = 
 				conn.prepareStatement("SELECT "+ g.FT_FIELD_ID_FDBK + ", "+ g.FT_FIELD_ID_OUTCOME +
 										", "+ g.FT_FIELD_INACTIVITY + ", "+ g.FT_FIELD_LIMIT + ", " +
-										g.FT_FIELD_INFERIOR +
+										g.FT_FIELD_INFERIOR + ", "+ g.FT_FIELD_IMMEDIATE +
 										" FROM " + g.TABLE_FEEDBACK_TRIGGER +
 										" WHERE " + g.FT_FIELD_ID_SG + " = ? AND "+ g.FT_FIELD_SG_VERSION + " = ? AND (" +
 										g.FT_FIELD_REPEAT + " OR " + g.FT_FIELD_ID_FDBK + 
@@ -212,6 +219,7 @@ public class FeedbackTriggerController {
 			Boolean inactivity = results.getBoolean(3);
 			int limit = results.getInt(4);
 			Boolean inferior = results.getBoolean(5);
+			Boolean immediate = results.getBoolean(6);
 			
 			// inactivity feedback
 			if (inactivity)

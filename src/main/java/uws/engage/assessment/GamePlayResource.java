@@ -322,7 +322,49 @@ public class GamePlayResource {
         {
             JSONObject action=(JSONObject) JSONValue.parse(actionP);
             GamePlayController gpController = new GamePlayController();
-            return gpController.assess(idGP, action).toString();
+            FeedbackTriggerController feedbackTriggerController = new FeedbackTriggerController();
+
+            ArrayList<JSONObject> feedback = gpController.assess(idGP, action);
+            feedback.addAll(feedbackTriggerController.getFeedback(idGP));
+
+            return feedback.toString();
+        }
+        catch( Exception e )
+        {
+            return "{ error: \"" + e + "\"}";
+        }
+    }
+
+    /**
+     * Method handling HTTP PUT requests on path "gameplay/{idGP}/assess"
+     * 
+     * @param idGP = an integer id of the current gameplay
+     * @param actionP = a JSON object containing a String "action" and a JSON "values" 
+     * (containg a String foreach parameter of the action)
+     * @return the list of feedback messages to trigger (JSON object)
+     */
+    @PUT
+    @Path("/{idGP}/assessAndScore")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String assessAndScore(String actionP, @PathParam("idGP") int idGP)
+    {
+        try
+        {
+            JSONObject action=(JSONObject) JSONValue.parse(actionP);
+            GamePlayController gpController = new GamePlayController();
+            FeedbackTriggerController feedbackTriggerController = new FeedbackTriggerController();
+
+            ArrayList<JSONObject> feedback = gpController.assess(idGP, action);
+            feedback.addAll(feedbackTriggerController.getFeedback(idGP));
+
+            ArrayList<JSONObject> scores = gpController.getScores(idGP);
+
+            JSONObject returnJSON = new JSONObject();
+            returnJSON.put("feedback", feedback);
+            returnJSON.put("scores", scores);
+
+            return returnJSON.toString();
         }
         catch( Exception e )
         {
