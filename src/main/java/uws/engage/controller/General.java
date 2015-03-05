@@ -24,6 +24,7 @@ public class General {
 		public String F_FIELD_MESSAGE = "message";
 		public String F_FIELD_TYPE = "type";
 		public String F_FIELD_FINAL = "final";
+		public String F_FIELD_WIN = "win";
 		public String F_FIELD_ID_SG = "idSG";
 		public String F_FIELD_VERSION_SG = "version";
 				
