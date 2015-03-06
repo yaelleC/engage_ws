@@ -26,6 +26,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import uws.engage.controller.SeriousGameController;
+import uws.engage.controller.StudentController;
 
 /**
  * Root resource (exposed at "seriousgame" path)
@@ -107,7 +108,13 @@ public class SeriousGameResource {
             JSONObject configFileJSON = engageParser.getJSONfromDSL(configFile);
 
             SeriousGameController sgController = new SeriousGameController();
-            return sgController.createSG(configFileJSON) + "";
+            int idSG = sgController.createSG(configFileJSON);
+
+            // give access to test user
+            StudentController stdController = new StudentController();
+            stdController.giveSGaccessToStudent(idSG, 1, 0);
+
+            return  idSG + "";
         }
         catch( Exception e )
         {
