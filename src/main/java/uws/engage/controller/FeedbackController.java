@@ -156,7 +156,7 @@ public class FeedbackController {
 				feedback.put(g.F_FIELD_NAME, name);
 				feedback.put(g.F_FIELD_MESSAGE, results.getString(2));
 				feedback.put(g.F_FIELD_TYPE, results.getString(3));
-				if (results.getString(4) != null)
+				if (results.getBoolean(4))
 				{
 					String finalString = (results.getString(5) != null)? ( (results.getBoolean(5))? "win" : "lose") : "true";
 					feedback.put(g.F_FIELD_FINAL, finalString);

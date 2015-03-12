@@ -108,8 +108,6 @@ public class LearningAnalyticsResource {
 
             // TODO: deal with gps null case -> error when gameplay was not ended? check
 
-            System.out.println(gps);
-
             for (JSONObject gp : gps) {
                 JSONObject playerJson = playerController.getPlayerFromId(Integer.parseInt(gp.get("idPlayer").toString()), 
                                             idSeriousGame, version);
@@ -145,6 +143,15 @@ public class LearningAnalyticsResource {
                 if (gp.get(g.GP_FIELD_ENDED) != null)
                 {
                     String target2 = gp.get(g.GP_FIELD_ENDED).toString();
+                    Date end =  df.parse(target2);  
+    
+                    long timeSpent = (end.getTime() - start.getTime()) / 1000;
+
+                    gameplay.put("timeSpent", timeSpent);
+                }
+                else
+                {
+                    String target2 = gp.get(g.GP_FIELD_LASTACTION).toString();
                     Date end =  df.parse(target2);  
     
                     long timeSpent = (end.getTime() - start.getTime()) / 1000;
