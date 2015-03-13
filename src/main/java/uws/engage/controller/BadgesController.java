@@ -61,6 +61,11 @@ public class BadgesController {
 	{
 		// Feedback to be returned
 		ArrayList<JSONObject> badges = new ArrayList<JSONObject>();
+
+		if (idPlayer < 0)
+		{
+			return badges;
+		}
 						
 		if (g.DEBUG)
 		{
@@ -136,9 +141,22 @@ public class BadgesController {
 			                DateFormat df = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss.S");
 			                Date start =  df.parse(target); 
 
-			                String target2 = gp.get(g.GP_FIELD_ENDED).toString();
-                    		Date end =  df.parse(target2);     
-                    		long timeSpent = (end.getTime() - start.getTime()) / 60000;
+			               long timeSpent = 0;
+
+                    		if (gp.get(g.GP_FIELD_ENDED) != null)
+			                {
+			                    String target2 = gp.get(g.GP_FIELD_ENDED).toString();
+			                    Date end =  df.parse(target2);  
+			    
+                    			timeSpent = (end.getTime() - start.getTime()) / 60000;
+			                }
+			                else
+			                {
+			                    String target2 = gp.get(g.GP_FIELD_LASTACTION).toString();
+			                    Date end =  df.parse(target2);  
+			    
+                    			timeSpent = (end.getTime() - start.getTime()) / 60000;
+			                }
 
                     		if (g.DEBUG)
 							{
