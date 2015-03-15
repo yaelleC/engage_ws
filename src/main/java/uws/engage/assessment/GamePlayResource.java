@@ -237,6 +237,59 @@ public class GamePlayResource {
     }
 
     /**
+    * Method handling HTTP POST requests on path "gameplay/"
+     * 
+     * @param gameplayP = a JSON object containing 3 Integers "idSG", "version" and "idStudent"; 
+     * amd an array of characteristics for the player "params"
+     * @return the id of the gameplay created if successful, 
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String startGamePlay(String gameplayP)
+    {
+        try
+        {
+            JSONObject gameplay=(JSONObject) JSONValue.parse(gameplayP);
+           
+            int idSG = Integer.parseInt(gameplay.get("idSG").toString());
+            int version = Integer.parseInt(gameplay.get("version").toString());
+            int idStudent = Integer.parseInt(gameplay.get("idStudent").toString());
+
+            ArrayList<JSONObject> params = (ArrayList<JSONObject>) gameplay.get("params");
+
+            // use or create player                 -> idPlayer 
+            PlayerController playerController = new PlayerController();
+            int idPlayer;
+
+            if (idStudent == 0)
+            {
+                // create a player
+                idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
+            }
+            else
+            {
+                idPlayer = playerController.getPlayerFromIdStudent(idStudent, idSG, version);
+                if (idPlayer == 0)
+                {
+                    // create a player
+                    idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
+                }
+            }
+            
+            // create row in gameplay table         -> idGameplay
+            GamePlayController gpController = new GamePlayController();
+            int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
+                    
+            return idGamePlay + "";
+        }
+        catch( Exception e )
+        {
+            return "{ error: \"" + e + "\"}";
+        }
+    }
+
+    /**
     * Method handling HTTP PUT requests on path "gameplay/"
      * 
      * @param gameplayP = a JSON object containing 3 Integers "idSG", "version" and "idStudent"; 
@@ -244,6 +297,74 @@ public class GamePlayResource {
      * @return the id of the gameplay created if successful, 
      */
     @PUT
+    @Path("/start")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String startGamePlayWithPlayerId(String gameplayP)
+    {
+        try
+        {
+            JSONObject gameplay=(JSONObject) JSONValue.parse(gameplayP);
+           
+            int idSG = Integer.parseInt(gameplay.get("idSG").toString());
+            int version = Integer.parseInt(gameplay.get("version").toString());
+            int idPlayer;
+
+            if (gameplay.get("idPlayer") != null)
+            {
+                idPlayer = Integer.parseInt(gameplay.get("idPlayer").toString());
+            }
+            else
+            {
+                int idStudent = (gameplay.get("idStudent") != null)? Integer.parseInt(gameplay.get("idStudent").toString()) : 0;
+                ArrayList<JSONObject> params = (ArrayList<JSONObject>) gameplay.get("params");
+
+                PlayerController playerController = new PlayerController();
+
+                if (idStudent == 0)
+                {
+                    if (params == null)
+                    {
+                        return "Error: The field parameters is missing";
+                    }
+                    // create a player
+                    idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
+                }
+                else
+                {
+                    idPlayer = playerController.getPlayerFromIdStudent(idStudent, idSG, version);
+                    if (idPlayer == 0)
+                    {
+                        if (params == null)
+                        {
+                            return "Error: The field parameters is missing";
+                        }
+                        // create a player
+                        idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
+                    }
+                }
+            }
+
+            // create row in gameplay table         -> idGameplay
+            GamePlayController gpController = new GamePlayController();
+            int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
+                    
+            return idGamePlay + "";
+        }
+        catch( Exception e )
+        {
+            return "{ error: \"" + e + "\"}";
+        }
+    }
+
+    /**
+    * Method handling HTTP POST requests on path "gameplay/"
+     * 
+     * @param gameplayP = a JSON object containing 3 Integers "idSG", "version" and "idStudent"; 
+     * amd an array of characteristics for the player "params"
+     * @return the id of the gameplay created if successful, 
+     */
+    @POST
     @Path("/start")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -335,6 +456,37 @@ public class GamePlayResource {
         }
     }
 
+     /**
+     * Method handling HTTP POST requests on path "gameplay/{idGP}/assess"
+     * 
+     * @param idGP = an integer id of the current gameplay
+     * @param actionP = a JSON object containing a String "action" and a JSON "values" 
+     * (containg a String foreach parameter of the action)
+     * @return the list of feedback messages to trigger (JSON object)
+     */
+    @POST
+    @Path("/{idGP}/assess")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String assess(String actionP, @PathParam("idGP") int idGP)
+    {
+        try
+        {
+            JSONObject action=(JSONObject) JSONValue.parse(actionP);
+            GamePlayController gpController = new GamePlayController();
+            FeedbackTriggerController feedbackTriggerController = new FeedbackTriggerController();
+
+            ArrayList<JSONObject> feedback = gpController.assess(idGP, action);
+            feedback.addAll(feedbackTriggerController.getFeedback(idGP));
+
+            return feedback.toString();
+        }
+        catch( Exception e )
+        {
+            return "{ error: \"" + e + "\"}";
+        }
+    }
+
     /**
      * Method handling HTTP PUT requests on path "gameplay/{idGP}/assess"
      * 
@@ -344,6 +496,43 @@ public class GamePlayResource {
      * @return the list of feedback messages to trigger (JSON object)
      */
     @PUT
+    @Path("/{idGP}/assessAndScore")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String assessAndScore(String actionP, @PathParam("idGP") int idGP)
+    {
+        try
+        {
+            JSONObject action=(JSONObject) JSONValue.parse(actionP);
+            GamePlayController gpController = new GamePlayController();
+            FeedbackTriggerController feedbackTriggerController = new FeedbackTriggerController();
+
+            ArrayList<JSONObject> feedback = gpController.assess(idGP, action);
+            feedback.addAll(feedbackTriggerController.getFeedback(idGP));
+
+            ArrayList<JSONObject> scores = gpController.getScores(idGP);
+
+            JSONObject returnJSON = new JSONObject();
+            returnJSON.put("feedback", feedback);
+            returnJSON.put("scores", scores);
+
+            return returnJSON.toString();
+        }
+        catch( Exception e )
+        {
+            return "{ error: \"" + e + "\"}";
+        }
+    }
+
+    /**
+     * Method handling HTTP POST requests on path "gameplay/{idGP}/assess"
+     * 
+     * @param idGP = an integer id of the current gameplay
+     * @param actionP = a JSON object containing a String "action" and a JSON "values" 
+     * (containg a String foreach parameter of the action)
+     * @return the list of feedback messages to trigger (JSON object)
+     */
+    @POST
     @Path("/{idGP}/assessAndScore")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
