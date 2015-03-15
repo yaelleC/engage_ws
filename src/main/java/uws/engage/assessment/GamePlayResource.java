@@ -246,7 +246,7 @@ public class GamePlayResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public String startGamePlay(String gameplayP)
+    public String startGamePlay2(String gameplayP)
     {
         try
         {
@@ -368,7 +368,7 @@ public class GamePlayResource {
     @Path("/start")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public String startGamePlayWithPlayerId(String gameplayP)
+    public String startGamePlayWithPlayerId2(String gameplayP)
     {
         try
         {
@@ -468,7 +468,7 @@ public class GamePlayResource {
     @Path("/{idGP}/assess")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String assess(String actionP, @PathParam("idGP") int idGP)
+    public String assess2(String actionP, @PathParam("idGP") int idGP)
     {
         try
         {
@@ -536,7 +536,7 @@ public class GamePlayResource {
     @Path("/{idGP}/assessAndScore")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String assessAndScore(String actionP, @PathParam("idGP") int idGP)
+    public String assessAndScore2(String actionP, @PathParam("idGP") int idGP)
     {
         try
         {

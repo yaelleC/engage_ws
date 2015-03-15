@@ -131,7 +131,7 @@ public class SeriousGameResource {
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public String createSeriousGame(String configFile)
+    public String createSeriousGame2(String configFile)
     {
         try
         {
@@ -197,7 +197,7 @@ public class SeriousGameResource {
     @Path("/check")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public String checkDSL(String configFile)
+    public String checkDSL2(String configFile)
     {
         uws.engage.dsl.generator.Parser engageParser = new uws.engage.dsl.generator.Parser();
         try
