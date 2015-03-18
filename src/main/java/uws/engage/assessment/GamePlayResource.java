@@ -26,6 +26,12 @@ import uws.engage.controller.ActionLogController;
  * Root resource (exposed at "gameplay" path)
  */
 @Path("gameplay")
+
+/**
+* @apiDefine 2Gameplay Gameplay
+*
+*/
+
 /**
  * This class is the GamePlay class of the web services, it allows
  * 1. To get required parameters for a player before starting a game
@@ -47,6 +53,7 @@ public class GamePlayResource {
      * @param detailsP = a JSON object containing 3 Integers "idSG", "version" and "idStudent"
      * @return a list of parameters required for the player (json format)
      */
+
     @POST
     @Path("/parameters")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -74,11 +81,31 @@ public class GamePlayResource {
         }
     }
 
+
     /**
-    * Method handling HTTP GET requests on path "gameplay/{idGP}/feedback"
+     * @api {get} /gameplay/:idGP/feedback Get Feedback
+     * @apiDescription If a feedback is triggered by an action you would receive it after invoking the assess web service. 
+     * For any other feedback triggered (inactivity or score related) you can invoke this web service. 
+     *
+     * @apiName GetFeedback
+     * @apiGroup 2Gameplay
+     *
+     * @apiVersion 2.0.0
      * 
-     * @param idGP = an integer id of the current gameplay
-     * @return a list of feedback messages to be triggered in the current gameplay (json format)
+     * @apiParam {Number} idGP ID of the current gameplay 
+     *
+     * @apiSuccess {json} Feedback list of feedback to be triggered in the current gameplay
+     * @apiSuccessExample {json} Response type
+     *  [
+     *     {
+     *         "message": String,
+     *         "id": integer,
+     *         "name": String,
+     *         "final": String ("true", "win", "lose")
+     *         "type": String (POSITIVE, NEGATIVE, NEUTRAL, BADGE or HINT)
+     *     },
+     *     …
+     *   ]
      */
     @GET
     @Path("/{idGP}/feedback")
@@ -100,6 +127,47 @@ public class GamePlayResource {
      * 
      * @param idGP = an integer id of the current gameplay
      * @return the log of the current gameplay (json format)
+     */
+    /**
+     * @api {get} /gameplay/:idGP/log Get Log
+     * @apiDescription After the gameplay, you might want to present the player with a final summative feedback, 
+     * to do so you can use the logs that EngAGe keeps of gameplays. 
+     *
+     * @apiName GetLog
+     * @apiGroup 3AfterGameplay
+     *
+     * @apiVersion 2.0.0
+     * 
+     * @apiParam {Number} idGP ID of the current gameplay 
+     *
+     * @apiSuccess {json} gameplayLog JSON object listing actions and feedback of the gameplay
+     * @apiSuccessExample {json} Response type
+     *  {
+     *     "actionLog": [
+     *       {
+     *         "time": timestamp (yyyy-MM-dd hh:mm:ss.s),
+     *         "action": {
+     *             "values": {
+     *                 “name”: “value”, …
+     *             },
+     *             "action": String
+     *         },
+     *         "mark": integer,
+     *         "idOutcome": integer
+     *       }, …
+     *     ],
+     *     "feedbackLog": [
+     *       {
+     *         "feedback": {
+     *             "id": integer,
+     *             "message": String,
+     *             "name": String,
+     *             "type": String (POSITIVE, NEGATIVE, NEUTRAL, BADGE or HINT)
+     *         },
+     *         "time": timestamp (yyyy-MM-dd hh:mm:ss.s)
+     *       },…
+     *     ]
+     *   }
      */
     @GET
     @Path("/{idGP}/log")
@@ -138,11 +206,36 @@ public class GamePlayResource {
         }
     }
 
+
     /**
-    * Method handling HTTP GET requests on path "gameplay/{idGP}/scores"
+     * @api {get} /gameplay/:idGP/scores Get Scores
+     * @apiDescription To retrieve the current values of the learning outcome scores, invoke this web service.
+     *
+     * @apiName GetScores
+     * @apiGroup 2Gameplay
+     *
+     * @apiVersion 2.0.0
      * 
-     * @param idGP = an integer id of the current gameplay
-     * @return the scores for the learning outcomes of the current gameplay (json format)
+     * @apiParam {Number} idGP ID of the current gameplay 
+     *
+     * @apiSuccess {json} Scores the scores of the current gameplay
+     * @apiSuccessExample {json} Example
+     *  [
+     *       {
+     *           "id": 183,
+     *           "startingValue": 28,
+     *           "description": "distinct countries of the EU left to find",
+     *           "name": "eu_countries",
+     *           "value": 15
+     *       },
+     *       {
+     *           "id": 184,
+     *           "startingValue": 3,
+     *           "description": "number of lives the player has",
+     *           "name": "lives",
+     *           "value": 2
+     *       }
+     *   ]
      */
     @GET
     @Path("/{idGP}/scores")
@@ -160,12 +253,20 @@ public class GamePlayResource {
         }
     }
     
+  
     /**
-    * Method handling HTTP GET requests on path "gameplay/{idGP}/scores"
+     * @api {get} /gameplay/:idGP/score/:idScore Get Score
+     * @apiDescription To retrieve the current values of the learning outcome scores, invoke this web service.
+     *
+     * @apiName GetScore
+     * @apiGroup 2Gameplay
+     *
+     * @apiVersion 2.0.0
      * 
-     * @param idGP = an integer id of the current gameplay
-     * @param idOutcome = an integer id of the learning outcome to look up
-     * @return the score for the learning outcome of id idOutcome in the current gameplay (json format)
+     * @apiParam {Number} idGP ID of the current gameplay 
+     * @apiParam {Number} idScore ID of the specific score to lookup 
+     *
+     * @apiSuccess {Number} Score the score of ID idScore for the current gameplay (float)
      */
     @GET
     @Path("/{idGP}/score/{idOutcome}")
@@ -190,6 +291,7 @@ public class GamePlayResource {
      * amd an array of characteristics for the player "params"
      * @return the id of the gameplay created if successful, 
      */
+
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -243,6 +345,7 @@ public class GamePlayResource {
      * amd an array of characteristics for the player "params"
      * @return the id of the gameplay created if successful, 
      */
+            
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -358,11 +461,62 @@ public class GamePlayResource {
     }
 
     /**
-    * Method handling HTTP POST requests on path "gameplay/"
+     * @api {post} /gameplay/start Start a Gameplay
+     * @apiDescription When a player starts playing your game, you need to tell the engine to set up a new gameplay. 
+     * That way, new scores will be set for your learning outcomes and the player's actions will be associated to them. 
+     * In order to create a new gameplay, you need to invoke the <code>gameplay</code> web service as follows.
+     *
+     * @apiName StartGameplay
+     * @apiGroup 2Gameplay
+     *
+     * @apiVersion 2.0.0
      * 
-     * @param gameplayP = a JSON object containing 3 Integers "idSG", "version" and "idStudent"; 
-     * amd an array of characteristics for the player "params"
-     * @return the id of the gameplay created if successful, 
+     * @apiParam {json} gamePlayerData JSON object containing game and player data <br/>
+     * <i>If idStudent is 0, the game is started for a guest. </i>
+     * @apiParamExample {json} Known Player
+     *   {  
+     *      "idSG": 92,
+     *      "version": 0,
+     *      "idPlayer": 2
+     *   }
+     * @apiParamExample {json} New Player
+     *   { 
+     *       "idSG": 92,
+     *       "version": 0,
+     *       "idStudent": 9,
+     *       "params": [
+     *          {   
+     *              "name": "age",
+     *              "type": "Int",
+     *              "value": 15
+     *          },
+     *          {   
+     *               "name": "gender",
+     *               "type": "Char",
+     *               "value": "m"
+     *          }
+     *       ]
+     *   }
+     * @apiParamExample {json} Guest
+     *   { 
+     *       "idSG": 92,
+     *       "version": 0,
+     *       "idStudent": 0,
+     *       "params": [
+     *          {   
+     *              "name": "age",
+     *              "type": "Int",
+     *              "value": 26
+     *          },
+     *          {   
+     *               "name": "gender",
+     *               "type": "Char",
+     *               "value": "f"
+     *          }
+     *       ]
+     *   }
+     *
+     * @apiSuccess {Number} idGameplay ID of the gameplay started
      */
     @POST
     @Path("/start")
@@ -433,6 +587,7 @@ public class GamePlayResource {
      * (containg a String foreach parameter of the action)
      * @return the list of feedback messages to trigger (JSON object)
      */
+   
     @PUT
     @Path("/{idGP}/assess")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -532,6 +687,57 @@ public class GamePlayResource {
      * (containg a String foreach parameter of the action)
      * @return the list of feedback messages to trigger (JSON object)
      */
+     /**
+     * @api {post} /gameplay/:idGameplay/AssessAndScore Assess
+     * @apiDescription During the gameplay, you will want to assess every player's action, 
+     * you can do so by invoking the <code>assess</code> web service as follows.
+     *
+     * @apiName PostAssess
+     * @apiGroup 2Gameplay
+     *
+     * @apiVersion 2.0.0
+     * 
+     * @apiParam {Number} idGameplay ID of the current gameplay
+     * @apiParam {json} actionData JSON object containing the action to assess (name and parameters)
+     * @apiParamExample {json} Example one parameter
+     *   {  
+     *      "action": "collectEUcountries",
+     *      "values": {
+     *          "country": "France"
+     *      }
+     *   }
+     * @apiParamExample {json} Example several parameters
+     *   {  
+     *      "action": "translateToItalian",
+     *      "values": {
+     *          "englishWord": "Hello",
+     *          "italianWord": "Buongiorno",
+     *      }
+     *   }
+     *
+     * @apiSuccess {json} feedbackAndScore A JSON object containing feedback to trigger (if any) and the new score values
+     * @apiSuccessExample {json} Example
+     *  {
+     *       "feedback": [
+     *           {   "message": "Yes, France is indeed part of the EU",
+     *               "name": "correct_country",
+     *               "type": "POSITIVE"
+     *           }
+     *       ],
+     *       "scores": [
+     *           {   "startingValue": 28,
+     *               "description": "countries of the EU left to find",
+     *               "name": "eu_countries",
+     *               "value": 27
+     *           },
+     *           {   "startingValue": 3,
+     *               "description": "number of lives the player has",
+     *               "name": "lives",
+     *               "value": 3
+     *           }
+     *       ]
+     *   }
+     */
     @POST
     @Path("/{idGP}/assessAndScore")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -593,6 +799,24 @@ public class GamePlayResource {
      * @param idGP = an integer id of the current gameplay
      * @return 1 if the gameplay successfully ended, -1 if the gameplay id doesn't exist in the database
      * 0 if the id exists but corresponds to a gameplay already ended
+     */
+    /**
+     * @api {post} /gameplay/:idGP/end/:end End gameplay
+     * @apiDescription When the player stops or finishes the gameplay, 
+     * notify the engine by invoking the <code>end</code> web service. This will update the database
+     * allowing for accurate calculation of the time spent playing. Some badges are based on the number of gameplays won
+     * so it is crucial to save the data.
+     *
+     * @apiName PostEndGameplay
+     * @apiGroup 2Gameplay
+     *
+     * @apiVersion 2.0.0
+     * 
+     * @apiParam {Number} idGP ID of the current gameplay 
+     * @apiParam {String="win", "lose", "end"} end specifies whether the game was won, lost or simply ended 
+     *
+     * @apiSuccess {Number=0, 1, -1} endStatus returns 
+     * <ul><li>1 if the gameplay has ended correctly</li><li>0 if the game had already ended</li><li>-1 is the game doesn't exist</li></ul>
      */
     @POST
     @Path("/{idGP}/end/{win}")

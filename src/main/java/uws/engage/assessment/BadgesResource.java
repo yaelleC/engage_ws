@@ -36,6 +36,10 @@ import uws.engage.controller.BadgesController;
 @Path("badges")
 
 /**
+* @apiDefine 3AfterGameplay After the gameplay(s)
+*
+*/
+/**
  * This class is the Badges class of the web services, it allows
  * to retrieve the badges achieved by a player for a certain game (JSON format)
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
@@ -44,12 +48,36 @@ import uws.engage.controller.BadgesController;
  */
 public class BadgesResource {
     /**
-     * Method handling HTTP GET requests on path "learninganalytics/seriousgame/{idSG}/version/{idVersion}/player/{idP}"
+     * @api {get} /badges/seriousgame/:idSG/version/:version/player/:idPlayer Get Badges
+     * @apiDescription At some point in your game, you might want to display the badges
+     * earned by the player logged in. <br/> To retrieve them, you need to call this web service
+     *
+     * @apiName GetBadges
+     * @apiGroup 3AfterGameplay
+     *
+     * @apiVersion 2.0.0
      * 
-     * @param idSG = an integer id of the SG to retrieve
-     * @param idVersion = an integer, id of the version of the SG to retrieve
-     * @param idPlayer = an integer, id of the player
-     * @return a json, representing the badges the player has
+     * @apiParam {Number} idSG ID of the current game
+     * @apiParam {Number} version version number of the current game
+     * @apiParam {Number} idPlayer ID of the current player
+     *
+     * @apiSuccess {json} listBadges A list of badges the player has earned, each badge has: 
+     * <ul><li>A<i> message </i> : string </li><li>
+     * An<i> id </i> : integer</li><li>
+     * A<i> name </i> : string </li></ul>
+     * @apiSuccessExample {json} Example
+     *  [
+     *      {
+     *          "message": "You played 10+ times",
+     *          "id": 466,
+     *          "name": "effort"
+     *      },
+     *      {
+     *          "message": "You found 50 EU countries",
+     *          "id": 469,
+     *          "name": "bronze_medal"
+     *      }
+     *  ]
      */
     @GET
     @Path("seriousgame/{idSG}/version/{version}/player/{idPlayer}")

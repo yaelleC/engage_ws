@@ -21,6 +21,10 @@ import uws.engage.controller.SeriousGameController;
 /**
  * Root resource (exposed at "SGaccess" path)
  */
+/**
+* @apiDefine 1OutsideGameplay Outside the gameplay
+*
+*/
 @Path("SGaccess")
 /**
  * This class is the SeriousGameAccess class of the web services, it allows
@@ -58,11 +62,94 @@ public class SeriousGameAccessResource {
     }    
 
      /**
-     * Method handling HTTP GET requests on path "SGaccess/{idSG}/student/{idStudent}"
+     * @api {post} /SGaccess Login Student or Guest
+     * @apiDescription A teacher can modify your game’s assessment, thus creating a new version of the game. 
+     * Before the player can start the game, you need to check their credential (username and password) 
+     * and get the version the teacher decided they would play. You do so by invoking the <code>SGaccess</code> web service. 
+     * It will also return a list of caracteristics you need to know about the player 
+     * (based on the Player section of the configuration file).
+     *
+     * @apiName 1PostLogin
+     * @apiGroup 1OutsideGameplay
+     *
+     * @apiVersion 2.0.0
+     *
+     * @apiParam {json} loginData JSON with three key/value: <ul><li><i>idSG </i>: int, ID of current game 
+     * </li><li><i>username </i>: string, username of player, empty for guest login
+     * </li><li><i>password </i>: string, password of player, empty for guest login </li></ul>
+     *
+     * @apiParamExample {json} player login
+     *   {
+     *     "idSG": 92,
+     *     "username": "yaelle",
+     *     "password": "password"
+     *   }
      * 
-     * @param idSG = an integer id of the SG to play
-     * @param idStudent = an integer, id of the student (0 if unauthentificated player)
-     * @return an integer version number to play if successful
+     * @apiParamExample {json} guest login
+     *   {
+     *     "idSG": 92,
+     *     "username": "",
+     *     "password": ""
+     *   }
+     *
+     * @apiSuccess {json} loginResult JSON with: <ul><li><i>loginSuccess </i>: true if username/password exists
+     *       </li><li><i>params </i>: list of information to ask about the player, if any
+     *       </li><li><i>version </i>: version of the game to be played by the player
+     *       </li><li><i>idPlayer </i>: ID of the player if he/she has played before
+     *       </li><li><i>student </i>: basic info about the student logged in </li></ul>
+     * @apiSuccessExample {json} Wrong/Guest login, public game
+     *  {
+     *       "loginSuccess": false,
+     *       "params": [
+     *           {
+     *               "name": "age",
+     *               "type": "Int"
+     *           },
+     *           {
+     *               "name": "gender",
+     *               "type": "Char"
+     *           }
+     *       ],
+     *       "version": 0
+     *   }
+     * @apiSuccessExample {json}  Wrong login, non-public game
+     *   {  
+     *      "loginSuccess": false
+     *   }
+     * @apiSuccessExample {json}  Correct login, known player
+     *   {  
+     *           "idPlayer": 2,
+     *           "student": {
+     *               "id": 9,
+     *               "username": "yaelle",
+     *               "idSchool": 1,
+     *               "dateBirth": "1988-08-17"
+     *           },
+     *           "loginSuccess": true,
+     *           "params": [],
+     *           "version": 0
+     *   } 
+     * @apiSuccessExample {json}  Correct login, new student
+     *   {  
+     *           "student": {
+     *               "id": 1,
+     *               "username": "test",
+     *               "idSchool": 1,
+     *               "dateBirth": "2000-01-01"
+     *           },
+     *           "loginSuccess": true,
+     *           "params":[
+     *              {
+     *                   "name": "age",
+     *                   "type": "Int"
+     *              },
+     *              {
+     *                  "name": "gender",
+     *                  "type": "Char"
+     *              }
+     *          ],
+     *          "version": 0
+     *   }
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)

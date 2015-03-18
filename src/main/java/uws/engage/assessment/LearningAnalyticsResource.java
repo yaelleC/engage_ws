@@ -44,6 +44,11 @@ import uws.engage.controller.General;
 @Path("learninganalytics")
 
 /**
+* @apiDefine LearningAnalytics Learning Analytics
+*
+*/
+
+/**
  * This class is the Learning analytics class of the web services, it allows 
  * to retrieve LA info and leaderboard (JSON format)
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
@@ -51,18 +56,109 @@ import uws.engage.controller.General;
  *
  */
 public class LearningAnalyticsResource {
+
     /**
-     * Method handling HTTP GET requests on path "learninganalytics/seriousgame/{idSG}/version/{idVersion}"
+     * @api {get} /learninganalytics/seriousgame/:idSG/version/:version Get Learning Analytics
+     * @apiDescription This web service returns extensive information about the players and the gameplays. 
+     * Every action of every player is listed in the JSON returned, along with timestamp and how it affected the score. 
+     *
+     * @apiName GetLearningAnalytics
+     * @apiGroup LearningAnalytics
+     *
+     * @apiVersion 2.0.0
      * 
-     * @param idSG = an integer id of the SG to retrieve
-     * @param idVersion = an integer, id of the version of the SG to retrieve
-     * @return a json, representing the SG assessment configuration
+     * @apiParam {Number} idSG ID of the game to retrieve LA from
+     * @apiParam {Number} version version number of the current game
+     *
+     * @apiSuccess {json} LAData all the learning analytics data available on the game
+     * @apiSuccessExample {json} Example type
+     *  {
+     *      "players": [
+     *          {
+     *              "idPlayer": 1,
+     *              "age": "26",
+     *              "gender": "f",
+     *              "idStudent": 1
+     *          }],
+     *      "gameplays": [
+     *          "id": 600,
+     *          "idPlayer": 1,
+     *          "timeStarted": "2015-03-12 20:35:01.0",
+     *           "finalScores": {
+     *              "eu_countries": 16, "lives": 0
+     *          },
+     *          "timeSpent": 93,
+     *          "actions": [
+     *           {
+     *               "timestamp": 4,
+     *               "action": "newCountrySelected",
+     *               "mark": -1,
+     *               "parameters": {
+     *                   "country": "switzerland"
+     *               },
+     *               "outcome": "lives",
+     *               "valuesLog": null
+     *           }, ...
+     *        ],
+     *        "game": {
+     *           "genre": "runner",
+     *           "idDeveloper": 200,
+     *           "learningOutcomes": {
+     *               "eu_countries": {
+     *                   "desc": "the number of EU countries left to find",
+     *                    "feedbackTriggered": [
+     *                        {
+     *                           "limit": 1,
+     *                           "sign": "<",
+     *                           "feedback": [
+     *                               {
+     *                                   "immediate": true,
+     *                                   "name": "endWin"
+     *                               }
+     *                           ]
+     *                       }
+     *                   ],
+     *                   "value": 28
+     *               },
+     *              "lives": {
+     *                   "desc": "the number left to the player",
+     *                   "feedbackTriggered": [
+     *                       {
+     *                           "limit": 1,
+    *                            "sign": "<",
+     *                           "feedback": [
+     *                               {
+     *                                   "immediate": true,
+     *                                   "name": "endLose"
+    *                                }
+     *                           ]
+     *                       }
+     *                   ],
+     *                   "value": 3
+     *               }
+     *           },
+     *           "subject": "Europe, Capitals, Geography",
+     *           "ageMax": 99,
+     *           "playerCharacteristics": [
+     *               "age",
+     *               "gender"            
+     *           ],
+     *           "lang": "EN",
+     *           "country": "UK",
+     *           "version": 0,
+     *           "id": 95,
+     *           "ageMin": 10,
+     *           "description": "Find european capitals",
+     *           "name": "EuMouse",
+     *           "public": "false"
+     *       }
+     *  }
      */
     @GET
-    @Path("seriousgame/{idSG}/version/{idVersion}")
+    @Path("seriousgame/{idSG}/version/{version}")
     @Produces(MediaType.APPLICATION_JSON)
     public String getLAinfo(@PathParam("idSG") int idSeriousGame, 
-                                        @PathParam("idVersion") int version) 
+                                        @PathParam("version") int version) 
     {
         try
         {
@@ -216,41 +312,44 @@ public class LearningAnalyticsResource {
         }
     }
 
-    /*    
-        "actions": [
-          {
-            "timestamp": 77,
-            "action": "associateCountryCapital",
-            "parameters": [
-              "Paris",
-              "France"
-            ],
-            "mark": 2,
-            "outcome": "european_capital"
-          }
-        ]
-
-        "time": "2014-11-22 21:04:09.0",
-            "action": 
-            {
-                "values": {
-                    "selectedProp": 1
-                },
-                "action": "compare",
-                "valuesLog": {
-                    "propName": "Salt and Pepper"
-                }
-            },
-            "mark": -1,
-            "idOutcome": 72
-    */
-
     /**
-     * Method handling HTTP GET requests on path "learninganalytics/leaderboard/seriousgame/{idSG}/version/{idVersion}"
+     * @api {get} /learninganalytics/leaderboard/seriousgame/:idSG/version/:version Get LeaderBoard
+     * @apiDescription EngAGe also gives you access to the game's leader board. 
+     * To retrieve it, you need to call this web service.
+     *
+     * @apiName GetLeaderBoard
+     * @apiGroup 3AfterGameplay
+     *
+     * @apiVersion 2.0.0
      * 
-     * @param idSG = an integer id of the SG to retrieve
-     * @param idVersion = an integer, id of the version of the SG to retrieve
-     * @return a json, representing the leaderboard 
+     * @apiParam {Number} idSG ID of the game to retrieve the leaderboard from
+     * @apiParam {Number} version version number of the game
+     *
+     * @apiSuccess {json} gameLearderboard game leaderboard: JSON object containing an array of performances for each score of the game. 
+     * The performances are in descending order and are composed of a name and a score. 
+     * @apiSuccessExample {json} Example
+     *  {
+     *       "score1": [
+     *           {
+     *               "name": "Anonymous",
+     *               "score": 74
+     *           },
+     *           {
+     *               "name": "yaelle",
+     *               "score": 38
+     *           }
+     *       ],
+     *       "score2": [
+     *           {
+     *               "name": "yaelle",
+     *               "score": 129
+     *           },
+     *           {
+     *               "name": "Anonymous",
+     *               "score": 112
+     *           }
+     *       ]
+     *   }       
      */
     @GET
     @Path("leaderboard/seriousgame/{idSG}/version/{idVersion}")
@@ -281,40 +380,43 @@ public class LearningAnalyticsResource {
                     int idGP = Integer.parseInt(gp.get("id").toString());
                     ArrayList<JSONObject> scores = gpController.getScores(idGP);
                     int idPlayer = Integer.parseInt(gp.get("idPlayer").toString());
-                    JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
-                    String playerName = "Anonymous";
-                    JSONObject leader = new JSONObject();
-
-                    // get player's name
-                    if (player.get("idStudent") != 0)
+                    if (idPlayer > 0)
                     {
-                        JSONObject student = studentController.getStudentsByID(Integer.parseInt(player.get("idStudent").toString()));
-                        playerName = student.get("username").toString();
-                    }
-                    else
-                    {
-                        if (player.get("name") != null)
-                        {
-                            playerName = player.get("name").toString();
-                        }
-                        else if (player.get("username") != null)
-                        {
-                            playerName = player.get("username").toString();
-                        }
-                    }
+                        JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
+                        String playerName = "Anonymous";
+                        JSONObject leader = new JSONObject();
 
-                    leader.put("name", playerName);
-
-                    
-                    for (JSONObject score : scores) {
-                        if (score.get("name").toString().equals(lo.get("name").toString()))
+                        // get player's name
+                        if (player.get("idStudent") != 0)
                         {
-                            leader.put("score", score.get("value"));
+                            JSONObject student = studentController.getStudentsByID(Integer.parseInt(player.get("idStudent").toString()));
+                            playerName = student.get("username").toString();
                         }
-                    }
+                        else
+                        {
+                            if (player.get("name") != null)
+                            {
+                                playerName = player.get("name").toString();
+                            }
+                            else if (player.get("username") != null)
+                            {
+                                playerName = player.get("username").toString();
+                            }
+                        }
 
-                    System.out.println(leader.toString());
-                    listPlayers.add(leader);
+                        leader.put("name", playerName);
+
+                        
+                        for (JSONObject score : scores) {
+                            if (score.get("name").toString().equals(lo.get("name").toString()))
+                            {
+                                leader.put("score", score.get("value"));
+                            }
+                        }
+
+                        System.out.println(leader.toString());
+                        listPlayers.add(leader);
+                    }
                 }
 
                 Collections.sort(listPlayers, new LeadersCompare());

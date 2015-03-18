@@ -68,11 +68,33 @@ public class SeriousGameResource {
     }
 
     /**
-     * Method handling HTTP GET requests on path "seriousgame/info/{idSG}/version/{idVersion}"
+     * @api {get} /seriousgame/info/:idSG/version/:version Get Game Data
+     * @apiDescription Because a teacher might modify some of the game information (description, age range...), 
+     * you may need to access the game data at some point in your game (e.g. an "about" window). <br/>
+     * To retrieve this, you need to call this web service
+     *
+     * @apiName 2GetGameInfo
+     * @apiGroup 1OutsideGameplay
+     *
+     * @apiVersion 2.0.0
      * 
-     * @param idSG = an integer id of the SG to retrieve
-     * @param idVersion = an integer, id of the version of the SG to retrieve
-     * @return a json with name, desc... of the SG
+     * @apiParam {Number} idSG ID of the current game
+     * @apiParam {Number} version version number of the current game
+     *
+     * @apiSuccess {json} gameData A json describing the current game (name, description... as defined in the configuration file)
+     * @apiSuccessExample {json} Example of response
+     *  "seriousGame": {
+     *       "genre": "Runner",
+     *       "idDeveloper": 1,
+     *       "ageMin": 10, 
+     *       "ageMax": 99,
+     *       "description": "This is a mini game that trains you to identify the countries that form the European Union",
+     *       "subject": "geography",
+     *       "name": "EU mouse",
+     *       "public": true,
+     *       "lang": "EN",
+     *       "country": "UK"
+     *  }
      */
     @GET
     @Path("info/{idSG}/version/{idVersion}")
