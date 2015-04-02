@@ -201,18 +201,21 @@ public class LearningAnalyticsResource {
             PlayerController playerController = new PlayerController();
 
             ArrayList<JSONObject> gps = gpController.getGameplaysByGame(idSeriousGame, version);
-
-            // TODO: deal with gps null case -> error when gameplay was not ended? check
+            ArrayList<JSONObject> gpsFiltered = new ArrayList<JSONObject>();
 
             for (JSONObject gp : gps) {
-                JSONObject playerJson = playerController.getPlayerFromId(Integer.parseInt(gp.get("idPlayer").toString()), 
-                                            idSeriousGame, version);
-                playerJson.put("idPlayer", playerJson.get("id"));
-                playerJson.remove("id");
-                if (!players.contains(playerJson))  
+                if (Integer.parseInt(gp.get("idPlayer").toString()) > 0)
                 {
-                    players.add(playerJson);
-                }  
+                    JSONObject playerJson = playerController.getPlayerFromId(Integer.parseInt(gp.get("idPlayer").toString()), 
+                                                idSeriousGame, version);
+                    playerJson.put("idPlayer", playerJson.get("id"));
+                    playerJson.remove("id");
+                    if (!players.contains(playerJson))  
+                    {
+                        players.add(playerJson);
+                    }  
+                    gpsFiltered.add(gp);
+                }
             }
 
             infoLA.put("players", players);
@@ -220,7 +223,7 @@ public class LearningAnalyticsResource {
             // ---------------------------- GAMEPLAYS ---------------------------- //
             ArrayList<JSONObject> gameplays = new ArrayList<JSONObject>();
 
-            for (JSONObject gp : gps) {
+            for (JSONObject gp : gpsFiltered) {
                 
                 JSONObject gameplay = new JSONObject();
                 int idGP = Integer.parseInt(gp.get(g.GP_FIELD_ID).toString());
@@ -325,8 +328,9 @@ public class LearningAnalyticsResource {
      * @apiParam {Number} idSG ID of the game to retrieve the leaderboard from
      * @apiParam {Number} version version number of the game
      *
-     * @apiSuccess {json} gameLearderboard game leaderboard: JSON object containing an array of performances for each score of the game. 
+     * @apiSuccess {json} gameLearderboard game leaderboard: JSON object containing an array of performances (15 max) for each score of the game. 
      * The performances are in descending order and are composed of a name and a score. 
+     * The leaderboard also include the longest and shortest times (in seconds).
      * @apiSuccessExample {json} Example
      *  {
      *       "score1": [
@@ -348,6 +352,26 @@ public class LearningAnalyticsResource {
      *               "name": "Anonymous",
      *               "score": 112
      *           }
+     *       ], 
+     *      "longestGameplays": [
+     *           {
+     *               "name": "Yaelle",
+     *               "score": 77
+     *           },
+     *           {
+     *               "name": "Anonymous",
+     *               "score": 40
+     *           }
+     *       ],
+     *       "shortestGameplays": [
+     *           {
+     *               "name": "Anonymous",
+     *               "score": 6
+     *           },
+     *           {
+     *               "name": "Anonymous",
+     *               "score": 40
+     *           }
      *       ]
      *   }       
      */
@@ -358,8 +382,20 @@ public class LearningAnalyticsResource {
                                         @PathParam("idVersion") int version) 
     {
         try
+        {            
+            return getLeaderboard(idSeriousGame, version, 15).toString();
+        }
+        catch(Exception e)
         {
-            JSONObject infoLeaderboard = new JSONObject();
+            JSONObject error = new JSONObject();
+            error.put("error", e);
+            return error.toString();
+        }
+    } 
+
+    private JSONObject getLeaderboard(int idSeriousGame, int version, int limit) throws Exception
+    {
+        JSONObject infoLeaderboard = new JSONObject();
 
             LearningOutcomeController loController = new LearningOutcomeController();
             GamePlayController gpController = new GamePlayController();
@@ -370,21 +406,17 @@ public class LearningAnalyticsResource {
 
             ArrayList<JSONObject> los = loController.getOutcomeListByGame(idSeriousGame, version);
 
-            ArrayList<JSONObject> gps = gpController.getGameplaysByGame(idSeriousGame, version);
+            // get longest gameplays
+            ArrayList<JSONObject> gpsLongestTime = gpController.getBestTimeGameplaysByGame(idSeriousGame, version, limit, true);
+            ArrayList<JSONObject> listLongestPlayers = new ArrayList<JSONObject>();
+            for (JSONObject gp : gpsLongestTime) {
 
-            for (JSONObject lo : los ) {
-                ArrayList<JSONObject> listPlayers = new ArrayList<JSONObject>();
-
-                for (JSONObject gp : gps) {
-
-                    int idGP = Integer.parseInt(gp.get("id").toString());
-                    ArrayList<JSONObject> scores = gpController.getScores(idGP);
                     int idPlayer = Integer.parseInt(gp.get("idPlayer").toString());
+                    String playerName = "Anonymous";
+                    JSONObject leader = new JSONObject();
                     if (idPlayer > 0)
                     {
                         JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
-                        String playerName = "Anonymous";
-                        JSONObject leader = new JSONObject();
 
                         // get player's name
                         if (player.get("idStudent") != 0)
@@ -403,27 +435,171 @@ public class LearningAnalyticsResource {
                                 playerName = player.get("username").toString();
                             }
                         }
-
-                        leader.put("name", playerName);
-
-                        
-                        for (JSONObject score : scores) {
-                            if (score.get("name").toString().equals(lo.get("name").toString()))
-                            {
-                                leader.put("score", score.get("value"));
-                            }
-                        }
-
-                        System.out.println(leader.toString());
-                        listPlayers.add(leader);
                     }
+                    leader.put("name", playerName);
+                    leader.put("score", gp.get("value"));
+                                        
+                    listLongestPlayers.add(leader);
+                    
                 }
 
-                Collections.sort(listPlayers, new LeadersCompare());
+                infoLeaderboard.put("longestGameplays", listLongestPlayers);
+
+            // get shortest gameplays
+            ArrayList<JSONObject> gpsShortestTime = gpController.getBestTimeGameplaysByGame(idSeriousGame, version, limit, false);
+            ArrayList<JSONObject> listShortestPlayers = new ArrayList<JSONObject>();
+            for (JSONObject gp : gpsShortestTime) {
+
+                    int idPlayer = Integer.parseInt(gp.get("idPlayer").toString());
+                    String playerName = "Anonymous";
+                    JSONObject leader = new JSONObject();
+                    if (idPlayer > 0)
+                    {
+                        JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
+
+                        // get player's name
+                        if (player.get("idStudent") != 0)
+                        {
+                            JSONObject student = studentController.getStudentsByID(Integer.parseInt(player.get("idStudent").toString()));
+                            playerName = student.get("username").toString();
+                        }
+                        else
+                        {
+                            if (player.get("name") != null)
+                            {
+                                playerName = player.get("name").toString();
+                            }
+                            else if (player.get("username") != null)
+                            {
+                                playerName = player.get("username").toString();
+                            }
+                        }
+                    }
+                    leader.put("name", playerName);
+                    leader.put("score", gp.get("value"));
+                                        
+                    listShortestPlayers.add(leader);
+                    
+                }
+
+                infoLeaderboard.put("shortestGameplays", listShortestPlayers);
+
+            // get each score
+            for (JSONObject lo : los ) {
+                ArrayList<JSONObject> listPlayers = new ArrayList<JSONObject>();
+
+                ArrayList<JSONObject> gps = gpController.getBestGameplaysByGameAndOutcome(idSeriousGame, version, 
+                                                                                        limit, lo.get("name").toString(), true);
+
+                for (JSONObject gp : gps) {
+
+                    int idPlayer = Integer.parseInt(gp.get("idPlayer").toString());
+                    String playerName = "Anonymous";
+                    JSONObject leader = new JSONObject();
+                    if (idPlayer > 0)
+                    {
+                        JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
+
+                        // get player's name
+                        if (player.get("idStudent") != 0)
+                        {
+                            JSONObject student = studentController.getStudentsByID(Integer.parseInt(player.get("idStudent").toString()));
+                            playerName = student.get("username").toString();
+                        }
+                        else
+                        {
+                            if (player.get("name") != null)
+                            {
+                                playerName = player.get("name").toString();
+                            }
+                            else if (player.get("username") != null)
+                            {
+                                playerName = player.get("username").toString();
+                            }
+                        }
+                    }
+
+                    leader.put("name", playerName);
+                    leader.put("score", gp.get("value"));
+                                        
+                    listPlayers.add(leader);
+                    
+                }
 
                 infoLeaderboard.put(lo.get("name"), listPlayers);
             }
-            return infoLeaderboard.toString();
+            return infoLeaderboard;
+    }
+
+        /**
+     * @api {get} /learninganalytics/leaderboard/:limit/seriousgame/:idSG/version/:version Get LeaderBoard (limit)
+     * @apiDescription EngAGe allows you to specify the number of results you want for the game's leader board. 
+     *
+     * @apiName GetLeaderBoardLimit
+     * @apiGroup 3AfterGameplay
+     *
+     * @apiVersion 2.0.0
+     * 
+     * @apiParam {Number} idSG ID of the game to retrieve the leaderboard from
+     * @apiParam {Number} version version number of the game
+     * @apiParam {Number} limit maximum number of performances to retrieve
+     *
+     * @apiSuccess {json} gameLearderboard game leaderboard: JSON object containing an array of performances (max :limit) for each score of the game. 
+     * The performances are in descending order and are composed of a name and a score. 
+     * The leaderboard also include the longest and shortest times (in seconds).
+     * @apiSuccessExample {json} Example
+     *  {
+     *       "score1": [
+     *           {
+     *               "name": "Anonymous",
+     *               "score": 74
+     *           },
+     *           {
+     *               "name": "yaelle",
+     *               "score": 38
+     *           }
+     *       ],
+     *       "score2": [
+     *           {
+     *               "name": "yaelle",
+     *               "score": 129
+     *           },
+     *           {
+     *               "name": "Anonymous",
+     *               "score": 112
+     *           }
+     *       ], 
+     *      "longestGameplays": [
+     *           {
+     *               "name": "Yaelle",
+     *               "score": 77
+     *           },
+     *           {
+     *               "name": "Anonymous",
+     *               "score": 40
+     *           }
+     *       ],
+     *       "shortestGameplays": [
+     *           {
+     *               "name": "Anonymous",
+     *               "score": 6
+     *           },
+     *           {
+     *               "name": "Anonymous",
+     *               "score": 40
+     *           }
+     *       ]
+     *   }       
+     */
+    @GET
+    @Path("leaderboard/{numResults}/seriousgame/{idSG}/version/{idVersion}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getLeaderBoardNumResults(@PathParam("numResults") int numRes, @PathParam("idSG") int idSeriousGame, 
+                                        @PathParam("idVersion") int version) 
+    {
+        try
+        {
+            return getLeaderboard(idSeriousGame, version, numRes).toString();
         }
         catch(Exception e)
         {

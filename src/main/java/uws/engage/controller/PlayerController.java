@@ -282,12 +282,12 @@ public class PlayerController {
 		
 		if (getPlayerFromIdStudent(idStudent, idSG, version) > 0)
 		{
-			// TODO , return "null" columns
 			return params;
 		}
 		
 		// else
-		
+
+	
 		PreparedStatement stGetParams = 
 				conn.prepareStatement("SELECT column_name, data_type, column_type"+ 
 										" FROM information_schema.columns WHERE table_name = ?" );

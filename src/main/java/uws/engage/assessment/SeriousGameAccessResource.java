@@ -103,6 +103,7 @@ public class SeriousGameAccessResource {
      *       "params": [
      *           {
      *               "name": "age",
+     *               "question": "How old are you?",
      *               "type": "Int"
      *           },
      *           {
@@ -157,14 +158,32 @@ public class SeriousGameAccessResource {
     public String logonAndGetVersion(String loginParams) {
         try
         {
-            JSONObject returnData = new JSONObject();
+            SeriousGameController sgController = new SeriousGameController();
 
+            JSONObject returnData = new JSONObject();
             JSONObject loginParamsJson=(JSONObject) JSONValue.parse(loginParams);
 
             String username = loginParamsJson.get("username").toString();
             String password = loginParamsJson.get("password").toString();
-            int idSG = Integer.parseInt(loginParamsJson.get("idSG").toString());
 
+            if (username == null )
+            {
+                username = "";
+            }
+            if ( password == null)
+            {
+                password = "";
+            }
+
+            if (loginParamsJson.get("idSG") == null)
+            {
+                return "{ \"error\": \"idSG must be specified\" }";
+            }
+            int idSG = Integer.parseInt(loginParamsJson.get("idSG").toString());
+            if (sgController.getSGById(idSG, 0) == null)
+            {
+                return "{ \"error\": \"idSG nnot found in the database\" }";                
+            }
 
             PlayerController playerController = new PlayerController();
             ArrayList<JSONObject> params = new ArrayList<JSONObject>();
@@ -179,6 +198,22 @@ public class SeriousGameAccessResource {
                 int idStudent = Integer.parseInt(student.get("id").toString());
                 int version = stdtController.getStudentVersionOfSG(idSG, idStudent);
 
+                if (version < 0)
+                {
+                    //if the serious game is public
+                    JSONObject sg = sgController.getSGById(idSG, 0);
+                    if ((Boolean) sg.get("public"))
+                    {
+                        version = 0;
+                    }
+                    // else
+                    else
+                    {
+                        returnData.put("loginSuccess", false);
+                        return returnData.toString();
+                    }
+                }
+
                 returnData.put("loginSuccess", true);
                 returnData.put("student", student);
                 returnData.put("version", version);
@@ -188,8 +223,11 @@ public class SeriousGameAccessResource {
                 {
                     returnData.put("idPlayer", idPlayer);
                 }
-                
-                params = playerController.getParametersRequired(idStudent,idSG, version);
+                else 
+                {
+                    params = (ArrayList<JSONObject>) sgController.getConfigFile(idSG, version).get("player");
+                }
+                //params = playerController.getParametersRequired(idStudent,idSG, version);
                 returnData.put("params", params);
 
                 System.out.println(returnData.toString());
@@ -197,13 +235,15 @@ public class SeriousGameAccessResource {
             else
             {
                 //if the serious game is public
-                SeriousGameController sgController = new SeriousGameController();
                 JSONObject sg = sgController.getSGById(idSG, 0);
                 if ((Boolean) sg.get("public"))
                 {
                     returnData.put("loginSuccess", false);
                     returnData.put("version", 0);
-                    params = playerController.getParametersRequired(idSG, 0);
+                    
+                    params = (ArrayList<JSONObject>) sgController.getConfigFile(idSG, 0).get("player");
+                    
+                    //params = playerController.getParametersRequired(idSG, 0);
                     returnData.put("params", params);
                 }
                 // else
