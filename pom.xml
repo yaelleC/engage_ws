@@ -41,12 +41,6 @@
         <artifactId>mail</artifactId>
         <version>1.4.6-rc1</version>
     </dependency>
-    <!-- Mockito extension (to simulate DB for tests) -->
-    <!--<dependency>
-        <groupId>javax.mail</groupId>
-        <artifactId>mail</artifactId>
-        <version>1.4.6-rc1</version>
-    </dependency>-->
 
     <dependency>
         <groupId>org.glassfish.jersey.containers</groupId>

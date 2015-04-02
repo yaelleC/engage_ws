@@ -114,65 +114,6 @@ public class SeriousGameResource {
     }
 
     /**
-     * @api {get} /seriousgame/:idSG/version/:version/actionParam/{action} Get Parameters of action
-     * @apiDescription Because a teacher might modify the possible values for an action's parameters, 
-     * you may need to access the list of possible values at some point in your game 
-     * (e.g. when you generate enemies, or words to translate). <br/>
-     * To retrieve this, you need to call this web service
-     *
-     * @apiName 3GetParametersOfAction
-     * @apiGroup 2Gameplay
-     *
-     * @apiVersion 2.0.0
-     * 
-     * @apiParam {Number} idSG ID of the current game
-     * @apiParam {Number} version version number of the current game
-     * @apiParam {String} action to retrieve the values from
-     *
-     * @apiSuccess {json} actionParams A json listing the possible values for the action's parameters
-     * @apiSuccessExample {json} Example of response for action 'translate'
-     *  [
-     *       { "wordInFrench": "poire", "wordInEnglish": "pear" },
-     *       { "wordInFrench": "pomme", "wordInEnglish": "apple" },
-     *       { "wordInFrench": "fraise", "wordInEnglish": "strawberry" },
-     *  ]
-     */
-    @GET
-    @Path("{idSG}/version/{version}/actionParam/{action}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String getActionParams(@PathParam("idSG") int idSeriousGame, 
-                                        @PathParam("version") int version, @PathParam("action") String action) 
-    {
-        try
-        {
-            ArrayList<JSONObject> values = new ArrayList<JSONObject>();
-            SeriousGameController sgController = new SeriousGameController();
-            JSONObject gameJSON = sgController.getConfigFile(idSeriousGame, version);
-            JSONObject evidenceModel = (JSONObject) gameJSON.get("evidenceModel");
-            JSONObject actionJSON = (JSONObject) evidenceModel.get(action);
-
-
-            ArrayList<JSONObject> reactions = (ArrayList<JSONObject>) actionJSON.get("reactions");
-            for (JSONObject reaction : reactions)
-            {
-                if (reaction.get("values") != null)
-                {
-                    for (JSONObject val : (ArrayList<JSONObject>) reaction.get("values"))
-                    {
-                        values.add(val);
-                    }
-                }
-            }
-
-            return values.toString();
-        }
-        catch( Exception e )
-        {
-            return "{'error':'"+e+"'}";
-        }
-    }
-
-    /**
      * Method handling HTTP PUT requests on path "seriousgame/"
      * 
      * @param configFile = the configuration file (DSL format) of the SG to create

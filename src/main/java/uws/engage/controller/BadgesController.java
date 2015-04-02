@@ -53,14 +53,6 @@ public class BadgesController {
 		conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
 	}
 	
-	public void finalize() throws Exception
-    {
-    	conn.close();
-    	if (g.DEBUG)
-		{
-			System.out.println("*** connection closed ***");
-		}  
-    }
 	// ********************************** Methods ********************************** //
 	
 	
@@ -99,7 +91,12 @@ public class BadgesController {
 		
 		// if there are badges triggers described
 		for (JSONObject badgeTrigger : badgeModel)
-		{			
+		{
+			if (g.DEBUG)
+			{
+				System.out.println("badges found: " + badgeTrigger.toString());
+			}
+			
 			ArrayList<String> badgesNames = (ArrayList<String>) badgeTrigger.get("feedback");
 			String badgeName = badgesNames.get(0);
 			int idFeedback = Integer.parseInt(feedbackController.getFeedbackByName(badgeName, idSG, version).get("id").toString());
@@ -118,6 +115,11 @@ public class BadgesController {
 			// time or gameplay badge
 			if (idOutcome < 0)
 			{
+				if (g.DEBUG)
+				{
+					System.out.println("time or gameplay found: " + function);
+				}
+
 				long numberToCompareWith = 0;
 				ArrayList<JSONObject> gps;
 
@@ -156,6 +158,11 @@ public class BadgesController {
                     			timeSpent = (end.getTime() - start.getTime()) / 60000;
 			                }
 
+                    		if (g.DEBUG)
+							{
+								System.out.println("timeSpent: " + timeSpent);
+							}
+
                     		numberToCompareWith += timeSpent;
 						}
 						
@@ -179,6 +186,11 @@ public class BadgesController {
 						numberToCompareWith = (gps.size() > 0)? sum / gps.size() : 0;
 						break;
 				}
+
+				if (g.DEBUG)
+				{
+					System.out.println("numberToCompareWith: " + numberToCompareWith);
+				}
 									
 				if ( (numberToCompareWith > limit) && (!inferior) || (numberToCompareWith < limit) && (inferior) )
 				{						
@@ -191,7 +203,7 @@ public class BadgesController {
 					f.put(g.F_FIELD_MESSAGE, message);
 											
 					badges.add(f);
-
+					
 					//fdbkLogController.logFeedback(f, idGamePlay);
 				}
 				
@@ -199,6 +211,10 @@ public class BadgesController {
 			// goal related feedback
 			else
 			{
+				if (g.DEBUG)
+				{
+					System.out.println("outcome badge found: " + function + " - " + idOutcome);
+				}
 
 				Float numberToCompareWith = new Float (0);
 
@@ -249,7 +265,6 @@ public class BadgesController {
 						f.put(g.F_FIELD_MESSAGE, message);
 												
 						badges.add(f);
-
 					}
 				}
 			}				
@@ -261,223 +276,6 @@ public class BadgesController {
 		return badges;			
 	}
 
-	public ArrayList<JSONObject> getAllBadges(int idSG, int version, int idPlayer ) throws Exception
-	{
-		// Feedback to be returned
-		ArrayList<JSONObject> badges = new ArrayList<JSONObject>();
-
-		if (idPlayer < 0)
-		{
-			return badges;
-		}
-						
-		if (g.DEBUG)
-		{
-			System.out.println("********* getBadges **************");
-		}
-		
-		// To get feedback data
-		FeedbackController feedbackController = new FeedbackController();
-
-		// To get learning outcome data
-		LearningOutcomeController loController = new LearningOutcomeController();
-
-
-		// To get gameplay data
-		GamePlayController gpController = new GamePlayController();
-
-		// To get serious game data
-		SeriousGameController sgController = new SeriousGameController();
-		JSONObject configFile = sgController.getConfigFile(idSG, version);
-
-		ArrayList<JSONObject> badgeModel = (ArrayList<JSONObject>) configFile.get("badgeModel");
-			
-		
-		// if there are badges triggers described
-		for (JSONObject badgeTrigger : badgeModel)
-		{			
-			ArrayList<String> badgesNames = (ArrayList<String>) badgeTrigger.get("feedback");
-			String badgeName = badgesNames.get(0);
-			int idFeedback = Integer.parseInt(feedbackController.getFeedbackByName(badgeName, idSG, version).get("id").toString());
-
-			int idOutcome = -1;
-			if (badgeTrigger.get("outcome") != null)
-			{
-				String outcome = badgeTrigger.get("outcome").toString();	
-				idOutcome = loController.getOutcomeIdByName(outcome, idSG, version);
-			}
-
-			String function = badgeTrigger.get("function").toString();
-			int limit = Integer.parseInt(badgeTrigger.get("limit").toString());
-			Boolean inferior = badgeTrigger.get("sign").toString().equals("<");
-			
-			// time or gameplay badge
-			if (idOutcome < 0)
-			{
-				long numberToCompareWith = 0;
-				ArrayList<JSONObject> gps;
-
-				switch (function)
-				{
-					case "numberGameplays":
-						 gps = gpController.getGameplaysByGameAndPlayer(idSG, version, idPlayer);
-						 numberToCompareWith = gps.size();
-						break;
-					case "numberWin":
-						gps = gpController.getGameplaysWonByGameAndPlayer(idSG, version, idPlayer);
-						 numberToCompareWith = gps.size();
-						break;
-					case "totalTime":
-						numberToCompareWith = 0;
-						gps = gpController.getGameplaysByGameAndPlayer(idSG, version, idPlayer);
-						for (JSONObject gp : gps) {
-							String target = gp.get(g.GP_FIELD_CREATED).toString();
-			                DateFormat df = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss.S");
-			                Date start =  df.parse(target); 
-
-			               long timeSpent = 0;
-
-                    		if (gp.get(g.GP_FIELD_ENDED) != null)
-			                {
-			                    String target2 = gp.get(g.GP_FIELD_ENDED).toString();
-			                    Date end =  df.parse(target2);  
-			    
-                    			timeSpent = (end.getTime() - start.getTime()) / 60000;
-			                }
-			                else
-			                {
-			                    String target2 = gp.get(g.GP_FIELD_LASTACTION).toString();
-			                    Date end =  df.parse(target2);  
-			    
-                    			timeSpent = (end.getTime() - start.getTime()) / 60000;
-			                }
-
-                    		numberToCompareWith += timeSpent;
-						}
-						
-						
-						break;
-					case "averageTime":
-						long sum = 0;
-
-						gps = gpController.getGameplaysByGameAndPlayer(idSG, version, idPlayer);
-						for (JSONObject gp : gps) {
-							String target = gp.get(g.GP_FIELD_CREATED).toString();
-			                DateFormat df = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss.S");
-			                Date start =  df.parse(target); 
-
-			                String target2 = gp.get(g.GP_FIELD_ENDED).toString();
-                    		Date end =  df.parse(target2);     
-                    		long timeSpent = (end.getTime() - start.getTime()) / 60000;
-
-                    		sum += timeSpent;
-						}
-						numberToCompareWith = (gps.size() > 0)? sum / gps.size() : 0;
-						break;
-				}
-
-
-				// create JSONObject and update the message
-				JSONObject f = feedbackController.getFeedbackById(idFeedback);
-
-				String message = f.get(g.F_FIELD_MESSAGE).toString();
-				message = message.replace("[number]", numberToCompareWith +"");
-				f.remove(g.F_FIELD_MESSAGE);
-				f.put(g.F_FIELD_MESSAGE, message);
-
-				// add new key/values 
-				f.put("goalNum", limit+1);
-				f.put("playerNum", numberToCompareWith);
-
-
-				if ( (numberToCompareWith > limit) && (!inferior) || (numberToCompareWith < limit) && (inferior) )
-				{						
-					f.put ("earned", true);
-				}
-				else
-				{
-					f.put("earned", false);
-				}
-
-						
-				badges.add(f);
-			}
-			// goal related feedback
-			else
-			{
-
-				Float numberToCompareWith = new Float (0);
-
-				ArrayList<Float> scores = getOutcomeListByGamePlayerAndOutcome(idSG, version, idPlayer, idOutcome);
-				Boolean noData = scores.isEmpty();
-
-				switch (function)
-				{
-					case "sumScore":
-						numberToCompareWith = new Float (0);
-						 for (Float s : scores ) {
-						 	numberToCompareWith += s;
-						 }
-						break;
-					case "averageScore":
-						Float sum = new Float (0);
-						 for (Float s : scores ) {
-						 	sum += s;
-						 }
-						 numberToCompareWith = (scores.size() > 0)? sum / scores.size() : 0;
-						break;
-					case "maxScore":
-						Collections.max(scores);
-						break;
-					case "minScore":
-						Collections.min(scores);
-						break;
-				}
-
-				if (!noData)
-				{
-					// create JSONObject and update the message
-					JSONObject f = feedbackController.getFeedbackById(idFeedback);
-
-					String message = f.get(g.F_FIELD_MESSAGE).toString();
-					message = message.replace("[number]", numberToCompareWith +"");
-					if (f.get(g.F_FIELD_MESSAGE).toString().contains("[outcome]"))
-					{				
-						LearningOutcomeController loC = new LearningOutcomeController();
-						JSONObject o = loC.getOutcomeById(idOutcome);
-						
-						message = message.replace("[outcome]", o.get(g.O_FIELD_NAME)+" (" + o.get(g.O_FIELD_DESC) + ")");
-					}
-					f.remove(g.F_FIELD_MESSAGE);
-					f.put(g.F_FIELD_MESSAGE, message);
-
-					// add new key/values 
-					f.put("goalNum", limit+1);
-					f.put("playerNum", numberToCompareWith);
-
-
-					if ( (numberToCompareWith > limit) && (!inferior) || (numberToCompareWith < limit) && (inferior) )
-					{						
-						f.put ("earned", true);
-					}
-					else
-					{
-						f.put("earned", false);
-					}
-
-							
-					badges.add(f);
-				}
-			}				
-		}
-		if (g.DEBUG)
-		{
-			System.out.println(badges);
-		}
-		return badges;			
-	}
-
-/*
 	public ArrayList<JSONObject> getBadgesSQL(int idSG, int version, int idPlayer ) throws Exception
 	{
 		// Feedback to be returned
@@ -774,18 +572,16 @@ public class BadgesController {
 			return g.CST_RETURN_SQL_ERROR;
 		}
 	}
-	*/
+	
 
 	public ArrayList<Float> getOutcomeListByGamePlayerAndOutcome(int idSG, int version, int idPlayer, int idOutcome)
 		{
 			if (g.DEBUG)
 			{
-				System.out.println("*** getOutcomeListByGamePlayerAndOutcome ***");
+				System.out.println("*** GetLearningOutcomeByGame ***");
 			}
 			try
 			{
-				ArrayList<Float> list = new ArrayList<Float>();
-				
 				PreparedStatement stGetOutcomes = 
 						conn.prepareStatement("SELECT "+ g.G_O_FIELD_VALUE + " FROM " + g.TABLE_GAMEPLAY_OUTCOME + 
 												" WHERE "+ g.G_O_FIELD_ID_O + " = ? AND " + g.G_O_FIELD_ID_GP + " IN (" +
@@ -805,10 +601,9 @@ public class BadgesController {
 				}
 				
 				ResultSet results = stGetOutcomes.executeQuery();
-				if (g.DEBUG_SQL)
-				{
-					return list;
-				}			
+				
+				ArrayList<Float> list = new ArrayList<Float>();
+				
 				while (results.next())
 				{
 					list.add(results.getFloat(1));
@@ -822,5 +617,4 @@ public class BadgesController {
 				return null;
 			}
 		}
-		
 }

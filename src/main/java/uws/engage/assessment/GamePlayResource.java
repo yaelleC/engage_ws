@@ -460,70 +460,8 @@ public class GamePlayResource {
         }
     }
 
-    
-    @POST
-    @Path("/start")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String startGamePlayWithPlayerId2(String gameplayP)
-    {
-        try
-        {
-            JSONObject gameplay=(JSONObject) JSONValue.parse(gameplayP);
-           
-            int idSG = Integer.parseInt(gameplay.get("idSG").toString());
-            int version = Integer.parseInt(gameplay.get("version").toString());
-            int idPlayer;
-
-            if (gameplay.get("idPlayer") != null)
-            {
-                idPlayer = Integer.parseInt(gameplay.get("idPlayer").toString());
-            }
-            else
-            {
-                int idStudent = (gameplay.get("idStudent") != null)? Integer.parseInt(gameplay.get("idStudent").toString()) : 0;
-                ArrayList<JSONObject> params = (ArrayList<JSONObject>) gameplay.get("params");
-
-                PlayerController playerController = new PlayerController();
-
-                if (idStudent == 0)
-                {
-                    if (params == null)
-                    {
-                        return "Error: The field parameters is missing";
-                    }
-                    // create a player
-                    idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
-                }
-                else
-                {
-                    idPlayer = playerController.getPlayerFromIdStudent(idStudent, idSG, version);
-                    if (idPlayer == 0)
-                    {
-                        if (params == null)
-                        {
-                            return "Error: The field parameters is missing";
-                        }
-                        // create a player
-                        idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
-                    }
-                }
-            }
-
-            // create row in gameplay table         -> idGameplay
-            GamePlayController gpController = new GamePlayController();
-            int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
-                    
-            return idGamePlay + "";
-        }
-        catch( Exception e )
-        {
-            return "{ error: \"" + e + "\"}";
-        }
-    }
-
     /**
-     * @api {post} /gameplay/startGP Start a Gameplay
+     * @api {post} /gameplay/start Start a Gameplay
      * @apiDescription When a player starts playing your game, you need to tell the engine to set up a new gameplay. 
      * That way, new scores will be set for your learning outcomes and the player's actions will be associated to them. 
      * In order to create a new gameplay, you need to invoke the <code>gameplay</code> web service as follows.
@@ -578,31 +516,17 @@ public class GamePlayResource {
      *       ]
      *   }
      *
-     * @apiSuccess {json} gameplayData json with ID of gameplay created and ID of player
-     * @apiSuccessExample {json} Example
-     *       {
-     *           "idGameplay": 183,
-     *           "idPlayer": 28
-     *       }
+     * @apiSuccess {Number} idGameplay ID of the gameplay started
      */
     @POST
-    @Path("/startGP")
+    @Path("/start")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public String startGamePlayWithPlayerIdReturnJSON(String gameplayP)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String startGamePlayWithPlayerId2(String gameplayP)
     {
         try
         {
             JSONObject gameplay=(JSONObject) JSONValue.parse(gameplayP);
-
-            if (gameplay.get("idSG") == null )
-            {
-                 return "{ error: \"idSG must be specified\"}";
-            }
-            if ( gameplay.get("version") == null)
-            {
-                 return "{ error: \"version must be specified\"}";
-            }
            
             int idSG = Integer.parseInt(gameplay.get("idSG").toString());
             int version = Integer.parseInt(gameplay.get("version").toString());
@@ -615,7 +539,6 @@ public class GamePlayResource {
             else
             {
                 int idStudent = (gameplay.get("idStudent") != null)? Integer.parseInt(gameplay.get("idStudent").toString()) : 0;
-
                 ArrayList<JSONObject> params = (ArrayList<JSONObject>) gameplay.get("params");
 
                 PlayerController playerController = new PlayerController();
@@ -624,13 +547,8 @@ public class GamePlayResource {
                 {
                     if (params == null)
                     {
-                        return "{ error: \"params must be specified\"}";
+                        return "Error: The field parameters is missing";
                     }
-                    if (params.size() > 0 && (params.get(0).get("name") == null ||  params.get(0).get("value") == null ))
-                    {
-                        return "{ error: \"each parameter must include a name and a value\"}";
-                    }
-                
                     // create a player
                     idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
                 }
@@ -641,31 +559,19 @@ public class GamePlayResource {
                     {
                         if (params == null)
                         {
-                            return "{ error: \"params must be specified\"}";
-                        }
-                        if (params.size() > 0 && (params.get(0).get("name") == null ||  params.get(0).get("value") == null ))
-                        {
-                            return "{ error: \"each parameter must include a name and a value\"}";
+                            return "Error: The field parameters is missing";
                         }
                         // create a player
                         idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
                     }
                 }
             }
-            if (idPlayer < 0)
-            {
-                return "{ error: \"impossible to create player, check that the parameters sent are the ones required.\"}";
-            }
 
             // create row in gameplay table         -> idGameplay
             GamePlayController gpController = new GamePlayController();
             int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
-
-            JSONObject gpData = new JSONObject();
-            gpData.put("idGameplay", idGamePlay);
-            gpData.put("idPlayer", idPlayer);
                     
-            return gpData.toString();
+            return idGamePlay + "";
         }
         catch( Exception e )
         {
@@ -887,7 +793,13 @@ public class GamePlayResource {
         }
     }
 
-
+    /**
+     * Method handling HTTP POST requests on path "gameplay/{idGP}/end"
+     * 
+     * @param idGP = an integer id of the current gameplay
+     * @return 1 if the gameplay successfully ended, -1 if the gameplay id doesn't exist in the database
+     * 0 if the id exists but corresponds to a gameplay already ended
+     */
     /**
      * @api {post} /gameplay/:idGP/end/:end End gameplay
      * @apiDescription When the player stops or finishes the gameplay, 
@@ -915,16 +827,9 @@ public class GamePlayResource {
         try
         {
             GamePlayController gpController = new GamePlayController();
-            if (win.equals("end"))
-            {
-                return gpController.endGamePlay(idGP) + "";
-            }
-            else
-            {
-                Boolean gameWon = win.equals("win");
+            Boolean gameWon = win.equals("win");
            
-                return gpController.endGamePlay(idGP, gameWon) + "";
-            }
+            return gpController.endGamePlay(idGP, gameWon) + "";
 
         }
         catch( Exception e )
