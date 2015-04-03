@@ -50,6 +50,15 @@ public class GamePlayController {
 		Class.forName("com.mysql.jdbc.Driver");		
 		conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
 	}
+
+	public void finalize() throws Exception
+    {
+    	conn.close();
+    	if (g.DEBUG)
+		{
+			System.out.println("*** connection closed ***");
+		}  
+    }
 	
 	// ********************************** Methods ********************************** //
 
@@ -712,6 +721,151 @@ public class GamePlayController {
 		}
 		
 		return g.CST_RETURN_SUCCESS;
+	}
+
+	public ArrayList<JSONObject> getBestGameplaysByGameAndOutcome (int idSG, int version, int numResults, 
+		String scoreName, Boolean descendantOrder)
+	{
+		if (g.DEBUG)
+		{
+			System.out.println("*** getBestGameplaysByGame ***");
+		}
+		try
+		{
+			
+			String order = (descendantOrder)? "DESC" : "ASC";
+
+			String getIdScore = "(SELECT "+ g.O_FIELD_ID +" FROM  "+ g.TABLE_OUTCOME +
+								" WHERE "+g.O_FIELD_ID_SG+"= ? AND "+g.O_FIELD_VERSION_SG+"= ? AND "+g.O_FIELD_NAME+"= ?)";
+
+			PreparedStatement stGetGameplays = 
+					conn.prepareStatement("SELECT "+ g.GP_FIELD_ID + ", " + g.GP_FIELD_CREATED + ", " + 
+											g.GP_FIELD_LASTACTION + ", " + g.GP_FIELD_ENDED + ", " + g.GP_FIELD_ID_PLAYER + 
+											 ", " + g.GP_FIELD_WIN + ", " + g.G_O_FIELD_ID_O + ", " + g.G_O_FIELD_VALUE + 
+											" FROM " + g.TABLE_GAMEPLAY_OUTCOME + ", " + g.TABLE_GAMEPLAY +
+											" WHERE " + g.TABLE_GAMEPLAY_OUTCOME + "." + g.G_O_FIELD_ID_GP + 
+															" = " + g.TABLE_GAMEPLAY + "." + g.GP_FIELD_ID + 
+											" AND " + g.G_O_FIELD_ID_O + "=" + getIdScore +
+											" ORDER BY " + g.G_O_FIELD_VALUE + " " + order + " LIMIT ?");
+
+			stGetGameplays.setInt(1, idSG);
+			stGetGameplays.setInt(2, version);
+			stGetGameplays.setString(3, scoreName);
+			//stGetGameplays.setString(4, order);
+			stGetGameplays.setInt(4, numResults);
+			
+			if (g.DEBUG_SQL)
+			{
+				System.out.println(stGetGameplays.toString());
+			}
+			
+			ResultSet results = stGetGameplays.executeQuery();
+
+			ArrayList<JSONObject> gps = new ArrayList<JSONObject>();
+			
+			while (results.next())
+			{
+				if (g.DEBUG_SQL)
+				{
+					System.out.println();
+				}
+				
+				JSONObject gameplay = new JSONObject();
+
+				gameplay.put(g.GP_FIELD_ID, results.getInt(1));
+				gameplay.put(g.GP_FIELD_ID_SG, idSG);
+				gameplay.put(g.GP_FIELD_VERSION, version);
+				gameplay.put(g.GP_FIELD_CREATED, results.getTimestamp(2).toString());
+				gameplay.put(g.GP_FIELD_LASTACTION, results.getTimestamp(3).toString());
+				if (results.getTimestamp(4) != null) { gameplay.put(g.GP_FIELD_ENDED, results.getTimestamp(4).toString()); }
+				gameplay.put(g.GP_FIELD_ID_PLAYER, results.getInt(5));
+				if (results.getString(6) != null) { gameplay.put(g.GP_FIELD_WIN, results.getBoolean(6)); }
+				gameplay.put(g.G_O_FIELD_ID_O, results.getInt(7));
+				gameplay.put(g.G_O_FIELD_VALUE, results.getInt(8));
+				
+				if (g.DEBUG)
+				{
+					System.out.println(gameplay.toJSONString());
+				}
+				
+				gps.add(gameplay);
+			}
+			return gps;			
+		}
+		catch (Exception e)
+		{		
+			System.err.println("ERROR (getBestGamePlaysByGame): " + e.getMessage());
+			return null;
+		}
+	}
+
+	public ArrayList<JSONObject> getBestTimeGameplaysByGame (int idSG, int version, int numResults, Boolean descendantOrder)
+	{
+		if (g.DEBUG)
+		{
+			System.out.println("*** getBestTimeGameplaysByGame ***");
+		}
+		try
+		{
+			
+			String order = (descendantOrder)? "DESC" : "ASC";
+
+			PreparedStatement stGetGameplays = 
+					conn.prepareStatement("SELECT "+ g.GP_FIELD_ID + ", " + g.GP_FIELD_CREATED + ", " + g.GP_FIELD_LASTACTION + ", " + 
+											g.GP_FIELD_ENDED + ", " + g.GP_FIELD_ID_PLAYER +  ", " + g.GP_FIELD_WIN + ", " +
+											"UNIX_TIMESTAMP("+g.GP_FIELD_ENDED+") - UNIX_TIMESTAMP("+ g.GP_FIELD_CREATED +") AS value "+
+											", UNIX_TIMESTAMP("+g.GP_FIELD_LASTACTION+") - UNIX_TIMESTAMP("+ g.GP_FIELD_CREATED +") AS valueBis" +
+											" FROM " + g.TABLE_GAMEPLAY + 
+											" WHERE " + g.GP_FIELD_ID_SG + " = ? AND " + g.GP_FIELD_VERSION + " = ?"+ 
+											" ORDER BY valueBis " + order + " LIMIT ?");
+
+			stGetGameplays.setInt(1, idSG);
+			stGetGameplays.setInt(2, version);
+			stGetGameplays.setInt(3, numResults);
+			
+			if (g.DEBUG_SQL)
+			{
+				System.out.println(stGetGameplays.toString());
+			}
+			
+			ResultSet results = stGetGameplays.executeQuery();
+
+			ArrayList<JSONObject> gps = new ArrayList<JSONObject>();
+			
+			while (results.next())
+			{
+				if (g.DEBUG_SQL)
+				{
+					System.out.println();
+				}
+				
+				JSONObject gameplay = new JSONObject();
+
+				gameplay.put(g.GP_FIELD_ID, results.getInt(1));
+				gameplay.put(g.GP_FIELD_ID_SG, idSG);
+				gameplay.put(g.GP_FIELD_VERSION, version);
+				gameplay.put(g.GP_FIELD_CREATED, results.getTimestamp(2).toString());
+				gameplay.put(g.GP_FIELD_LASTACTION, results.getTimestamp(3).toString());
+				if (results.getTimestamp(4) != null) { gameplay.put(g.GP_FIELD_ENDED, results.getTimestamp(4).toString()); }
+				gameplay.put(g.GP_FIELD_ID_PLAYER, results.getInt(5));
+				if (results.getString(6) != null) { gameplay.put(g.GP_FIELD_WIN, results.getBoolean(6)); }
+				if (results.getString(7) != null) { gameplay.put(g.G_O_FIELD_VALUE, results.getInt(7)); }
+				else { gameplay.put(g.G_O_FIELD_VALUE, results.getInt(8)); }
+				
+				if (g.DEBUG)
+				{
+					System.out.println(gameplay.toJSONString());
+				}
+				
+				gps.add(gameplay);
+			}
+			return gps;			
+		}
+		catch (Exception e)
+		{		
+			System.err.println("ERROR (getBestGamePlaysByGame): " + e.getMessage());
+			return null;
+		}
 	}
 
 	public ArrayList<JSONObject> getGameplaysByGame (int idSG, int version) throws Exception

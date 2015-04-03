@@ -47,7 +47,7 @@
       "examples": [
         {
           "title": "Wrong/Guest login, public game",
-          "content": "{\n     \"loginSuccess\": false,\n     \"params\": [\n         {\n             \"name\": \"age\",\n             \"type\": \"Int\"\n         },\n         {\n             \"name\": \"gender\",\n             \"type\": \"Char\"\n         }\n     ],\n     \"version\": 0\n }",
+          "content": "{\n     \"loginSuccess\": false,\n     \"params\": [\n         {\n             \"name\": \"age\",\n             \"question\": \"How old are you?\",\n             \"type\": \"Int\"\n         },\n         {\n             \"name\": \"gender\",\n             \"type\": \"Char\"\n         }\n     ],\n     \"version\": 0\n }",
           "type": "json"
         },
         {
@@ -120,6 +120,64 @@
     },
     "filename": "./src/main/java/uws/engage/assessment/SeriousGameResource.java",
     "groupTitle": "Outside the gameplay"
+  },
+  {
+    "type": "get",
+    "url": "/seriousgame/:idSG/version/:version/actionParam/{action}",
+    "title": "Get Parameters of action",
+    "description": "<p>Because a teacher might modify the possible values for an action&#39;s parameters,  you may need to access the list of possible values at some point in your game  (e.g. when you generate enemies, or words to translate). <br/> To retrieve this, you need to call this web service</p> ",
+    "name": "3GetParametersOfAction",
+    "group": "2Gameplay",
+    "version": "2.0.0",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "idSG",
+            "description": "<p>ID of the current game</p> "
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "version",
+            "description": "<p>version number of the current game</p> "
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "action",
+            "description": "<p>to retrieve the values from</p> "
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "json",
+            "optional": false,
+            "field": "actionParams",
+            "description": "<p>A json listing the possible values for the action&#39;s parameters</p> "
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example of response for action 'translate'",
+          "content": "[\n     { \"wordInFrench\": \"poire\", \"wordInEnglish\": \"pear\" },\n     { \"wordInFrench\": \"pomme\", \"wordInEnglish\": \"apple\" },\n     { \"wordInFrench\": \"fraise\", \"wordInEnglish\": \"strawberry\" },\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./src/main/java/uws/engage/assessment/SeriousGameResource.java",
+    "groupTitle": "Gameplay"
   },
   {
     "type": "get",
@@ -372,7 +430,7 @@
   },
   {
     "type": "post",
-    "url": "/gameplay/start",
+    "url": "/gameplay/startGP",
     "title": "Start a Gameplay",
     "description": "<p>When a player starts playing your game, you need to tell the engine to set up a new gameplay.  That way, new scores will be set for your learning outcomes and the player&#39;s actions will be associated to them.  In order to create a new gameplay, you need to invoke the <code>gameplay</code> web service as follows.</p> ",
     "name": "StartGameplay",
@@ -413,16 +471,81 @@
         "Success 200": [
           {
             "group": "Success 200",
+            "type": "json",
+            "optional": false,
+            "field": "gameplayData",
+            "description": "<p>json with ID of gameplay created and ID of player</p> "
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example",
+          "content": "{\n    \"idGameplay\": 183,\n    \"idPlayer\": 28\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./src/main/java/uws/engage/assessment/GamePlayResource.java",
+    "groupTitle": "Gameplay"
+  },
+  {
+    "type": "get",
+    "url": "/badges/all/seriousgame/:idSG/version/:version/player/:idPlayer",
+    "title": "Get All Badges",
+    "description": "<p>At some point in your game, you might want to display the badges earned by the player logged in. <br/>  This function returns all the badges available in the game and specify if the player earned it.</p> ",
+    "name": "GetAllBadges",
+    "group": "3AfterGameplay",
+    "version": "2.0.0",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
             "type": "Number",
             "optional": false,
-            "field": "idGameplay",
-            "description": "<p>ID of the gameplay started</p> "
+            "field": "idSG",
+            "description": "<p>ID of the current game</p> "
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "version",
+            "description": "<p>version number of the current game</p> "
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "idPlayer",
+            "description": "<p>ID of the current player</p> "
           }
         ]
       }
     },
-    "filename": "./src/main/java/uws/engage/assessment/GamePlayResource.java",
-    "groupTitle": "Gameplay"
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "json",
+            "optional": false,
+            "field": "listBadges",
+            "description": "<p>A list of badges the player has earned, each badge has: </p> <ul><li>A<i> message </i> : string </li><li> An<i> id </i> : integer</li><li> A<i> name </i> : string </li></ul>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example",
+          "content": "[\n    {\n        \"message\": \"You played 10+ times\",\n        \"id\": 466,\n        \"name\": \"effort\",\n        \"earned\": false,\n        \"goalNum\": 10,\n        \"playerNum\": 8\n    },\n    {\n        \"message\": \"You found 50 EU countries\",\n        \"id\": 469,\n        \"name\": \"bronze_medal\",\n        \"earned\": true,\n        \"goalNum\": 50,\n        \"playerNum\": 76\n    }\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./src/main/java/uws/engage/assessment/BadgesResource.java",
+    "groupTitle": "After the gameplay(s)"
   },
   {
     "type": "get",
@@ -518,14 +641,72 @@
             "type": "json",
             "optional": false,
             "field": "gameLearderboard",
-            "description": "<p>game leaderboard: JSON object containing an array of performances for each score of the game.  The performances are in descending order and are composed of a name and a score.</p> "
+            "description": "<p>game leaderboard: JSON object containing an array of performances (15 max) for each score of the game.  The performances are in descending order and are composed of a name and a score.  The leaderboard also include the longest and shortest times (in seconds).</p> "
           }
         ]
       },
       "examples": [
         {
           "title": "Example",
-          "content": "{\n     \"score1\": [\n         {\n             \"name\": \"Anonymous\",\n             \"score\": 74\n         },\n         {\n             \"name\": \"yaelle\",\n             \"score\": 38\n         }\n     ],\n     \"score2\": [\n         {\n             \"name\": \"yaelle\",\n             \"score\": 129\n         },\n         {\n             \"name\": \"Anonymous\",\n             \"score\": 112\n         }\n     ]\n }",
+          "content": "{\n     \"score1\": [\n         {\n             \"name\": \"Anonymous\",\n             \"score\": 74\n         },\n         {\n             \"name\": \"yaelle\",\n             \"score\": 38\n         }\n     ],\n     \"score2\": [\n         {\n             \"name\": \"yaelle\",\n             \"score\": 129\n         },\n         {\n             \"name\": \"Anonymous\",\n             \"score\": 112\n         }\n     ], \n    \"longestGameplays\": [\n         {\n             \"name\": \"Yaelle\",\n             \"score\": 77\n         },\n         {\n             \"name\": \"Anonymous\",\n             \"score\": 40\n         }\n     ],\n     \"shortestGameplays\": [\n         {\n             \"name\": \"Anonymous\",\n             \"score\": 6\n         },\n         {\n             \"name\": \"Anonymous\",\n             \"score\": 40\n         }\n     ]\n }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./src/main/java/uws/engage/assessment/LearningAnalyticsResource.java",
+    "groupTitle": "After the gameplay(s)"
+  },
+  {
+    "type": "get",
+    "url": "/learninganalytics/leaderboard/:limit/seriousgame/:idSG/version/:version",
+    "title": "Get LeaderBoard (limit)",
+    "description": "<p>EngAGe allows you to specify the number of results you want for the game&#39;s leader board.</p> ",
+    "name": "GetLeaderBoardLimit",
+    "group": "3AfterGameplay",
+    "version": "2.0.0",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "idSG",
+            "description": "<p>ID of the game to retrieve the leaderboard from</p> "
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "version",
+            "description": "<p>version number of the game</p> "
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "limit",
+            "description": "<p>maximum number of performances to retrieve</p> "
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "json",
+            "optional": false,
+            "field": "gameLearderboard",
+            "description": "<p>game leaderboard: JSON object containing an array of performances (max :limit) for each score of the game.  The performances are in descending order and are composed of a name and a score.  The leaderboard also include the longest and shortest times (in seconds).</p> "
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example",
+          "content": "{\n     \"score1\": [\n         {\n             \"name\": \"Anonymous\",\n             \"score\": 74\n         },\n         {\n             \"name\": \"yaelle\",\n             \"score\": 38\n         }\n     ],\n     \"score2\": [\n         {\n             \"name\": \"yaelle\",\n             \"score\": 129\n         },\n         {\n             \"name\": \"Anonymous\",\n             \"score\": 112\n         }\n     ], \n    \"longestGameplays\": [\n         {\n             \"name\": \"Yaelle\",\n             \"score\": 77\n         },\n         {\n             \"name\": \"Anonymous\",\n             \"score\": 40\n         }\n     ],\n     \"shortestGameplays\": [\n         {\n             \"name\": \"Anonymous\",\n             \"score\": 6\n         },\n         {\n             \"name\": \"Anonymous\",\n             \"score\": 40\n         }\n     ]\n }",
           "type": "json"
         }
       ]
