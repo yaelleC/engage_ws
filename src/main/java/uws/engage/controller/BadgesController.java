@@ -330,31 +330,29 @@ public class BadgesController {
 					case "totalTime":
 						numberToCompareWith = 0;
 						gps = gpController.getGameplaysByGameAndPlayer(idSG, version, idPlayer);
+						float sumTime = 0;
 						for (JSONObject gp : gps) {
 							String target = gp.get(g.GP_FIELD_CREATED).toString();
 			                DateFormat df = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss.S");
 			                Date start =  df.parse(target); 
-
-			               long timeSpent = 0;
 
                     		if (gp.get(g.GP_FIELD_ENDED) != null)
 			                {
 			                    String target2 = gp.get(g.GP_FIELD_ENDED).toString();
 			                    Date end =  df.parse(target2);  
 			    
-                    			timeSpent = (end.getTime() - start.getTime()) / 60000;
+                    			sumTime += (end.getTime() - start.getTime());
 			                }
 			                else
 			                {
 			                    String target2 = gp.get(g.GP_FIELD_LASTACTION).toString();
 			                    Date end =  df.parse(target2);  
 			    
-                    			timeSpent = (end.getTime() - start.getTime()) / 60000;
+                    			sumTime += (end.getTime() - start.getTime()) ;
 			                }
 
-                    		numberToCompareWith += timeSpent;
 						}
-						
+						numberToCompareWith = Math.round(sumTime / 60000);
 						
 						break;
 					case "averageTime":
@@ -405,11 +403,11 @@ public class BadgesController {
 			// goal related feedback
 			else
 			{
-
 				Float numberToCompareWith = new Float (0);
 
 				ArrayList<Float> scores = getOutcomeListByGamePlayerAndOutcome(idSG, version, idPlayer, idOutcome);
-				Boolean noData = scores.isEmpty();
+				System.out.println(scores.toString());
+				//Boolean noData = scores.isEmpty();
 
 				switch (function)
 				{
@@ -427,15 +425,14 @@ public class BadgesController {
 						 numberToCompareWith = (scores.size() > 0)? sum / scores.size() : 0;
 						break;
 					case "maxScore":
-						Collections.max(scores);
+						numberToCompareWith = Collections.max(scores);
 						break;
 					case "minScore":
-						Collections.min(scores);
+						numberToCompareWith = Collections.min(scores);
 						break;
 				}
 
-				if (!noData)
-				{
+
 					// create JSONObject and update the message
 					JSONObject f = feedbackController.getFeedbackById(idFeedback);
 
@@ -463,11 +460,9 @@ public class BadgesController {
 					else
 					{
 						f.put("earned", false);
-					}
-
-							
+					}							
 					badges.add(f);
-				}
+
 			}				
 		}
 		if (g.DEBUG)

@@ -9,8 +9,8 @@ public class General {
 	
 	// ********************************** Parameters ********************************** //
 	
-		public boolean DEBUG = true;
-		public boolean DEBUG_SQL = true;
+		public boolean DEBUG = false;
+		public boolean DEBUG_SQL = false;
 	
 		// --------------------------- Database codes --------------------------- //
 		public String DB_NAME = "jdbc:mysql://mysql:3306/engage_dev";
@@ -69,6 +69,8 @@ public class General {
 		public String SG_FIELD_ID_DEVELOPER = "idDeveloper";
 		public String SG_FIELD_ID_TEACHER = "idTeacher";
 		public String SG_FIELD_NAME = "name";
+		public String SG_FIELD_COMMENTS = "comments";
+		public String SG_FIELD_NAME_VERSION = "nameVersion";
 		public String SG_FIELD_DESC = "description";
 		public String SG_FIELD_AGEMIN = "ageMin";
 		public String SG_FIELD_AGEMAX = "ageMax";
@@ -79,7 +81,6 @@ public class General {
 		public String SG_FIELD_UPDATED = "updated";
 		public String SG_FIELD_CONFIG_SHORT = "configFile_short";
 		public String SG_FIELD_CONFIG_LONG = "configFile_long";
-		public String SG_FIELD_COMMENTS = "comments";
 		
 		// --------------------------- Table gamePlay --------------------------- //		
 		

@@ -234,6 +234,59 @@ public class SeriousGameResource {
         }
     }
 
+
+    /**
+     * Method handling HTTP POST requests on path "seriousgame/"
+     * 
+     * @param configFile = the configuration file (DSL format) of the SG to create
+     * @return the id of SG created in the database if successful
+     */
+    @POST
+    @Path("/{idSG}/createVersion")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String updateSeriousGame(String configFile, @PathParam("idSG") int idSG)
+    {
+        try
+        {
+            SeriousGameController sgController = new SeriousGameController();
+
+            JSONObject configFileJSON = (JSONObject) JSONValue.parse(configFile);
+            JSONObject seriousgameBlock = (JSONObject) configFileJSON.get("seriousGame");
+
+            // add idSG in JSON
+            seriousgameBlock.put("id", idSG);
+            // add version in JSON
+            int newVersion = sgController.getNewVersion(idSG);
+            seriousgameBlock.put("version", newVersion);
+            System.out.println(newVersion);
+
+            // modify block in JSON
+            configFileJSON.remove("seriousGame");
+            configFileJSON.put("seriousGame", seriousgameBlock);
+
+            int idSGCreated = sgController.createSG(configFileJSON);
+
+            if (idSGCreated == -1)
+            {                
+                return "{\"error\" : \"The game id does not correspond to an existing game in the database.\"}";
+            }
+
+            if (idSG == idSGCreated)
+            {
+                return configFileJSON.toString();
+            }
+            else
+            {
+                return "{\"error\" : \"error while creating new version of the game.\"}";
+            }
+        }
+        catch( Exception e )
+        {
+            return "{\"error\" : \"error while creating new version of the game.\"}";
+        }
+    }
+
     /**
      * Method handling HTTP PUT requests on path "seriousgame/check"
      * 

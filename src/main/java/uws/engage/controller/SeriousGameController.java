@@ -65,7 +65,8 @@ public class SeriousGameController {
 						", "+ g.SG_FIELD_ID_TEACHER + ", "+ g.SG_FIELD_NAME + ", "+ g.SG_FIELD_DESC + 
 						", "+ g.SG_FIELD_AGEMIN +", "+ g.SG_FIELD_AGEMAX + ", "+ g.SG_FIELD_LANG + ", " + 
 						g.SG_FIELD_COUNTRY + ", "+ g.SG_FIELD_PUBLIC + ", "+ g.SG_FIELD_COMMENTS +
-						", "+ g.SG_FIELD_ID_DEVELOPER + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+						", "+ g.SG_FIELD_ID_DEVELOPER + ", " + g.SG_FIELD_NAME_VERSION +
+						") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 				thereIsId = 1;
 			}
 			else 
@@ -74,7 +75,8 @@ public class SeriousGameController {
 						", "+ g.SG_FIELD_ID_TEACHER + ", "+ g.SG_FIELD_NAME + ", "+ g.SG_FIELD_DESC + 
 						", "+ g.SG_FIELD_AGEMIN +", "+ g.SG_FIELD_AGEMAX + ", "+ g.SG_FIELD_LANG + ", " + 
 						g.SG_FIELD_COUNTRY + ", "+ g.SG_FIELD_PUBLIC + ", "+ g.SG_FIELD_COMMENTS +
-						", "+ g.SG_FIELD_ID_DEVELOPER +") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+						", "+ g.SG_FIELD_ID_DEVELOPER+ ", " + g.SG_FIELD_NAME_VERSION +
+						") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 			}
 			
 			PreparedStatement stCreationGame = conn.prepareStatement(sqlQuery);
@@ -103,6 +105,9 @@ public class SeriousGameController {
 				else { stCreationGame.setString(10+thereIsId, sg.get("comments").toString()); }
 			
 			stCreationGame.setInt(11+thereIsId, Integer.parseInt(sg.get("idDeveloper").toString()));
+			
+			if (!sg.containsKey("nameVersion")){ stCreationGame.setNull(12+thereIsId, java.sql.Types.NULL); } 
+				else { stCreationGame.setString(12+thereIsId, sg.get("nameVersion").toString()); }
 			
 			if (g.DEBUG_SQL)
 			{
@@ -137,6 +142,44 @@ public class SeriousGameController {
 			System.err.println("ERROR (CreateSG): " + e.getMessage());
 			System.out.println("*** End of CreateSeriousGame - from JSON ***");
 			return g.CST_RETURN_SQL_ERROR;
+		}
+	}
+
+	public int getNewVersion(int idSG) throws Exception
+	{
+		if (g.DEBUG)
+		{
+			System.out.println("*** getNewVersion ***");
+		}
+		PreparedStatement stGetNewVersion = 
+				conn.prepareStatement("SELECT MAX(" + g.SG_FIELD_VERSION + ")+1 as newVersion" +
+										" FROM  "+ g.TABLE_SG + " WHERE " + 
+									g.SG_FIELD_ID + " = ? ");
+
+		stGetNewVersion.setInt(1, idSG);
+		
+		if (g.DEBUG_SQL)
+		{
+			System.out.println(stGetNewVersion.toString());
+		}
+		
+		ResultSet results = stGetNewVersion.executeQuery();
+		
+		if (results.next())
+		{
+			if (g.DEBUG_SQL)
+			{
+				System.out.println();
+			}
+			
+			int newVersion = results.getInt(1);
+			
+			return newVersion;
+			
+		}
+		else
+		{
+			return -1;
 		}
 	}
 	
