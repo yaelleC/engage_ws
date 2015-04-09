@@ -200,6 +200,8 @@ public class LearningAnalyticsResource {
             GamePlayController gpController = new GamePlayController();
             PlayerController playerController = new PlayerController();
 
+            StudentController studentController = new StudentController();
+
             ArrayList<JSONObject> gps = gpController.getGameplaysByGame(idSeriousGame, version);
             ArrayList<JSONObject> gpsFiltered = new ArrayList<JSONObject>();
 
@@ -210,6 +212,8 @@ public class LearningAnalyticsResource {
                                                 idSeriousGame, version);
                     playerJson.put("idPlayer", playerJson.get("id"));
                     playerJson.remove("id");
+                    JSONObject student = studentController.getStudentsByID(Integer.parseInt(playerJson.get("idStudent").toString()));
+                    playerJson.put("student", student);
                     if (!players.contains(playerJson))  
                     {
                         players.add(playerJson);
