@@ -88,7 +88,9 @@ public class BadgesResource {
         try
         {
             BadgesController badgesController = new BadgesController();
-            return badgesController.getBadges(idSeriousGame, version, idPlayer).toString();
+            ArrayList<JSONObject> bs = badgesController.getBadges(idSeriousGame, version, idPlayer);
+            badgesController.finalize();
+            return bs.toString();
         }
         catch( Exception e )
         {
@@ -144,7 +146,9 @@ public class BadgesResource {
         try
         {
             BadgesController badgesController = new BadgesController();
-            return badgesController.getAllBadges(idSeriousGame, version, idPlayer).toString();
+            ArrayList<JSONObject> bs = badgesController.getAllBadges(idSeriousGame, version, idPlayer);
+            badgesController.finalize();
+            return bs.toString();
         }
         catch( Exception e )
         {

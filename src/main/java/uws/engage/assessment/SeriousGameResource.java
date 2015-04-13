@@ -59,7 +59,9 @@ public class SeriousGameResource {
         try
         {
             SeriousGameController sgController = new SeriousGameController();
-            return sgController.getConfigFile(idSeriousGame, version).toString();
+            JSONObject cf = sgController.getConfigFile(idSeriousGame, version);
+            sgController.finalize();
+            return cf.toString();
         }
         catch( Exception e )
         {
@@ -105,7 +107,9 @@ public class SeriousGameResource {
         try
         {
             SeriousGameController sgController = new SeriousGameController();
-            return sgController.getConfigFile(idSeriousGame, version).get("seriousGame").toString();
+            String sg = sgController.getConfigFile(idSeriousGame, version).get("seriousGame").toString();
+            sgController.finalize();
+            return sg;
         }
         catch( Exception e )
         {
@@ -164,6 +168,7 @@ public class SeriousGameResource {
                 }
             }
 
+            sgController.finalize();
             return values.toString();
         }
         catch( Exception e )
@@ -195,6 +200,8 @@ public class SeriousGameResource {
             StudentController stdController = new StudentController();
             stdController.giveSGaccessToStudent(idSG, 1, 0);
 
+            sgController.finalize();
+            stdController.finalize();
             return  idSG + "";
         }
         catch( Exception e )
@@ -226,6 +233,8 @@ public class SeriousGameResource {
             StudentController stdController = new StudentController();
             stdController.giveSGaccessToStudent(idSG, 1, 0);
 
+            sgController.finalize();
+            stdController.finalize();
             return  idSG + "";
         }
         catch( Exception e )
@@ -266,6 +275,8 @@ public class SeriousGameResource {
             configFileJSON.put("seriousGame", seriousgameBlock);
 
             int idSGCreated = sgController.createSG(configFileJSON);
+
+            sgController.finalize();
 
             if (idSGCreated == -1)
             {                
@@ -370,7 +381,10 @@ public class SeriousGameResource {
         {
             JSONObject configFileJSON=(JSONObject) JSONValue.parse(seriousGameCF);
             SeriousGameController sgController = new SeriousGameController();
-            return sgController.createSG(configFileJSON) + "";
+            int idSG = sgController.createSG(configFileJSON);
+
+            sgController.finalize();
+            return idSG + "";
         }
         catch( Exception e )
         {

@@ -135,6 +135,7 @@ public class GamePlayController {
 			System.out.println();
 		}
 		
+		outcomeController.finalize();
 		return idGamePlay;
 	}
 	
@@ -160,14 +161,15 @@ public class GamePlayController {
 		
 		ArrayList<JSONObject> list = new ArrayList<JSONObject>();
 		
+		LearningOutcomeController loController = new LearningOutcomeController();
 		while (results.next())
 		{
-			LearningOutcomeController loController = new LearningOutcomeController();
 			JSONObject score = loController.getOutcomeById(results.getInt(2));
 			score.put(g.G_O_FIELD_VALUE, results.getFloat(1));
 
 			list.add(score);
 		}
+		loController.finalize();
 		return list;			
 	}
 	
@@ -281,7 +283,7 @@ public class GamePlayController {
 		ActionLogController actionLogController = new ActionLogController();		
 		FeedbackLogController feedbackLogController = new FeedbackLogController();		
 		ArrayList<JSONObject> feedbackTriggered = new ArrayList<JSONObject>();
-		
+
 		JSONObject gameplay = getGamePlay(idGamePlay);
 		
 		if (g.DEBUG)
@@ -301,6 +303,10 @@ public class GamePlayController {
 			errorValuesNull.put("error", "'values' were not found in json sent");
 			errorValuesNull.put("json", action);
 			errors.add(errorValuesNull);
+
+			actionLogController.finalize();
+			feedbackLogController.finalize();
+			sgController.finalize();
 			return errors;
 		}
 
@@ -310,6 +316,9 @@ public class GamePlayController {
 			errorActionNull.put("error", "'action' was not found in json sent");
 			errorActionNull.put("json", action);
 			errors.add(errorActionNull);
+			actionLogController.finalize();
+			feedbackLogController.finalize();
+			sgController.finalize();
 			return errors;
 		}
 
@@ -328,6 +337,9 @@ public class GamePlayController {
 			JSONObject errorActionName = new JSONObject();
 			errorActionName.put("error", "name of action '"+ actionName +"' was not found in the database");
 			errors.add(errorActionName);
+			actionLogController.finalize();
+			feedbackLogController.finalize();
+			sgController.finalize();
 			return errors;
 		}
 
@@ -419,6 +431,9 @@ public class GamePlayController {
 						}
 					}
 
+					actionLogController.finalize();
+					feedbackLogController.finalize();
+					sgController.finalize();
 					return feedbackTriggered;
 				}
 			}
@@ -497,6 +512,10 @@ public class GamePlayController {
 					if ((Boolean) f.get("immediate"))
 					feedbackTriggered.add(feedback);
 				}
+
+				actionLogController.finalize();
+				feedbackLogController.finalize();
+				sgController.finalize();
 				return feedbackTriggered;
 			}
 		}
@@ -510,6 +529,10 @@ public class GamePlayController {
 			return errors;
 		}
 		// return empty list
+		
+		actionLogController.finalize();
+		feedbackLogController.finalize();
+		sgController.finalize();
 		return feedbackTriggered;
 	}
 	

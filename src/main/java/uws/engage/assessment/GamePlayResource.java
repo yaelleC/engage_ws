@@ -73,7 +73,10 @@ public class GamePlayResource {
                 idStudent = -1;
             }
             PlayerController playerController = new PlayerController();
-            return playerController.getParametersRequired(idStudent, idSG, version).toString();
+            String paramsReturn = playerController.getParametersRequired(idStudent, idSG, version).toString();
+
+            playerController.finalize();
+            return paramsReturn;
         }
         catch( Exception e )
         {
@@ -114,7 +117,9 @@ public class GamePlayResource {
         try
         {
             FeedbackTriggerController feedbackTriggerController = new FeedbackTriggerController();
-            return feedbackTriggerController.getFeedback(idGP).toString();
+            ArrayList<JSONObject> fs = feedbackTriggerController.getFeedback(idGP);
+            feedbackTriggerController.finalize();
+            return fs.toString();
         }
         catch( Exception e )
         {
@@ -198,6 +203,9 @@ public class GamePlayResource {
             ArrayList<JSONObject> feedbackLogs = feedbackLogController.getFeedbackLog(idGP);
             logs.put("feedbackLog", feedbackLogs);
             
+            gpController.finalize();
+            actionLogController.finalize();
+            feedbackLogController.finalize();
             return logs.toString();
         }
         catch( Exception e )
@@ -245,7 +253,9 @@ public class GamePlayResource {
         {
             GamePlayController gpController;
             gpController = new GamePlayController();
-            return gpController.getScores(idGP).toString();
+            String s = gpController.getScores(idGP).toString();
+            gpController.finalize();
+            return s;
         }
         catch( Exception e )
         {
@@ -276,7 +286,9 @@ public class GamePlayResource {
         {
             GamePlayController gpController;
             gpController = new GamePlayController();
-            return gpController.getScore(idGP, idOutcome) + "";
+            String s = gpController.getScore(idGP, idOutcome) + "";
+            gpController.finalize();
+            return s;
         }
         catch( Exception e )
         {
@@ -330,6 +342,8 @@ public class GamePlayResource {
             GamePlayController gpController = new GamePlayController();
             int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
                     
+            playerController.finalize();
+            gpController.finalize();
             return idGamePlay + "";
         }
         catch( Exception e )
@@ -384,6 +398,8 @@ public class GamePlayResource {
             GamePlayController gpController = new GamePlayController();
             int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
                     
+            playerController.finalize();
+            gpController.finalize();
             return idGamePlay + "";
         }
         catch( Exception e )
@@ -446,12 +462,14 @@ public class GamePlayResource {
                         idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
                     }
                 }
+                playerController.finalize();
             }
 
             // create row in gameplay table         -> idGameplay
             GamePlayController gpController = new GamePlayController();
             int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
                     
+            gpController.finalize();
             return idGamePlay + "";
         }
         catch( Exception e )
@@ -508,12 +526,14 @@ public class GamePlayResource {
                         idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
                     }
                 }
+                playerController.finalize();
             }
 
             // create row in gameplay table         -> idGameplay
             GamePlayController gpController = new GamePlayController();
             int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
-                    
+                  
+            gpController.finalize();  
             return idGamePlay + "";
         }
         catch( Exception e )
@@ -651,6 +671,7 @@ public class GamePlayResource {
                         idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
                     }
                 }
+                playerController.finalize();
             }
             if (idPlayer < 0)
             {
@@ -664,7 +685,8 @@ public class GamePlayResource {
             JSONObject gpData = new JSONObject();
             gpData.put("idGameplay", idGamePlay);
             gpData.put("idPlayer", idPlayer);
-                    
+                 
+            gpController.finalize();   
             return gpData.toString();
         }
         catch( Exception e )
@@ -697,6 +719,8 @@ public class GamePlayResource {
             ArrayList<JSONObject> feedback = gpController.assess(idGP, action);
             feedback.addAll(feedbackTriggerController.getFeedback(idGP));
 
+            feedbackTriggerController.finalize();
+            gpController.finalize();
             return feedback.toString();
         }
         catch( Exception e )
@@ -728,6 +752,8 @@ public class GamePlayResource {
             ArrayList<JSONObject> feedback = gpController.assess(idGP, action);
             feedback.addAll(feedbackTriggerController.getFeedback(idGP));
 
+            feedbackTriggerController.finalize();
+            gpController.finalize();
             return feedback.toString();
         }
         catch( Exception e )
@@ -765,6 +791,8 @@ public class GamePlayResource {
             returnJSON.put("feedback", feedback);
             returnJSON.put("scores", scores);
 
+            feedbackTriggerController.finalize();
+            gpController.finalize();
             return returnJSON.toString();
         }
         catch( Exception e )
@@ -853,6 +881,8 @@ public class GamePlayResource {
             returnJSON.put("feedback", feedback);
             returnJSON.put("scores", scores);
 
+            feedbackTriggerController.finalize();
+            gpController.finalize();
             return returnJSON.toString();
         }
         catch( Exception e )
@@ -877,8 +907,9 @@ public class GamePlayResource {
         try
         {
             GamePlayController gpController = new GamePlayController();
-           
-            return gpController.endGamePlay(idGP) + "";
+            String end = gpController.endGamePlay(idGP) + "";
+            gpController.finalize();
+            return end;
 
         }
         catch( Exception e )
@@ -917,13 +948,17 @@ public class GamePlayResource {
             GamePlayController gpController = new GamePlayController();
             if (win.equals("end"))
             {
-                return gpController.endGamePlay(idGP) + "";
+                String end = gpController.endGamePlay(idGP) + "";
+                gpController.finalize();
+                return end;
             }
             else
             {
                 Boolean gameWon = win.equals("win");
            
-                return gpController.endGamePlay(idGP, gameWon) + "";
+                String end = gpController.endGamePlay(idGP, gameWon) + "";
+                gpController.finalize();
+                return end;
             }
 
         }

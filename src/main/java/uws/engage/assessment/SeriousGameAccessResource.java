@@ -53,7 +53,9 @@ public class SeriousGameAccessResource {
                 return "0";
             }
             StudentController stdtController = new StudentController();
-            return stdtController.getStudentVersionOfSG(idSG, idStudent) + "";
+            String v = stdtController.getStudentVersionOfSG(idSG, idStudent) + "";
+            stdtController.finalize();
+            return v;
         }
         catch( Exception e )
         {
@@ -253,6 +255,9 @@ public class SeriousGameAccessResource {
                 }
             }
 
+            sgController.finalize();
+            playerController.finalize();
+            stdtController.finalize();
             return returnData.toString();
 
         }

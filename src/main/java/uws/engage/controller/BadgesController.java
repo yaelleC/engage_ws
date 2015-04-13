@@ -258,6 +258,10 @@ public class BadgesController {
 		{
 			System.out.println(badges);
 		}
+		feedbackController.finalize();
+		loController.finalize();
+		gpController.finalize();
+		sgController.finalize();
 		return badges;			
 	}
 
@@ -469,6 +473,10 @@ public class BadgesController {
 		{
 			System.out.println(badges);
 		}
+		feedbackController.finalize();
+		loController.finalize();
+		gpController.finalize();
+		sgController.finalize();
 		return badges;			
 	}
 

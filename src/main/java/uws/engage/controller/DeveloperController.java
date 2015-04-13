@@ -44,6 +44,14 @@ public class DeveloperController {
 		
 		if (g.DEBUG) { System.out.println("### Access to DB ok ###"); }
 	}
+	public void finalize() throws Exception
+    {
+    	conn.close();
+    	if (g.DEBUG)
+		{
+			System.out.println("*** connection closed ***");
+		}  
+    }
 	
 	// ********************************** Methods ********************************** //
 	

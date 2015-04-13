@@ -46,7 +46,14 @@ public class SeriousGameController {
 		Class.forName("com.mysql.jdbc.Driver");				
 		conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
 	}
-	
+	public void finalize() throws Exception
+    {
+    	conn.close();
+    	if (g.DEBUG)
+		{
+			System.out.println("*** connection closed ***");
+		}  
+    }
 	// ********************************** Methods ********************************** //
 	
 	public int createSeriousGame(JSONObject sg)
@@ -337,9 +344,9 @@ public class SeriousGameController {
 		// ##################### SERIOUS GAME TABLE ######################		
 		// Create a row in the seriousgame table
 				
-		SeriousGameController SGcontroller = new SeriousGameController();
+		SeriousGameController sgController = new SeriousGameController();
 		JSONObject sg = (JSONObject)configFile.get("seriousGame");
-		int idSG = SGcontroller.createSeriousGame(sg);
+		int idSG = sgController.createSeriousGame(sg);
 		int version = 0;
 		if (sg.containsKey("id"))
 		{
@@ -365,7 +372,7 @@ public class SeriousGameController {
 			{
 				playerController.createTablePlayer(new ArrayList<JSONObject>(), idSG, version);
 			}
-					
+			playerController.finalize();	
 			
 			// ##################### FEEDBACK MESSAGES TABLE ######################
 			// Creates rows in table feedback message linked to this SG
@@ -379,6 +386,7 @@ public class SeriousGameController {
 			{
 				fdbckController.createFeedback(key, (JSONObject)feedback.get(key), idSG, version);
 			}
+			fdbckController.finalize();
 			
 			
 			// ##################### FEEDBACK_TRIGGER TABLE ######################
@@ -392,7 +400,6 @@ public class SeriousGameController {
 			for (JSONObject t : triggersInactivity) {
 				triggerController.addFeedbackTriggerInactivity(idSG, t, version);
 			}
-			
 			
 			
 			// ##################### LEARNING_OUTCOME / FEEDBACK_TRIGGER TABLES ######################
@@ -416,14 +423,15 @@ public class SeriousGameController {
 					}
 				}
 			}
-			
+			triggerController.finalize();
+			LOController.finalize();
 			// ##################### SAVE CONFIG FILE ######################
 			// Update SG table to save config file
 			
-			SGcontroller.saveCF(configFile.toJSONString(), idSG);
+			sgController.saveCF(configFile.toJSONString(), idSG);
 				
 		}
-		
+		sgController.finalize();
 		return idSG;
 	}
 }

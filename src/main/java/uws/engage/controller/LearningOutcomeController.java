@@ -43,6 +43,14 @@ public class LearningOutcomeController {
 			Class.forName("com.mysql.jdbc.Driver");		
 			conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
 		}
+		public void finalize() throws Exception
+	    {
+	    	conn.close();
+	    	if (g.DEBUG)
+			{
+				System.out.println("*** connection closed ***");
+			}  
+	    }
 		
 		// ********************************** Methods ********************************** //
 		

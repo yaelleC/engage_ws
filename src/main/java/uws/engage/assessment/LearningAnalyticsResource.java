@@ -164,11 +164,19 @@ public class LearningAnalyticsResource {
         {
             General g = new General();
             JSONObject infoLA = new JSONObject();
+
+            // ------------------------- Controllers ----------------------- //
             SeriousGameController sgController = new SeriousGameController();
-            JSONObject cf = sgController.getConfigFile(idSeriousGame, version);
+            ActionLogController actionLogController = new ActionLogController();
+            LearningOutcomeController loController = new LearningOutcomeController();
+            GamePlayController gpController = new GamePlayController();
+            PlayerController playerController = new PlayerController();
+            StudentController studentController = new StudentController();
 
             // ---------------------------- GAME ---------------------------- //
             
+            JSONObject cf = sgController.getConfigFile(idSeriousGame, version);
+
             // ************ Get game basic information ************ //
             JSONObject game = (JSONObject) cf.get("seriousGame");
             game.put("id", idSeriousGame);
@@ -196,11 +204,6 @@ public class LearningAnalyticsResource {
 
             // ---------------------------- PLAYERS ---------------------------- //
             ArrayList<JSONObject> players = new ArrayList<JSONObject>();
-
-            GamePlayController gpController = new GamePlayController();
-            PlayerController playerController = new PlayerController();
-
-            StudentController studentController = new StudentController();
 
             ArrayList<JSONObject> gps = gpController.getGameplaysByGame(idSeriousGame, version);
             ArrayList<JSONObject> gpsFiltered = new ArrayList<JSONObject>();
@@ -241,8 +244,6 @@ public class LearningAnalyticsResource {
     
                 gameplay.put("timeStarted", gp.get(g.GP_FIELD_CREATED));
 
-                System.out.println(start);
-
                 if (gp.get(g.GP_FIELD_ENDED) != null)
                 {
                     String target2 = gp.get(g.GP_FIELD_ENDED).toString();
@@ -277,8 +278,6 @@ public class LearningAnalyticsResource {
                 // ---------------------------- Actions ---------------------------- //
 
                 ArrayList<JSONObject> actions = new ArrayList<JSONObject>();
-                ActionLogController actionLogController = new ActionLogController();
-                LearningOutcomeController loController = new LearningOutcomeController();
 
                 ArrayList<JSONObject> log = actionLogController.getActionLog(idGP);
 
@@ -310,6 +309,12 @@ public class LearningAnalyticsResource {
 
             infoLA.put("gameplays", gameplays);
 
+            actionLogController.finalize();
+            loController.finalize();
+            gpController.finalize();
+            playerController.finalize();
+            studentController.finalize();
+            sgController.finalize();
 
             return infoLA.toString();
         }
@@ -529,6 +534,11 @@ public class LearningAnalyticsResource {
                     listPlayers.add(leader);
                     
                 }
+
+                loController.finalize();
+                gpController.finalize();
+                playerController.finalize();
+                studentController.finalize();
 
                 infoLeaderboard.put(lo.get("name"), listPlayers);
             }
