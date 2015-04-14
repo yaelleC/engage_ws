@@ -535,13 +535,13 @@ public class LearningAnalyticsResource {
                     
                 }
 
-                loController.finalize();
-                gpController.finalize();
-                playerController.finalize();
-                studentController.finalize();
 
                 infoLeaderboard.put(lo.get("name"), listPlayers);
             }
+            loController.finalize();
+            gpController.finalize();
+            playerController.finalize();
+            studentController.finalize();
             return infoLeaderboard;
     }
 

@@ -9,7 +9,7 @@ public class General {
 	
 	// ********************************** Parameters ********************************** //
 	
-		public boolean DEBUG = true;
+		public boolean DEBUG = false;
 		public boolean DEBUG_SQL = false;
 	
 		// --------------------------- Database codes --------------------------- //
