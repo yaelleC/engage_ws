@@ -19,6 +19,7 @@ public class CrossDomainResource {
 									"<cross-domain-policy>" +
 									"<allow-access-from domain=\"*\"/>" +
 									"<allow-http-request-headers-from domain=\"*\" headers=\"*\"/>" +
+									"<allow-https-request-headers-from domain=\"*\" headers=\"*\"/>" +
 									"</cross-domain-policy>";
 			return crossdomain;
         }
