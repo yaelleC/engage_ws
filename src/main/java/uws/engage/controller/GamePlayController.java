@@ -352,7 +352,7 @@ public class GamePlayController {
 			System.out.println("In evidence : " + assessment.toJSONString());
 		}
 		
-		// check if there is a set of values supported in the config file
+		// check if there is a set of values supported in the config file		
 		for (JSONObject reaction : reactions) {
 			ArrayList<JSONObject> valuesSupported = new ArrayList<JSONObject>();
 			if (reaction.containsKey("values")) { valuesSupported = (ArrayList<JSONObject>) reaction.get("values"); }
@@ -368,6 +368,7 @@ public class GamePlayController {
 					ArrayList<JSONObject> updateScores = (ArrayList<JSONObject>) reaction.get("marks");
 
 					// foreach - update score
+					LearningOutcomeController loController = new LearningOutcomeController();
 					for (JSONObject updateScore : updateScores)
 					{
 						String outcome = updateScore.get("learningOutcome").toString();
@@ -386,7 +387,7 @@ public class GamePlayController {
 		                    mark = Float.parseFloat(updateScore.get("mark").toString());
 		                }
 
-						LearningOutcomeController loController = new LearningOutcomeController();
+						
 						int idOutcome = loController.getOutcomeIdByName(outcome, idSG, version);
 
 						if (reset) { resetScore(idGamePlay, idOutcome, mark); }
@@ -395,13 +396,14 @@ public class GamePlayController {
 						actionLogController.logAction(action, idGamePlay, idOutcome, mark);
 						updateLastActionTimestamp(idGamePlay);
 					}
+					loController.finalize();
 					
 					// get feedback to trigger
 					ArrayList<JSONObject> feedbackList = new  ArrayList<JSONObject>() ;
 					if (reaction.get("feedback") != null) {feedbackList=(ArrayList<JSONObject>) reaction.get("feedback");}
 
+					FeedbackController feedbackController = new FeedbackController();
 					for (JSONObject f : feedbackList) {
-						FeedbackController feedbackController = new FeedbackController();
 						JSONObject feedback = feedbackController.getFeedbackByName(f.get("name").toString(), idSG, version);
 
 						Boolean immediteTrigger = (Boolean)f.get("immediate");
@@ -430,7 +432,7 @@ public class GamePlayController {
 							feedbackTriggered.add(feedback);
 						}
 					}
-
+					feedbackController.finalize();
 					actionLogController.finalize();
 					feedbackLogController.finalize();
 					sgController.finalize();
