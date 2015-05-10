@@ -301,6 +301,10 @@ public class FeedbackTriggerController {
 				}
 			}				
 		}
+
+		fdbkLogController.finalize();
+		feedbackController.finalize();
+		gpController.finalize();
 		if (g.DEBUG)
 		{
 			System.out.println(feedback);
