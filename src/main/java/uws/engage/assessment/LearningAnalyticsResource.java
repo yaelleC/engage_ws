@@ -231,17 +231,15 @@ public class LearningAnalyticsResource {
                     playerJson.remove("id");
                     JSONObject student = studentController.getStudentsByID(Integer.parseInt(playerJson.get("idStudent").toString()));
                     playerJson.put("student", student);
+                    // get all badges and those earned by the player
+                    int idP = (int)playerJson.get("idPlayer");
+                    System.out.println("idP: " + idP);
+
+                    ArrayList<JSONObject> bs = badgesController.getAllBadges(idSeriousGame, version, idP);                
+                    playerJson.put("badges", bs);
+
                     if (!players.contains(playerJson))  
                     {
-                        // get all badges and those earned by the player
-                        int idP = (int)playerJson.get("idPlayer");
-                        System.out.println("idSG: " + idSeriousGame);
-                        System.out.println("version: " + version);
-                        System.out.println("idP: " + idP);
-
-                        ArrayList<JSONObject> bs = badgesController.getAllBadges(idSeriousGame, version, idP);                
-                        playerJson.put("badges", bs);
-
                         players.add(playerJson);
                     }  
                     gpsFiltered.add(gp);
