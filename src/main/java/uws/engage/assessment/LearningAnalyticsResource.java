@@ -36,6 +36,8 @@ import uws.engage.controller.GamePlayController;
 import uws.engage.controller.PlayerController;
 import uws.engage.controller.StudentController;
 import uws.engage.controller.ActionLogController;
+import uws.engage.controller.BadgesController;
+import uws.engage.controller.FeedbackLogController;
 import uws.engage.controller.General;
 
 /**
@@ -171,7 +173,9 @@ public class LearningAnalyticsResource {
             LearningOutcomeController loController = new LearningOutcomeController();
             GamePlayController gpController = new GamePlayController();
             PlayerController playerController = new PlayerController();
-            StudentController studentController = new StudentController();
+            StudentController studentController = new StudentController();            
+            BadgesController badgesController = new BadgesController();
+            FeedbackLogController feedbackLogController = new FeedbackLogController();
 
             // ---------------------------- GAME ---------------------------- //
             
@@ -198,6 +202,16 @@ public class LearningAnalyticsResource {
 
             game.put("learningOutcomes", learningOutcomes);
 
+            // ************** Get Evidence model ************** //
+            JSONObject evidenceModel = (JSONObject) cf.get("evidenceModel");
+
+            game.put("evidenceModel", evidenceModel);
+
+            // ************** Get Feedback ************** //
+            JSONObject feedback = (JSONObject) cf.get("feedback");
+
+            game.put("feedback", feedback);
+
 
             infoLA.put("game", game);
 
@@ -219,6 +233,15 @@ public class LearningAnalyticsResource {
                     playerJson.put("student", student);
                     if (!players.contains(playerJson))  
                     {
+                        // get all badges and those earned by the player
+                        int idP = (int)playerJson.get("idPlayer");
+                        System.out.println("idSG: " + idSeriousGame);
+                        System.out.println("version: " + version);
+                        System.out.println("idP: " + idP);
+
+                        ArrayList<JSONObject> bs = badgesController.getAllBadges(idSeriousGame, version, idP);                
+                        playerJson.put("badges", bs);
+
                         players.add(playerJson);
                     }  
                     gpsFiltered.add(gp);
@@ -302,7 +325,11 @@ public class LearningAnalyticsResource {
                     actions.add(action);
                 }
 
-                gameplay.put("actions", actions);   
+                gameplay.put("actions", actions);      
+
+                // add feedback that was triggered
+                ArrayList<JSONObject> feedbackLogs = feedbackLogController.getFeedbackLog(idGP);
+                gameplay.put("feedback", feedbackLogs);   
 
                 gameplays.add(gameplay);
             }
@@ -315,6 +342,8 @@ public class LearningAnalyticsResource {
             playerController.finalize();
             studentController.finalize();
             sgController.finalize();
+            badgesController.finalize();
+            feedbackLogController.finalize();
 
             return infoLA.toString();
         }
