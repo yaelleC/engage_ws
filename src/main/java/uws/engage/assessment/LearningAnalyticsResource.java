@@ -56,7 +56,7 @@ import uws.engage.controller.General;
  * @author Yaelle Chaudy - University of the West of Scotland - yaelle.chaudy@uws.ac.uk
  * @version 2.0
  *
- */
+ **/
 public class LearningAnalyticsResource {
 
     /**
@@ -127,12 +127,12 @@ public class LearningAnalyticsResource {
      *                   "feedbackTriggered": [
      *                       {
      *                           "limit": 1,
-    *                            "sign": "<",
+     *                            "sign": "<",
      *                           "feedback": [
      *                               {
      *                                   "immediate": true,
      *                                   "name": "endLose"
-    *                                }
+     *                                }
      *                           ]
      *                       }
      *                   ],
@@ -155,7 +155,7 @@ public class LearningAnalyticsResource {
      *           "public": "false"
      *       }
      *  }
-     */
+     **/
     @GET
     @Path("seriousgame/{idSG}/version/{version}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -420,12 +420,12 @@ public class LearningAnalyticsResource {
      *                   "feedbackTriggered": [
      *                       {
      *                           "limit": 1,
-    *                            "sign": "<",
+     *                            "sign": "<",
      *                           "feedback": [
      *                               {
      *                                   "immediate": true,
      *                                   "name": "endLose"
-    *                                }
+     *                                }
      *                           ]
      *                       }
      *                   ],
@@ -448,7 +448,7 @@ public class LearningAnalyticsResource {
      *           "public": "false"
      *       }
      *  }
-     */
+     **/
     @GET
     @Path("seriousgame/{idSG}/version/{version}/teacher/{idTeacher}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -708,7 +708,7 @@ public class LearningAnalyticsResource {
      *           }
      *       ]
      *   }       
-     */
+     **/
     @GET
     @Path("leaderboard/seriousgame/{idSG}/version/{idVersion}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -751,7 +751,6 @@ public class LearningAnalyticsResource {
                     if (idPlayer > 0)
                     {
                         JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
-
                         // get player's name
                         if (player.get("idStudent") != 0)
                         {
@@ -870,7 +869,7 @@ public class LearningAnalyticsResource {
             return infoLeaderboard;
     }
 
-        /**
+    /**
      * @api {get} /learninganalytics/leaderboard/:limit/seriousgame/:idSG/version/:version Get LeaderBoard (limit)
      * @apiDescription EngAGe allows you to specify the number of results you want for the game's leader board. 
      *
@@ -929,7 +928,7 @@ public class LearningAnalyticsResource {
      *           }
      *       ]
      *   }       
-     */
+     **/
     @GET
     @Path("leaderboard/{numResults}/seriousgame/{idSG}/version/{idVersion}")
     @Produces(MediaType.APPLICATION_JSON)
