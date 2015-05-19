@@ -201,8 +201,11 @@ public class StudentController {
 			{
 				PreparedStatement stGetStudent = 
 						conn.prepareStatement("SELECT "+ g.STDT_FIELD_USERNAME + ", " + g.STDT_FIELD_AGE + ", "+ g.STDT_FIELD_GENDER + ", " +
-												g.STDT_FIELD_ID_SCHOOL + ", " + g.STDT_FIELD_PASSWORD + " FROM " + g.TABLE_STUDENT + 
-												" WHERE " + g.STDT_FIELD_ID + " = ?");
+												g.STDT_FIELD_ID_SCHOOL + ", " + g.STDT_FIELD_PASSWORD + ", " + 
+												g.TABLE_GROUP + "." + g.GROUP_FIELD_ID_TEACHER + 
+												" FROM " + g.TABLE_STUDENT + ", engage_dev." + g.TABLE_GROUP + 
+												" WHERE " + g.TABLE_STUDENT + "." + g.STDT_FIELD_ID + " = ? AND " + 
+												g.TABLE_STUDENT + "." + g.STDT_FIELD_ID_GROUP + " = " + g.TABLE_GROUP + "." + g.GROUP_FIELD_ID);
 
 				stGetStudent.setInt(1, idStudent);
 				
@@ -229,6 +232,7 @@ public class StudentController {
 					student.put(g.STDT_FIELD_GENDER, results.getString(3));
 					student.put(g.STDT_FIELD_ID_SCHOOL, results.getInt(4));
 					student.put(g.STDT_FIELD_PASSWORD, results.getString(5));
+					student.put(g.GROUP_FIELD_ID_TEACHER, results.getInt(6));
 					
 					if (g.DEBUG_SQL)
 					{

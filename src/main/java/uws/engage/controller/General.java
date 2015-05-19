@@ -172,6 +172,13 @@ public class General {
 		public String STDT_FIELD_AGE = "dateBirth";
 		public String STDT_FIELD_GENDER = "gender";
 		public String STDT_FIELD_ID_SCHOOL = "idSchool";
+		public String STDT_FIELD_ID_GROUP = "idGroup";
+
+		// --------------------------- Table group --------------------------- //
+		
+		public String TABLE_GROUP = "group";
+		public String GROUP_FIELD_ID = "id";
+		public String GROUP_FIELD_ID_TEACHER = "idTeacher";
 
 		// --------------------------- Table student_teacher --------------------------- //
 		

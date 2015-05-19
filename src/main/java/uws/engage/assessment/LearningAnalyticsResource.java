@@ -233,7 +233,6 @@ public class LearningAnalyticsResource {
                     playerJson.put("student", student);
                     // get all badges and those earned by the player
                     int idP = (int)playerJson.get("idPlayer");
-                    System.out.println("idP: " + idP);
 
                     ArrayList<JSONObject> bs = badgesController.getAllBadges(idSeriousGame, version, idP);                
                     playerJson.put("badges", bs);
@@ -350,6 +349,305 @@ public class LearningAnalyticsResource {
             return "{'error':'"+e+"'}";
         }
     }
+
+    /**
+     * @api {get} /learninganalytics/seriousgame/:idSG/version/:version/teacher/:idTeacher Get Teacher Learning Analytics
+     * @apiDescription This web service returns extensive information about the players and the gameplays. 
+     * Every action of every player is listed in the JSON returned, along with timestamp and how it affected the score. 
+     * The dataset is limited to the students associated to the teacher of ID idTeacher
+     *
+     * @apiName GetLearningAnalyticsTeacher
+     * @apiGroup LearningAnalytics
+     *
+     * @apiVersion 2.0.0
+     * 
+     * @apiParam {Number} idSG ID of the game to retrieve LA from
+     * @apiParam {Number} version version number of the current game
+     * @apiParam {Number} idTeacher ID of the teacher logged in to see the LA
+     *
+     * @apiSuccess {json} LAData all the learning analytics data available on the game
+     * @apiSuccessExample {json} Example type
+     *  {
+     *      "players": [
+     *          {
+     *              "idPlayer": 1,
+     *              "age": "26",
+     *              "gender": "f",
+     *              "idStudent": 1
+     *          }],
+     *      "gameplays": [
+     *          "id": 600,
+     *          "idPlayer": 1,
+     *          "timeStarted": "2015-03-12 20:35:01.0",
+     *           "finalScores": {
+     *              "eu_countries": 16, "lives": 0
+     *          },
+     *          "timeSpent": 93,
+     *          "actions": [
+     *           {
+     *               "timestamp": 4,
+     *               "action": "newCountrySelected",
+     *               "mark": -1,
+     *               "parameters": {
+     *                   "country": "switzerland"
+     *               },
+     *               "outcome": "lives",
+     *               "valuesLog": null
+     *           }, ...
+     *        ],
+     *        "game": {
+     *           "genre": "runner",
+     *           "idDeveloper": 200,
+     *           "learningOutcomes": {
+     *               "eu_countries": {
+     *                   "desc": "the number of EU countries left to find",
+     *                    "feedbackTriggered": [
+     *                        {
+     *                           "limit": 1,
+     *                           "sign": "<",
+     *                           "feedback": [
+     *                               {
+     *                                   "immediate": true,
+     *                                   "name": "endWin"
+     *                               }
+     *                           ]
+     *                       }
+     *                   ],
+     *                   "value": 28
+     *               },
+     *              "lives": {
+     *                   "desc": "the number left to the player",
+     *                   "feedbackTriggered": [
+     *                       {
+     *                           "limit": 1,
+    *                            "sign": "<",
+     *                           "feedback": [
+     *                               {
+     *                                   "immediate": true,
+     *                                   "name": "endLose"
+    *                                }
+     *                           ]
+     *                       }
+     *                   ],
+     *                   "value": 3
+     *               }
+     *           },
+     *           "subject": "Europe, Capitals, Geography",
+     *           "ageMax": 99,
+     *           "playerCharacteristics": [
+     *               "age",
+     *               "gender"            
+     *           ],
+     *           "lang": "EN",
+     *           "country": "UK",
+     *           "version": 0,
+     *           "id": 95,
+     *           "ageMin": 10,
+     *           "description": "Find european capitals",
+     *           "name": "EuMouse",
+     *           "public": "false"
+     *       }
+     *  }
+     */
+    @GET
+    @Path("seriousgame/{idSG}/version/{version}/teacher/{idTeacher}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getLAinfo(@PathParam("idSG") int idSeriousGame, 
+                                        @PathParam("version") int version, @PathParam("idTeacher") int idTeacher) 
+    {
+        try
+        {
+            General g = new General();
+            JSONObject infoLA = new JSONObject();
+
+            // ------------------------- Controllers ----------------------- //
+            SeriousGameController sgController = new SeriousGameController();
+            ActionLogController actionLogController = new ActionLogController();
+            LearningOutcomeController loController = new LearningOutcomeController();
+            GamePlayController gpController = new GamePlayController();
+            PlayerController playerController = new PlayerController();
+            StudentController studentController = new StudentController();            
+            BadgesController badgesController = new BadgesController();
+            FeedbackLogController feedbackLogController = new FeedbackLogController();
+
+            // ---------------------------- GAME ---------------------------- //
+            
+            JSONObject cf = sgController.getConfigFile(idSeriousGame, version);
+
+            // ************ Get game basic information ************ //
+            JSONObject game = (JSONObject) cf.get("seriousGame");
+            game.put("id", idSeriousGame);
+            game.put("version", version);
+
+            
+            // ************ Get player characteristics ************ //
+            ArrayList<String> playerCharacteristics = new ArrayList<String>();
+            ArrayList<JSONObject> player = (ArrayList<JSONObject>) cf.get("player");
+
+            for (JSONObject characteristic : player) {
+                playerCharacteristics.add(characteristic.get("name").toString());                
+            }
+            game.put("playerCharacteristics", playerCharacteristics);
+
+            
+            // ************** Get learning Outcomes ************** //
+            JSONObject learningOutcomes = (JSONObject) cf.get("learningOutcomes");
+
+            game.put("learningOutcomes", learningOutcomes);
+
+            // ************** Get Evidence model ************** //
+            JSONObject evidenceModel = (JSONObject) cf.get("evidenceModel");
+
+            game.put("evidenceModel", evidenceModel);
+
+            // ************** Get Feedback ************** //
+            JSONObject feedback = (JSONObject) cf.get("feedback");
+
+            game.put("feedback", feedback);
+
+
+            infoLA.put("game", game);
+
+
+            // ---------------------------- PLAYERS ---------------------------- //
+            ArrayList<JSONObject> players = new ArrayList<JSONObject>();
+
+            ArrayList<JSONObject> gps = gpController.getGameplaysByGame(idSeriousGame, version);
+            ArrayList<JSONObject> gpsFiltered = new ArrayList<JSONObject>();
+
+            for (JSONObject gp : gps) {
+                if (Integer.parseInt(gp.get("idPlayer").toString()) > 0)
+                {
+                    JSONObject playerJson = playerController.getPlayerFromId(Integer.parseInt(gp.get("idPlayer").toString()), 
+                                                idSeriousGame, version);
+                    playerJson.put("idPlayer", playerJson.get("id"));
+                    playerJson.remove("id");
+                    JSONObject student = studentController.getStudentsByID(Integer.parseInt(playerJson.get("idStudent").toString()));
+                    playerJson.put("student", student);
+
+                    // check that player's student exists and that is associated to teacher
+                    if (student != null && student.get("idTeacher") == idTeacher)
+                    {
+                        // get all badges and those earned by the player
+                        int idP = (int)playerJson.get("idPlayer");
+
+                        ArrayList<JSONObject> bs = badgesController.getAllBadges(idSeriousGame, version, idP);                
+                        playerJson.put("badges", bs);
+
+                        if (!players.contains(playerJson))  
+                        {
+                            players.add(playerJson);
+                        }  
+                        gpsFiltered.add(gp);
+                    }
+                }
+            }
+
+            infoLA.put("players", players);
+
+            // ---------------------------- GAMEPLAYS ---------------------------- //
+            ArrayList<JSONObject> gameplays = new ArrayList<JSONObject>();
+
+            for (JSONObject gp : gpsFiltered) {
+                
+                JSONObject gameplay = new JSONObject();
+                int idGP = Integer.parseInt(gp.get(g.GP_FIELD_ID).toString());
+                gameplay.put("id", idGP);
+                gameplay.put("idPlayer", gp.get(g.GP_FIELD_ID_PLAYER));
+
+                // "2014-11-22 21:04:09.0"
+                String target = gp.get(g.GP_FIELD_CREATED).toString();
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss.S");
+                Date start =  df.parse(target);  
+    
+                gameplay.put("timeStarted", gp.get(g.GP_FIELD_CREATED));
+
+                if (gp.get(g.GP_FIELD_ENDED) != null)
+                {
+                    String target2 = gp.get(g.GP_FIELD_ENDED).toString();
+                    Date end =  df.parse(target2);  
+    
+                    long timeSpent = (end.getTime() - start.getTime()) / 1000;
+
+                    gameplay.put("timeSpent", timeSpent);
+                }
+                else
+                {
+                    String target2 = gp.get(g.GP_FIELD_LASTACTION).toString();
+                    Date end =  df.parse(target2);  
+    
+                    long timeSpent = (end.getTime() - start.getTime()) / 1000;
+
+                    gameplay.put("timeSpent", timeSpent);
+                }
+
+                // ---------------------------- Final scores ---------------------------- //
+                
+                JSONObject finalScores = new JSONObject();
+
+                ArrayList<JSONObject> scores = gpController.getScores(idGP);
+
+                for (JSONObject score : scores) {
+                    finalScores.put(score.get("name"), score.get("value"));
+                }
+
+                gameplay.put("finalScores", finalScores);   
+
+                // ---------------------------- Actions ---------------------------- //
+
+                ArrayList<JSONObject> actions = new ArrayList<JSONObject>();
+
+                ArrayList<JSONObject> log = actionLogController.getActionLog(idGP);
+
+                for (JSONObject l : log) {
+                    JSONObject action = new JSONObject();
+
+                    String targetTime = l.get(g.LOG_A_FIELD_TIME).toString();
+                    Date time =  df.parse(targetTime);  
+    
+                    long timestamp = (time.getTime() - start.getTime()) / 1000;
+
+                    action.put("timestamp", timestamp);
+                    JSONObject actionJSON = (JSONObject) l.get("action");
+
+                    action.put("action", actionJSON.get("action"));
+                    action.put("parameters", actionJSON.get("values"));
+                    action.put("valuesLog", actionJSON.get("valuesLog"));
+                    action.put("mark", l.get("mark"));
+                    int idOutcome = Integer.parseInt(l.get("idOutcome").toString());
+                    action.put("outcome", loController.getOutcomeById(idOutcome).get("name"));
+
+                    actions.add(action);
+                }
+
+                gameplay.put("actions", actions);      
+
+                // add feedback that was triggered
+                ArrayList<JSONObject> feedbackLogs = feedbackLogController.getFeedbackLog(idGP);
+                gameplay.put("feedback", feedbackLogs);   
+
+                gameplays.add(gameplay);
+            }
+
+            infoLA.put("gameplays", gameplays);
+
+            actionLogController.finalize();
+            loController.finalize();
+            gpController.finalize();
+            playerController.finalize();
+            studentController.finalize();
+            sgController.finalize();
+            badgesController.finalize();
+            feedbackLogController.finalize();
+
+            return infoLA.toString();
+        }
+        catch( Exception e )
+        {
+            return "{'error':'"+e+"'}";
+        }
+    }
+
 
     /**
      * @api {get} /learninganalytics/leaderboard/seriousgame/:idSG/version/:version Get LeaderBoard

@@ -410,7 +410,6 @@ public class BadgesController {
 				Float numberToCompareWith = new Float (0);
 
 				ArrayList<Float> scores = getOutcomeListByGamePlayerAndOutcome(idSG, version, idPlayer, idOutcome);
-				System.out.println(scores.toString());
 				//Boolean noData = scores.isEmpty();
 
 				switch (function)
