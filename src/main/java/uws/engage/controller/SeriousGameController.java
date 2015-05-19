@@ -217,7 +217,7 @@ public class SeriousGameController {
 			PreparedStatement stsaveCF = 
 					conn.prepareStatement("UPDATE "+ g.TABLE_SG + " SET "+ dataTypeForCF + 
 							" = ? WHERE " + g.SG_FIELD_ID + " = " + idSG +
-							" AND " + g.SG_FIELD_NAME_VERSION + " = " + version);
+							" AND " + g.SG_FIELD_VERSION + " = " + version);
 
 			stsaveCF.setString(1, configFile);				
 			
@@ -371,8 +371,7 @@ public class SeriousGameController {
 		if (idSG > 0)
 		{			
 			// ##################### PLAYER TABLE ######################		
-			// Create a table player based on the SG player's characteristics
-			
+			// Create a table player based on the SG player's characteristics	
 
 			PlayerController playerController = new PlayerController();
 			if (configFile.get("player") != null)
@@ -417,13 +416,13 @@ public class SeriousGameController {
 			// Creates rows in table learning outcome linked to the SG
 			
 			JSONObject los = (JSONObject) configFile.get("learningOutcomes");
-			LearningOutcomeController LOController = new LearningOutcomeController();
+			LearningOutcomeController loController = new LearningOutcomeController();
 			
 			keys = los.keySet();
 			for (String key : keys) 
 			{
 				JSONObject lo = (JSONObject) los.get(key);
-				int idLO = LOController.createLearningOutcome(key, lo, idSG, version);
+				int idLO = loController.createLearningOutcome(key, lo, idSG, version);
 				
 				if (lo.containsKey("feedbackTriggered"))
 				{
@@ -435,7 +434,7 @@ public class SeriousGameController {
 				}
 			}
 			triggerController.finalize();
-			LOController.finalize();
+			loController.finalize();
 			// ##################### SAVE CONFIG FILE ######################
 			// Update SG table to save config file
 			
