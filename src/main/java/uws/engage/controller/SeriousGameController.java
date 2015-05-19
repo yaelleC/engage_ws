@@ -113,8 +113,18 @@ public class SeriousGameController {
 			
 			stCreationGame.setInt(11+thereIsId, Integer.parseInt(sg.get("idDeveloper").toString()));
 			
-			if (!sg.containsKey("nameVersion")){ stCreationGame.setNull(12+thereIsId, java.sql.Types.NULL); } 
-				else { stCreationGame.setString(12+thereIsId, sg.get("nameVersion").toString()); }
+			if (!sg.containsKey("nameVersion"))
+			{ 
+				if (!sg.containsKey("version"))
+				{
+					stCreationGame.setString(12+thereIsId, "initial");
+				}
+				else
+				{
+					stCreationGame.setNull(12+thereIsId, java.sql.Types.NULL); 
+				}
+			} 
+			else { stCreationGame.setString(12+thereIsId, sg.get("nameVersion").toString()); }
 			
 			if (g.DEBUG_SQL)
 			{
