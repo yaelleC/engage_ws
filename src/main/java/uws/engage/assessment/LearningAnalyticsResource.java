@@ -14,6 +14,7 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.Collections;
 import java.util.Comparator;
@@ -526,7 +527,9 @@ public class LearningAnalyticsResource {
                     playerJson.put("student", student);
 
                     // check that player's student exists and that is associated to teacher
-                    if (student != null && student.get("idTeacher") == idTeacher)
+                    String[] teachers = student.get("teachers").toString().split(",");
+                    String idTeacher_string = idTeacher+"";
+                    if (student != null && Arrays.asList(teachers).contains(idTeacher_string))
                     {
                         // get all badges and those earned by the player
                         int idP = (int)playerJson.get("idPlayer");

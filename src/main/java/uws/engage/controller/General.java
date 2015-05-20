@@ -185,7 +185,7 @@ public class General {
 		public String TABLE_STDT_TEACHER = "std_teacher";
 		public String ST_FIELD_ID_STDT = "idStd";
 		public String ST_FIELD_ID_TEACHER = "idTeacher";
-		public String ST_FIELD_CLASS = "groupName";
+		public String ST_FIELD_CLASS = "idGroup";
 
 		// --------------------------- Table sg_student --------------------------- //
 		
