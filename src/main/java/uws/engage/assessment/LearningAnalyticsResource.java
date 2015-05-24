@@ -257,6 +257,10 @@ public class LearningAnalyticsResource {
                 int idGP = Integer.parseInt(gp.get(g.GP_FIELD_ID).toString());
                 gameplay.put("id", idGP);
                 gameplay.put("idPlayer", gp.get(g.GP_FIELD_ID_PLAYER));
+                if (gp.get(g.GP_FIELD_WIN) != null) 
+                { 
+                    gameplay.put("won", gp.get(g.GP_FIELD_WIN)); 
+                }
 
                 // "2014-11-22 21:04:09.0"
                 String target = gp.get(g.GP_FIELD_CREATED).toString();
