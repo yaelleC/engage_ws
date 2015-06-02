@@ -160,6 +160,15 @@ public class SeriousGameAccessResource {
     public String logonAndGetVersion(String loginParams) {
         try
         {
+            System.out.println("headers:");
+            String headers = loginParams.split("\\{")[0];
+            System.out.println(headers);
+           
+            if (headers.trim().length() > 0)
+            {
+                loginParams = loginParams.replace(headers, " ");
+            }
+
             SeriousGameController sgController = new SeriousGameController();
 
             JSONObject returnData = new JSONObject();
