@@ -366,7 +366,14 @@ public class GamePlayResource {
     public String startGamePlay2(String gameplayP)
     {
         try
-        {
+        { 
+            String headers = gameplayP.split("\\{")[0];
+           
+            if (headers.trim().length() > 0)
+            {
+                gameplayP = gameplayP.replace(headers, " ");
+            }
+
             JSONObject gameplay=(JSONObject) JSONValue.parse(gameplayP);
            
             int idSG = Integer.parseInt(gameplay.get("idSG").toString());
@@ -487,6 +494,13 @@ public class GamePlayResource {
     {
         try
         {
+            String headers = gameplayP.split("\\{")[0];
+           
+            if (headers.trim().length() > 0)
+            {
+                gameplayP = gameplayP.replace(headers, " ");
+            }
+
             JSONObject gameplay=(JSONObject) JSONValue.parse(gameplayP);
            
             int idSG = Integer.parseInt(gameplay.get("idSG").toString());
@@ -881,7 +895,7 @@ public class GamePlayResource {
             {
                 actionP = actionP.replace(headers, " ");
             }
-            
+
             JSONObject action=(JSONObject) JSONValue.parse(actionP);
             GamePlayController gpController = new GamePlayController();
             FeedbackTriggerController feedbackTriggerController = new FeedbackTriggerController();
