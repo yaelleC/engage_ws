@@ -173,21 +173,59 @@ public class PlayerController {
 			for (int i=0 ; i<params.size() ; i++) {	
 				JSONObject characteristic = params.get(i);
 				String type = characteristic.get("type").toString();
-				
-				switch (type) {
-					case "Int":
-						stCreatePlayer.setInt(i+2, Integer.parseInt(characteristic.get("value").toString()));
-						break;
-					case "Float":
-						stCreatePlayer.setFloat(i+2, Float.parseFloat(characteristic.get("value").toString()));
-						break;
-					case "Bool":
-						stCreatePlayer.setBoolean(i+2, Boolean.parseBoolean(characteristic.get("value").toString()));
-						break;
-					default:
-						stCreatePlayer.setString(i+2, characteristic.get("value").toString());
-						break;
-				}				
+				String value = characteristic.get("value").toString();
+
+				//if (value == "") { stCreatePlayer.setNull(i+2); }
+
+				//else
+				//{
+					switch (type) {
+						case "Int":
+							try {
+								int intValue = Integer.parseInt(value);
+								stCreatePlayer.setInt(i+2, intValue);
+							}
+							catch(Exception e)
+							{
+								stCreatePlayer.setNull(i+2, java.sql.Types.INTEGER); 
+							}
+							break;
+						case "Float":
+							try {
+								float floatValue = Float.parseFloat(value);
+								stCreatePlayer.setFloat(i+2, floatValue);
+							}
+							catch(Exception e)
+							{
+								stCreatePlayer.setNull(i+2, java.sql.Types.FLOAT); 
+							}
+							break;
+						case "Bool":
+							try {
+								Boolean boolValue = Boolean.parseBoolean(value);
+								stCreatePlayer.setBoolean(i+2, boolValue);
+							}
+							catch(Exception e)
+							{
+								stCreatePlayer.setNull(i+2, java.sql.Types.BOOLEAN); 
+							}
+							break;
+						case "Char":
+							try {
+								if (value.length() > 1) { value = value.substring(0, 1);}
+								if (value == "") { value = null; }
+								stCreatePlayer.setString(i+2, value);
+							}
+							catch(Exception e)
+							{
+								stCreatePlayer.setNull(i+2, java.sql.Types.CHAR); 
+							}
+							break;
+						default:
+							stCreatePlayer.setString(i+2, value);
+							break;
+					}
+				//}				
 			}
 					
 			
