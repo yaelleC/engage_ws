@@ -199,11 +199,13 @@ public class StudentController {
 			}
 			try
 			{
+				String[] dbURL = g.DATABASE_URL.split("/")
+				String dbName = dbURL[dbURL.length-1];
 				PreparedStatement stGetStudent = 
 						conn.prepareStatement("SELECT "+ g.STDT_FIELD_USERNAME + ", " + g.STDT_FIELD_AGE + ", "+ g.STDT_FIELD_GENDER + ", " +
 												g.STDT_FIELD_ID_SCHOOL + ", " + g.STDT_FIELD_PASSWORD + ", " + 
 												"GROUP_CONCAT(" + g.TABLE_STDT_TEACHER + "." + g.ST_FIELD_ID_TEACHER + ")" +
-												" FROM " + g.TABLE_STUDENT + ", engage_dev." + g.TABLE_STDT_TEACHER + 
+												" FROM " + g.TABLE_STUDENT + ", "+ dbName +"." + g.TABLE_STDT_TEACHER + 
 												" WHERE " + g.TABLE_STUDENT + "." + g.STDT_FIELD_ID + " = ? AND " + 
 												g.TABLE_STUDENT + "." + g.STDT_FIELD_ID + " = " + 
 												g.TABLE_STDT_TEACHER + "." + g.ST_FIELD_ID_STDT + 

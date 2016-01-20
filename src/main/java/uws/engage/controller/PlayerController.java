@@ -247,6 +247,111 @@ public class PlayerController {
 		}
 	}
 	
+	
+	public int updatePlayer(int idSG, int version, int idPlayer, ArrayList<JSONObject> params)
+	{
+		if (g.DEBUG)
+		{
+			System.out.println("*** updatePlayer ***");
+		}
+		try
+		{
+			String sql = "UPDATE "+ g.TABLE_PLAYER + idSG + "_" + version + " SET " ;
+			
+			int cpt = 0;
+			for (JSONObject characteristic: params) {	
+				if (cpt > 0)
+				{
+					sql += " , ";
+				}
+				sql += characteristic.get("name") + " = ? " ;
+				cpt ++;
+			}
+			
+			sql += " WHERE "+ g.P_FIELD_ID + " = ?" ;
+
+			PreparedStatement stUpdatePlayer = conn.prepareStatement(sql);
+			
+			for (int i=0 ; i<params.size() ; i++) {	
+				JSONObject characteristic = params.get(i);
+				String type = characteristic.get("type").toString();
+				String value = characteristic.get("value").toString();
+
+				// checking type of param, and adding to player table
+				switch (type) {
+					case "Int":
+						try {
+							int intValue = Integer.parseInt(value);
+							stUpdatePlayer.setInt(i+1, intValue);
+						}
+						catch(Exception e)
+						{
+							stUpdatePlayer.setNull(i+1, java.sql.Types.INTEGER); 
+						}
+						break;
+					case "Float":
+						try {
+							float floatValue = Float.parseFloat(value);
+							stUpdatePlayer.setFloat(i+1, floatValue);
+						}
+						catch(Exception e)
+						{
+							stUpdatePlayer.setNull(i+1, java.sql.Types.FLOAT); 
+						}
+						break;
+					case "Bool":
+						try {
+							Boolean boolValue = Boolean.parseBoolean(value);
+							stUpdatePlayer.setBoolean(i+1, boolValue);
+						}
+						catch(Exception e)
+						{
+							stUpdatePlayer.setNull(i+1, java.sql.Types.BOOLEAN); 
+						}
+						break;
+					case "Char":
+						try {
+							if (value.length() > 1) { value = value.substring(0, 1);}
+							if (value == "") { value = null; }
+							stUpdatePlayer.setString(i+1, value);
+						}
+						catch(Exception e)
+						{
+							stUpdatePlayer.setNull(i+1, java.sql.Types.CHAR); 
+						}
+						break;
+					default:
+						stUpdatePlayer.setString(i+1, value);
+						break;
+				}		
+			}
+
+			stUpdatePlayer.setInt(params.size()+1, idPlayer);
+					
+			
+			if (g.DEBUG_SQL)
+			{
+				System.out.println(stUpdatePlayer.toString());
+			}
+			
+			stUpdatePlayer.executeUpdate();
+			
+			if (g.DEBUG)
+			{
+				System.out.println("SUCCESS");
+				System.out.println();
+			}
+			
+			return getPlayerFromIdStudent(idStudent, idSG, version);
+		}
+		catch (Exception e)
+		{		
+			System.err.println("ERROR (updatePlayer): " + e.getMessage());
+			return g.CST_RETURN_SQL_ERROR;
+		}
+	}
+
+
 	/**
 	 * get the player from its id 
 	 * @param idPlayer

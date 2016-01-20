@@ -391,4 +391,47 @@ public class SeriousGameResource {
             return "'error':'"+e+"'";
         }
     }
+
+     /**
+     * Method handling HTTP POST requests on path "seriousgame/player/{idSG}/version/{idVersion}"
+     * 
+     * @param seriousgame = the configuration file (JSON format) of SG to update
+     * @return 1 if successful
+     */
+    @POST
+    @Path("player/{idSG}/version/{idVersion}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String updatePlayerSeriousGame(String playerInfo)
+    {
+        try
+        {
+
+            String headers = loginParams.split("\\{")[0];
+           
+            if (headers.trim().length() > 0)
+            {
+                loginParams = loginParams.replace(headers, " ");
+            }
+
+            SeriousGameController sgController = new SeriousGameController();
+
+            JSONObject returnData = new JSONObject();
+            JSONObject loginParamsJson=(JSONObject) JSONValue.parse(loginParams);
+
+            String username = loginParamsJson.get("username").toString();
+            String password = loginParamsJson.get("password").toString();
+
+            PlayerController playerC = new PlayerController();
+
+            // call updatePlayer
+            playerC.updatePlayer(idSG, int version, int idPlayer, ArrayList<JSONObject> params)
+
+            playerC.finalize();
+        }
+        catch( Exception e )
+        {
+            return "'error':'"+e+"'";
+        }
+    }
 }
