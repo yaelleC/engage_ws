@@ -247,7 +247,7 @@ public class PlayerController {
 		}
 	}
 	
-	
+	/*
 	public int updatePlayer(int idSG, int version, int idPlayer, ArrayList<JSONObject> params)
 	{
 		if (g.DEBUG)
@@ -350,7 +350,7 @@ public class PlayerController {
 			return g.CST_RETURN_SQL_ERROR;
 		}
 	}
-
+*/
 
 	/**
 	 * get the player from its id 

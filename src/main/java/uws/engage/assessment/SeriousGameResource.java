@@ -392,12 +392,14 @@ public class SeriousGameResource {
         }
     }
 
+
      /**
      * Method handling HTTP POST requests on path "seriousgame/player/{idSG}/version/{idVersion}"
      * 
      * @param seriousgame = the configuration file (JSON format) of SG to update
      * @return 1 if successful
      */
+     /*
     @POST
     @Path("player/{idSG}/version/{idVersion}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -434,4 +436,5 @@ public class SeriousGameResource {
             return "'error':'"+e+"'";
         }
     }
+    */
 }
