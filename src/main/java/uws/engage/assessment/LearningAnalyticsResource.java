@@ -18,6 +18,9 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Iterator;
  
 import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
@@ -25,6 +28,9 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
 
 import org.eclipse.xtext.validation.Issue;
 
@@ -165,10 +171,22 @@ public class LearningAnalyticsResource {
     {
         try
         {
+            DateFormat dateFormat = new SimpleDateFormat("mm:ss.SSS");
+            Date date = new Date();
+            Date startdate = new Date();
+            System.out.println("Start: " + dateFormat.format(date));
             General g = new General();
             JSONObject infoLA = new JSONObject();
+            Map<Integer, String> outcomesIdNames = new HashMap<Integer, String>();
+
+            // ------------------------- DB connection ----------------------- //
+            //Connection conn;
+            //Class.forName("com.mysql.jdbc.Driver");             
+            //conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
 
             // ------------------------- Controllers ----------------------- //
+            System.out.println("one connection per controller");
+
             SeriousGameController sgController = new SeriousGameController();
             ActionLogController actionLogController = new ActionLogController();
             LearningOutcomeController loController = new LearningOutcomeController();
@@ -178,15 +196,29 @@ public class LearningAnalyticsResource {
             BadgesController badgesController = new BadgesController();
             FeedbackLogController feedbackLogController = new FeedbackLogController();
 
+            /*
+            System.out.println("one connection passed to each controller");
+
+            SeriousGameController sgController = new SeriousGameController(conn);
+            ActionLogController actionLogController = new ActionLogController(conn);
+            LearningOutcomeController loController = new LearningOutcomeController(conn);
+            GamePlayController gpController = new GamePlayController(conn);
+            PlayerController playerController = new PlayerController(conn);
+            StudentController studentController = new StudentController(conn);            
+            BadgesController badgesController = new BadgesController(conn);
+            FeedbackLogController feedbackLogController = new FeedbackLogController(conn);
+            */
             // ---------------------------- GAME ---------------------------- //
             
+            date = new Date();
+            System.out.println("Game: " + dateFormat.format(date));
+
             JSONObject cf = sgController.getConfigFile(idSeriousGame, version);
 
             // ************ Get game basic information ************ //
             JSONObject game = (JSONObject) cf.get("seriousGame");
             game.put("id", idSeriousGame);
             game.put("version", version);
-
             
             // ************ Get player characteristics ************ //
             ArrayList<String> playerCharacteristics = new ArrayList<String>();
@@ -196,11 +228,14 @@ public class LearningAnalyticsResource {
                 playerCharacteristics.add(characteristic.get("name").toString());                
             }
             game.put("playerCharacteristics", playerCharacteristics);
-
             
             // ************** Get learning Outcomes ************** //
             JSONObject learningOutcomes = (JSONObject) cf.get("learningOutcomes");
-
+            for(Iterator iterator = learningOutcomes.keySet().iterator(); iterator.hasNext();) {
+                String name = (String) iterator.next();
+                int id = loController.getOutcomeIdByName(name, idSeriousGame, version);
+                outcomesIdNames.put(id, name);
+            }
             game.put("learningOutcomes", learningOutcomes);
 
             // ************** Get Evidence model ************** //
@@ -218,29 +253,37 @@ public class LearningAnalyticsResource {
 
 
             // ---------------------------- PLAYERS ---------------------------- //
+            
+            date = new Date();
+            System.out.println("Players: " + dateFormat.format(date));
+
             ArrayList<JSONObject> players = new ArrayList<JSONObject>();
+            ArrayList<Integer> playerIds = new ArrayList<Integer>();
 
             ArrayList<JSONObject> gps = gpController.getGameplaysByGame(idSeriousGame, version);
             ArrayList<JSONObject> gpsFiltered = new ArrayList<JSONObject>();
 
             for (JSONObject gp : gps) {
-                if (Integer.parseInt(gp.get("idPlayer").toString()) > 0)
+                // System.out.println("Start Loop: " + dateFormat.format(new Date()));
+                int playerId = Integer.parseInt(gp.get("idPlayer").toString());
+                if (playerId > 0)
                 {
-                    JSONObject playerJson = playerController.getPlayerFromId(Integer.parseInt(gp.get("idPlayer").toString()), 
-                                                idSeriousGame, version);
-                    playerJson.put("idPlayer", playerJson.get("id"));
-                    playerJson.remove("id");
-                    JSONObject student = studentController.getStudentsByID(Integer.parseInt(playerJson.get("idStudent").toString()));
-                    playerJson.put("student", student);
-                    // get all badges and those earned by the player
-                    int idP = (int)playerJson.get("idPlayer");
-
-                    ArrayList<JSONObject> bs = badgesController.getAllBadges(idSeriousGame, version, idP);                
-                    playerJson.put("badges", bs);
-
-                    if (!players.contains(playerJson))  
+                    if (!playerIds.contains(playerId))  
                     {
+                        JSONObject playerJson = playerController.getPlayerFromId(playerId, idSeriousGame, version);
+                        playerJson.put("idPlayer", playerJson.get("id"));
+                        playerJson.remove("id");
+                        JSONObject student = studentController.getStudentsByID(Integer.parseInt(playerJson.get("idStudent").toString()));
+                        playerJson.put("student", student);
+                        // get all badges and those earned by the player
+                        int idP = (int)playerJson.get("idPlayer");
+                        // System.out.println("middle Loop: " + dateFormat.format(new Date()));
+
+                        ArrayList<JSONObject> bs = badgesController.getAllBadges(idSeriousGame, version, idP);                
+                        playerJson.put("badges", bs);
+
                         players.add(playerJson);
+                        playerIds.add(playerId);
                     }  
                     gpsFiltered.add(gp);
                 }
@@ -249,10 +292,12 @@ public class LearningAnalyticsResource {
             infoLA.put("players", players);
 
             // ---------------------------- GAMEPLAYS ---------------------------- //
-            ArrayList<JSONObject> gameplays = new ArrayList<JSONObject>();
+            
+            date = new Date();
+            System.out.println("Gameplays: " + dateFormat.format(date));
 
+            ArrayList<JSONObject> gameplays = new ArrayList<JSONObject>();
             for (JSONObject gp : gpsFiltered) {
-                
                 JSONObject gameplay = new JSONObject();
                 int idGP = Integer.parseInt(gp.get(g.GP_FIELD_ID).toString());
                 gameplay.put("id", idGP);
@@ -289,7 +334,6 @@ public class LearningAnalyticsResource {
                 }
 
                 // ---------------------------- Final scores ---------------------------- //
-                
                 JSONObject finalScores = new JSONObject();
 
                 ArrayList<JSONObject> scores = gpController.getScores(idGP);
@@ -298,10 +342,9 @@ public class LearningAnalyticsResource {
                     finalScores.put(score.get("name"), score.get("value"));
                 }
 
-                gameplay.put("finalScores", finalScores);   
+                gameplay.put("finalScores", finalScores);
 
                 // ---------------------------- Actions ---------------------------- //
-
                 ArrayList<JSONObject> actions = new ArrayList<JSONObject>();
 
                 ArrayList<JSONObject> log = actionLogController.getActionLog(idGP);
@@ -322,8 +365,7 @@ public class LearningAnalyticsResource {
                     action.put("valuesLog", actionJSON.get("valuesLog"));
                     action.put("mark", l.get("mark"));
                     int idOutcome = Integer.parseInt(l.get("idOutcome").toString());
-                    action.put("outcome", loController.getOutcomeById(idOutcome).get("name"));
-
+                    action.put("outcome", outcomesIdNames.get(idOutcome));
                     actions.add(action);
                 }
 
@@ -338,6 +380,12 @@ public class LearningAnalyticsResource {
 
             infoLA.put("gameplays", gameplays);
 
+            //conn.close();
+            //if (g.DEBUG)
+            //{
+            //    System.out.println("*** connection closed ***");
+            //}
+            System.out.println("Finalize: " + dateFormat.format(new Date()));
             actionLogController.finalize();
             loController.finalize();
             gpController.finalize();
@@ -346,6 +394,8 @@ public class LearningAnalyticsResource {
             sgController.finalize();
             badgesController.finalize();
             feedbackLogController.finalize();
+            System.out.println("End: " + dateFormat.format(new Date()));
+            System.out.println("Duration (ms): " + (startdate.getTime() - (new Date()).getTime()));
 
             return infoLA.toString();
         }

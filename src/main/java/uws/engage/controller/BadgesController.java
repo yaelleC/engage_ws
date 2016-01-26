@@ -49,6 +49,7 @@ public class BadgesController {
 	public BadgesController( ) throws Exception
 	{
 		g = new General();
+
 		Class.forName("com.mysql.jdbc.Driver");		
 		conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
 	}
@@ -295,14 +296,16 @@ public class BadgesController {
 		JSONObject configFile = sgController.getConfigFile(idSG, version);
 
 		ArrayList<JSONObject> badgeModel = (ArrayList<JSONObject>) configFile.get("badgeModel");
-			
-		
+		ArrayList<JSONObject> gps;
+		gps = gpController.getGameplaysByGameAndPlayer(idSG, version, idPlayer);
+
 		// if there are badges triggers described
 		for (JSONObject badgeTrigger : badgeModel)
 		{			
 			ArrayList<String> badgesNames = (ArrayList<String>) badgeTrigger.get("feedback");
 			String badgeName = badgesNames.get(0);
-			int idFeedback = Integer.parseInt(feedbackController.getFeedbackByName(badgeName, idSG, version).get("id").toString());
+			JSONObject feedback = feedbackController.getFeedbackByName(badgeName, idSG, version);
+			int idFeedback = Integer.parseInt(feedback.get("id").toString());
 
 			int idOutcome = -1;
 			if (badgeTrigger.get("outcome") != null)
@@ -319,21 +322,18 @@ public class BadgesController {
 			if (idOutcome < 0)
 			{
 				long numberToCompareWith = 0;
-				ArrayList<JSONObject> gps;
+				
 
 				switch (function)
 				{
 					case "numberGameplays":
-						 gps = gpController.getGameplaysByGameAndPlayer(idSG, version, idPlayer);
 						 numberToCompareWith = gps.size();
 						break;
 					case "numberWin":
-						gps = gpController.getGameplaysWonByGameAndPlayer(idSG, version, idPlayer);
-						 numberToCompareWith = gps.size();
+						numberToCompareWith = gps.size();
 						break;
 					case "totalTime":
 						numberToCompareWith = 0;
-						gps = gpController.getGameplaysByGameAndPlayer(idSG, version, idPlayer);
 						float sumTime = 0;
 						for (JSONObject gp : gps) {
 							String target = gp.get(g.GP_FIELD_CREATED).toString();
@@ -362,7 +362,6 @@ public class BadgesController {
 					case "averageTime":
 						long sum = 0;
 
-						gps = gpController.getGameplaysByGameAndPlayer(idSG, version, idPlayer);
 						for (JSONObject gp : gps) {
 							String target = gp.get(g.GP_FIELD_CREATED).toString();
 			                DateFormat df = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss.S");
@@ -437,7 +436,7 @@ public class BadgesController {
 
 
 					// create JSONObject and update the message
-					JSONObject f = feedbackController.getFeedbackById(idFeedback);
+					JSONObject f = feedback;
 
 					String message = f.get(g.F_FIELD_MESSAGE).toString();
 					message = message.replace("[number]", numberToCompareWith +"");

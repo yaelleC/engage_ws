@@ -43,10 +43,12 @@ public class GamePlayController {
 	public GamePlayController( ) throws Exception
 	{
 		g = new General();
+
 		if (g.DEBUG)
 		{
 			System.out.println("*** create GamePlayController ***");
 		}
+		
 		Class.forName("com.mysql.jdbc.Driver");		
 		conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
 	}
@@ -146,9 +148,14 @@ public class GamePlayController {
 			System.out.println("*** getScores ***");
 		}
 		PreparedStatement stGetOutcomes = 
-				conn.prepareStatement("SELECT "+ g.G_O_FIELD_VALUE + ", " + g.G_O_FIELD_ID_O + 
-										" FROM " + g.TABLE_GAMEPLAY_OUTCOME + 
-										" WHERE " + g.G_O_FIELD_ID_GP + " = ?");
+				conn.prepareStatement(
+					"SELECT "+ g.O_FIELD_NAME + ", "+ g.O_FIELD_DESC + ", "+ g.O_FIELD_TYPE + ", "+ g.O_FIELD_VALUE + 
+					", "+ g.G_O_FIELD_ID_O + ", " + g.G_O_FIELD_VALUE +
+					" FROM " + g.TABLE_OUTCOME +
+					" JOIN " +  g.TABLE_GAMEPLAY_OUTCOME +
+					" ON " + g.TABLE_GAMEPLAY_OUTCOME  + "." + g.G_O_FIELD_ID_O + " = " + g.TABLE_OUTCOME + "." + g.O_FIELD_ID +
+					" WHERE " +  g.G_O_FIELD_ID_GP + " = ?"
+				);
 
 		stGetOutcomes.setInt(1, idGamePlay);
 		
@@ -164,10 +171,15 @@ public class GamePlayController {
 		LearningOutcomeController loController = new LearningOutcomeController();
 		while (results.next())
 		{
-			JSONObject score = loController.getOutcomeById(results.getInt(2));
-			score.put(g.G_O_FIELD_VALUE, results.getFloat(1));
+			JSONObject outcome = new JSONObject();
+			outcome.put(g.O_FIELD_NAME, results.getString(1));
+			outcome.put(g.O_FIELD_DESC, results.getString(2));
+			outcome.put(g.O_FIELD_TYPE, results.getString(3));
+			outcome.put(g.O_FIELD_VALUE, results.getFloat(4));
+			outcome.put(g.O_FIELD_ID, results.getInt(5));
+			outcome.put(g.G_O_FIELD_VALUE, results.getFloat(6));
 
-			list.add(score);
+			list.add(outcome);
 		}
 		loController.finalize();
 		return list;			

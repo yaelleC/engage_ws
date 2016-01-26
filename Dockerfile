@@ -1,15 +1,19 @@
-FROM ubuntu:14.04
+FROM java:7
 MAINTAINER yaelle.chaudy@uws.ac.uk
 
+# Get noninteractive frontend for Debian to avoid some problems:
+#    debconf: unable to initialize frontend: Dialog
+#ENV DEBIAN_FRONTEND noninteractive
+
 # Update Ubuntu
-RUN apt-get update
+#RUN apt-get update
 
 # Install dependencies
-RUN apt-get install -y maven openjdk-7-jdk openjdk-7-jre-headless openjdk-7-jre-lib
+#RUN apt-get install -y maven openjdk-7-jdk openjdk-7-jre-headless openjdk-7-jre-lib
 
 # Set JAVA HOME
-ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
-
+#ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
+RUN apt-get update && apt-get install -y maven
 # Install maven dependencies
 ADD lib /opt/WebService/lib
 ADD install.sh /opt/WebService/install.sh
