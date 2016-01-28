@@ -36,8 +36,7 @@ public class FeedbackLogController {
 				// in debug mode = trace
 				if (g.DEBUG) { System.out.println("### FeedbackLogController.FeedbackLogController() ###"); }
 				
-				Class.forName("com.mysql.jdbc.Driver");				
-				conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
+				conn = DataSource.getInstance().getConnection();
 			}
 			public void finalize() throws Exception
 			{

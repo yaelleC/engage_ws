@@ -36,7 +36,7 @@ public class ActionLogController {
 			if (g.DEBUG) { System.out.println("### ActionLogController.ActionLogController() ###"); }
 			
 			Class.forName("com.mysql.jdbc.Driver");				
-			conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
+			conn = DataSource.getInstance().getConnection();
 		}
 		public void finalize() throws Exception
 	    {

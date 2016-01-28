@@ -39,8 +39,7 @@ public class TeacherController {
 		// in debug mode = trace
 		if (g.DEBUG) { System.out.println("### TeacherController.TeacherController() ###"); }
 		
-		Class.forName("com.mysql.jdbc.Driver");				
-		conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
+		conn = DataSource.getInstance().getConnection();
 		
 		if (g.DEBUG) { System.out.println("### Access to DB ok ###"); }
 	}

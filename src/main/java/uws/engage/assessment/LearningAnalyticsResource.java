@@ -171,10 +171,6 @@ public class LearningAnalyticsResource {
     {
         try
         {
-            DateFormat dateFormat = new SimpleDateFormat("mm:ss.SSS");
-            Date date = new Date();
-            Date startdate = new Date();
-            System.out.println("Start: " + dateFormat.format(date));
             General g = new General();
             JSONObject infoLA = new JSONObject();
             Map<Integer, String> outcomesIdNames = new HashMap<Integer, String>();
@@ -185,7 +181,6 @@ public class LearningAnalyticsResource {
             //conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
 
             // ------------------------- Controllers ----------------------- //
-            System.out.println("one connection per controller");
 
             SeriousGameController sgController = new SeriousGameController();
             ActionLogController actionLogController = new ActionLogController();
@@ -210,8 +205,6 @@ public class LearningAnalyticsResource {
             */
             // ---------------------------- GAME ---------------------------- //
             
-            date = new Date();
-            System.out.println("Game: " + dateFormat.format(date));
 
             JSONObject cf = sgController.getConfigFile(idSeriousGame, version);
 
@@ -254,9 +247,6 @@ public class LearningAnalyticsResource {
 
             // ---------------------------- PLAYERS ---------------------------- //
             
-            date = new Date();
-            System.out.println("Players: " + dateFormat.format(date));
-
             ArrayList<JSONObject> players = new ArrayList<JSONObject>();
             ArrayList<Integer> playerIds = new ArrayList<Integer>();
 
@@ -264,7 +254,6 @@ public class LearningAnalyticsResource {
             ArrayList<JSONObject> gpsFiltered = new ArrayList<JSONObject>();
 
             for (JSONObject gp : gps) {
-                // System.out.println("Start Loop: " + dateFormat.format(new Date()));
                 int playerId = Integer.parseInt(gp.get("idPlayer").toString());
                 if (playerId > 0)
                 {
@@ -277,7 +266,6 @@ public class LearningAnalyticsResource {
                         playerJson.put("student", student);
                         // get all badges and those earned by the player
                         int idP = (int)playerJson.get("idPlayer");
-                        // System.out.println("middle Loop: " + dateFormat.format(new Date()));
 
                         ArrayList<JSONObject> bs = badgesController.getAllBadges(idSeriousGame, version, idP);                
                         playerJson.put("badges", bs);
@@ -292,9 +280,6 @@ public class LearningAnalyticsResource {
             infoLA.put("players", players);
 
             // ---------------------------- GAMEPLAYS ---------------------------- //
-            
-            date = new Date();
-            System.out.println("Gameplays: " + dateFormat.format(date));
 
             ArrayList<JSONObject> gameplays = new ArrayList<JSONObject>();
             for (JSONObject gp : gpsFiltered) {
@@ -385,7 +370,6 @@ public class LearningAnalyticsResource {
             //{
             //    System.out.println("*** connection closed ***");
             //}
-            System.out.println("Finalize: " + dateFormat.format(new Date()));
             actionLogController.finalize();
             loController.finalize();
             gpController.finalize();
@@ -394,8 +378,6 @@ public class LearningAnalyticsResource {
             sgController.finalize();
             badgesController.finalize();
             feedbackLogController.finalize();
-            System.out.println("End: " + dateFormat.format(new Date()));
-            System.out.println("Duration (ms): " + (startdate.getTime() - (new Date()).getTime()));
 
             return infoLA.toString();
         }

@@ -43,8 +43,7 @@ public class StudentController {
 			// in debug mode = trace
 			if (g.DEBUG) { System.out.println("### StudentController.StudentController() ###"); }
 			
-			Class.forName("com.mysql.jdbc.Driver");				
-			conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
+			conn = DataSource.getInstance().getConnection();
 		}
 		public void finalize() throws Exception
 	    {

@@ -42,8 +42,7 @@ public class PlayerController {
 	public PlayerController( ) throws Exception
 	{
 		g = new General();
-		Class.forName("com.mysql.jdbc.Driver");		
-		conn = DriverManager.getConnection(g.DB_NAME, g.DB_USERNAME, g.DB_PASSWD);
+		conn = DataSource.getInstance().getConnection();
 	}
 	public void finalize() throws Exception
     {
