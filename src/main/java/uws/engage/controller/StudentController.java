@@ -196,10 +196,10 @@ public class StudentController {
 			}
 			try
 			{
-				//String[] dbURL = g.DATABASE_URL.split("/")
-				//String dbName = dbURL[dbURL.length-1];
+				String[] dbURL = g.DB_NAME.split("/");
+				String dbName = g.DB_NAME.split("/")[dbURL.length-1];
 
-				String dbName = "engage";
+				//String dbName = "engage_dev";
 
 				PreparedStatement stGetStudent = 
 						conn.prepareStatement("SELECT "+ g.STDT_FIELD_USERNAME + ", " + g.STDT_FIELD_AGE + ", "+ g.STDT_FIELD_GENDER + ", " +
