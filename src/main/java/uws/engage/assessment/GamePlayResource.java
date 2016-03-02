@@ -59,6 +59,7 @@ public class GamePlayResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String getParameters(String detailsP) {
+        PlayerController playerController = null;
         try
         {
            JSONObject details=(JSONObject) JSONValue.parse(detailsP);
@@ -72,15 +73,17 @@ public class GamePlayResource {
             {
                 idStudent = -1;
             }
-            PlayerController playerController = new PlayerController();
+            playerController = new PlayerController();
             String paramsReturn = playerController.getParametersRequired(idStudent, idSG, version).toString();
 
-            playerController.finalize();
             return paramsReturn;
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try{ playerController.finalize();} catch(Exception e){}
         }
     }
 
@@ -114,16 +117,19 @@ public class GamePlayResource {
     @Path("/{idGP}/feedback")
     @Produces(MediaType.APPLICATION_JSON)
     public String getFeedback(@PathParam("idGP") int idGP) {
+        FeedbackTriggerController feedbackTriggerController = null;
         try
         {
-            FeedbackTriggerController feedbackTriggerController = new FeedbackTriggerController();
+            feedbackTriggerController = new FeedbackTriggerController();
             ArrayList<JSONObject> fs = feedbackTriggerController.getFeedback(idGP);
-            feedbackTriggerController.finalize();
             return fs.toString();
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try{ feedbackTriggerController.finalize(); } catch ( Exception e ){}
         }
     }
 
@@ -178,10 +184,13 @@ public class GamePlayResource {
     @Path("/{idGP}/log")
     @Produces(MediaType.APPLICATION_JSON)
     public String getLog(@PathParam("idGP") int idGP) {
+        GamePlayController gpController = null;
+        ActionLogController actionLogController = null;
+        FeedbackLogController feedbackLogController = null;
         try
         {
             // if gameplay of id idGP not found, return error
-            GamePlayController gpController = new GamePlayController();
+            gpController = new GamePlayController();
             if (gpController.getGamePlay(idGP) == null)
             {
                 return "{ error: \"Gameplay of id: "+ idGP +" was not found in the database.\" }";
@@ -194,23 +203,25 @@ public class GamePlayResource {
             logs.put("scores", scores);
         
             // add action logs
-            ActionLogController actionLogController = new ActionLogController();
+            actionLogController = new ActionLogController();
             ArrayList<JSONObject> actionLogs = actionLogController.getActionLog(idGP);
             logs.put("actionLog", actionLogs);
             
             // add feedback logs
-            FeedbackLogController feedbackLogController = new FeedbackLogController();
+            feedbackLogController = new FeedbackLogController();
             ArrayList<JSONObject> feedbackLogs = feedbackLogController.getFeedbackLog(idGP);
             logs.put("feedbackLog", feedbackLogs);
             
-            gpController.finalize();
-            actionLogController.finalize();
-            feedbackLogController.finalize();
             return logs.toString();
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { gpController.finalize(); } catch ( Exception e) {}
+            try { actionLogController.finalize(); } catch ( Exception e) {}
+            try { feedbackLogController.finalize(); } catch ( Exception e) {}
         }
     }
 
@@ -249,17 +260,19 @@ public class GamePlayResource {
     @Path("/{idGP}/scores")
     @Produces(MediaType.APPLICATION_JSON)
     public String getScores(@PathParam("idGP") int idGP) {
+        GamePlayController gpController = null;
         try
         {
-            GamePlayController gpController;
             gpController = new GamePlayController();
             String s = gpController.getScores(idGP).toString();
-            gpController.finalize();
             return s;
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { gpController.finalize(); } catch ( Exception e ) {}
         }
     }
     
@@ -282,17 +295,19 @@ public class GamePlayResource {
     @Path("/{idGP}/score/{idOutcome}")
     @Produces(MediaType.TEXT_PLAIN)
     public String getScore(@PathParam("idGP") int idGP, @PathParam("idOutcome") int idOutcome) {
+        GamePlayController gpController = null;
         try
         {
-            GamePlayController gpController;
             gpController = new GamePlayController();
             String s = gpController.getScore(idGP, idOutcome) + "";
-            gpController.finalize();
             return s;
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { gpController.finalize(); } catch ( Exception e ) {}
         }
     }
 
@@ -309,6 +324,8 @@ public class GamePlayResource {
     @Produces(MediaType.TEXT_PLAIN)
     public String startGamePlay(String gameplayP)
     {
+        GamePlayController gpController = null;
+        PlayerController playerController = null;
         try
         {
             JSONObject gameplay=(JSONObject) JSONValue.parse(gameplayP);
@@ -320,7 +337,7 @@ public class GamePlayResource {
             ArrayList<JSONObject> params = (ArrayList<JSONObject>) gameplay.get("params");
 
             // use or create player                 -> idPlayer 
-            PlayerController playerController = new PlayerController();
+            playerController = new PlayerController();
             int idPlayer;
 
             if (idStudent == 0)
@@ -339,16 +356,18 @@ public class GamePlayResource {
             }
             
             // create row in gameplay table         -> idGameplay
-            GamePlayController gpController = new GamePlayController();
-            int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
-                    
-            playerController.finalize();
-            gpController.finalize();
+            gpController = new GamePlayController();
+            int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);              
+      
             return idGamePlay + "";
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { playerController.finalize(); } catch ( Exception e ) {}
+            try { gpController.finalize(); } catch ( Exception e ) {}
         }
     }
 
@@ -365,6 +384,8 @@ public class GamePlayResource {
     @Produces(MediaType.TEXT_PLAIN)
     public String startGamePlay2(String gameplayP)
     {
+        GamePlayController gpController = null;
+        PlayerController playerController = null;
         try
         { 
             String headers = gameplayP.split("\\{")[0];
@@ -383,7 +404,7 @@ public class GamePlayResource {
             ArrayList<JSONObject> params = (ArrayList<JSONObject>) gameplay.get("params");
 
             // use or create player                 -> idPlayer 
-            PlayerController playerController = new PlayerController();
+            playerController = new PlayerController();
             int idPlayer;
 
             if (idStudent == 0)
@@ -402,16 +423,18 @@ public class GamePlayResource {
             }
             
             // create row in gameplay table         -> idGameplay
-            GamePlayController gpController = new GamePlayController();
+            gpController = new GamePlayController();
             int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
                     
-            playerController.finalize();
-            gpController.finalize();
             return idGamePlay + "";
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { playerController.finalize(); } catch ( Exception e ) {}
+            try { gpController.finalize(); } catch ( Exception e ) {}
         }
     }
 
@@ -428,6 +451,8 @@ public class GamePlayResource {
     @Produces(MediaType.TEXT_PLAIN)
     public String startGamePlayWithPlayerId(String gameplayP)
     {
+        GamePlayController gpController = null;
+        PlayerController playerController = null;
         try
         {
             JSONObject gameplay=(JSONObject) JSONValue.parse(gameplayP);
@@ -445,7 +470,7 @@ public class GamePlayResource {
                 int idStudent = (gameplay.get("idStudent") != null)? Integer.parseInt(gameplay.get("idStudent").toString()) : 0;
                 ArrayList<JSONObject> params = (ArrayList<JSONObject>) gameplay.get("params");
 
-                PlayerController playerController = new PlayerController();
+                playerController = new PlayerController();
 
                 if (idStudent == 0)
                 {
@@ -469,19 +494,21 @@ public class GamePlayResource {
                         idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
                     }
                 }
-                playerController.finalize();
             }
 
             // create row in gameplay table         -> idGameplay
-            GamePlayController gpController = new GamePlayController();
+            gpController = new GamePlayController();
             int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
                     
-            gpController.finalize();
             return idGamePlay + "";
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { gpController.finalize(); } catch ( Exception e ) {}
+            try { playerController.finalize(); } catch ( Exception e ) {}
         }
     }
 
@@ -492,6 +519,8 @@ public class GamePlayResource {
     @Produces(MediaType.TEXT_PLAIN)
     public String startGamePlayWithPlayerId2(String gameplayP)
     {
+        GamePlayController gpController = null;
+        PlayerController playerController = null;
         try
         {
             String headers = gameplayP.split("\\{")[0];
@@ -516,7 +545,7 @@ public class GamePlayResource {
                 int idStudent = (gameplay.get("idStudent") != null)? Integer.parseInt(gameplay.get("idStudent").toString()) : 0;
                 ArrayList<JSONObject> params = (ArrayList<JSONObject>) gameplay.get("params");
 
-                PlayerController playerController = new PlayerController();
+                playerController = new PlayerController();
 
                 if (idStudent == 0)
                 {
@@ -540,19 +569,20 @@ public class GamePlayResource {
                         idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
                     }
                 }
-                playerController.finalize();
             }
 
             // create row in gameplay table         -> idGameplay
-            GamePlayController gpController = new GamePlayController();
-            int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
-                  
-            gpController.finalize();  
+            gpController = new GamePlayController();
+            int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);                  
             return idGamePlay + "";
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { gpController.finalize(); } catch ( Exception e ) {}
+            try { playerController.finalize(); } catch ( Exception e ) {}
         }
     }
 
@@ -625,6 +655,8 @@ public class GamePlayResource {
     @Produces(MediaType.APPLICATION_JSON)
     public String startGamePlayWithPlayerIdReturnJSON(String gameplayP)
     {
+        GamePlayController gpController = null;
+        PlayerController playerController = null;
         try
         {
             String headers = gameplayP.split("\\{")[0];
@@ -659,7 +691,7 @@ public class GamePlayResource {
 
                 ArrayList<JSONObject> params = (ArrayList<JSONObject>) gameplay.get("params");
 
-                PlayerController playerController = new PlayerController();
+                playerController = new PlayerController();
 
                 if (idStudent == 0)
                 {
@@ -692,7 +724,6 @@ public class GamePlayResource {
                         idPlayer = playerController.createPlayer(idSG, version, idStudent, params);
                     }
                 }
-                playerController.finalize();
             }
             if (idPlayer < 0)
             {
@@ -700,19 +731,22 @@ public class GamePlayResource {
             }
 
             // create row in gameplay table         -> idGameplay
-            GamePlayController gpController = new GamePlayController();
+            gpController = new GamePlayController();
             int idGamePlay = gpController.startGamePlay(idPlayer, idSG, version);
 
             JSONObject gpData = new JSONObject();
             gpData.put("idGameplay", idGamePlay);
             gpData.put("idPlayer", idPlayer);
                  
-            gpController.finalize();   
             return gpData.toString();
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { gpController.finalize(); } catch ( Exception e ) {}
+            try { playerController.finalize(); } catch ( Exception e ) {}
         }
     }
 
@@ -731,22 +765,26 @@ public class GamePlayResource {
     @Produces(MediaType.APPLICATION_JSON)
     public String assess(String actionP, @PathParam("idGP") int idGP)
     {
+        GamePlayController gpController = null;
+        FeedbackTriggerController feedbackTriggerController = null;
         try
         {
             JSONObject action=(JSONObject) JSONValue.parse(actionP);
-            GamePlayController gpController = new GamePlayController();
-            FeedbackTriggerController feedbackTriggerController = new FeedbackTriggerController();
+            gpController = new GamePlayController();
+            feedbackTriggerController = new FeedbackTriggerController();
 
             ArrayList<JSONObject> feedback = gpController.assess(idGP, action);
             feedback.addAll(feedbackTriggerController.getFeedback(idGP));
 
-            feedbackTriggerController.finalize();
-            gpController.finalize();
             return feedback.toString();
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { gpController.finalize(); } catch ( Exception e ) {}
+            try { feedbackTriggerController.finalize(); } catch ( Exception e ) {}
         }
     }
 
@@ -764,22 +802,26 @@ public class GamePlayResource {
     @Produces(MediaType.APPLICATION_JSON)
     public String assess2(String actionP, @PathParam("idGP") int idGP)
     {
+        FeedbackTriggerController feedbackTriggerController = null;
+        GamePlayController gpController = null;
         try
         {
             JSONObject action=(JSONObject) JSONValue.parse(actionP);
-            GamePlayController gpController = new GamePlayController();
-            FeedbackTriggerController feedbackTriggerController = new FeedbackTriggerController();
+            gpController = new GamePlayController();
+            feedbackTriggerController = new FeedbackTriggerController();
 
             ArrayList<JSONObject> feedback = gpController.assess(idGP, action);
             feedback.addAll(feedbackTriggerController.getFeedback(idGP));
 
-            feedbackTriggerController.finalize();
-            gpController.finalize();
             return feedback.toString();
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { gpController.finalize(); } catch ( Exception e ) {}
+            try { feedbackTriggerController.finalize(); } catch ( Exception e ) {}
         }
     }
 
@@ -797,11 +839,13 @@ public class GamePlayResource {
     @Produces(MediaType.APPLICATION_JSON)
     public String assessAndScore(String actionP, @PathParam("idGP") int idGP)
     {
+        GamePlayController gpController = null;
+        FeedbackTriggerController feedbackTriggerController = null;
         try
         {
             JSONObject action=(JSONObject) JSONValue.parse(actionP);
-            GamePlayController gpController = new GamePlayController();
-            FeedbackTriggerController feedbackTriggerController = new FeedbackTriggerController();
+            gpController = new GamePlayController();
+            feedbackTriggerController = new FeedbackTriggerController();
 
             ArrayList<JSONObject> feedback = gpController.assess(idGP, action);
             feedback.addAll(feedbackTriggerController.getFeedback(idGP));
@@ -812,13 +856,15 @@ public class GamePlayResource {
             returnJSON.put("feedback", feedback);
             returnJSON.put("scores", scores);
 
-            feedbackTriggerController.finalize();
-            gpController.finalize();
             return returnJSON.toString();
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { gpController.finalize(); } catch ( Exception e ) {}
+            try { feedbackTriggerController.finalize(); } catch ( Exception e ) {}
         }
     }
 
@@ -887,6 +933,8 @@ public class GamePlayResource {
     @Produces(MediaType.APPLICATION_JSON)
     public String assessAndScore2(String actionP, @PathParam("idGP") int idGP)
     {
+        GamePlayController gpController = null;
+        FeedbackTriggerController feedbackTriggerController = null;
         try
         {
             String headers = actionP.split("\\{")[0];
@@ -897,8 +945,8 @@ public class GamePlayResource {
             }
 
             JSONObject action=(JSONObject) JSONValue.parse(actionP);
-            GamePlayController gpController = new GamePlayController();
-            FeedbackTriggerController feedbackTriggerController = new FeedbackTriggerController();
+            gpController = new GamePlayController();
+            feedbackTriggerController = new FeedbackTriggerController();
 
             ArrayList<JSONObject> feedback = gpController.assess(idGP, action);
             feedback.addAll(feedbackTriggerController.getFeedback(idGP));
@@ -909,13 +957,15 @@ public class GamePlayResource {
             returnJSON.put("feedback", feedback);
             returnJSON.put("scores", scores);
 
-            feedbackTriggerController.finalize();
-            gpController.finalize();
             return returnJSON.toString();
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { gpController.finalize(); } catch ( Exception e ) {}
+            try { feedbackTriggerController.finalize(); } catch ( Exception e ) {}
         }
     }
 
@@ -932,17 +982,20 @@ public class GamePlayResource {
     @Produces(MediaType.TEXT_PLAIN)
     public String endGamePlay(@PathParam("idGP") int idGP)
     {
+        GamePlayController gpController = null;
         try
         {
-            GamePlayController gpController = new GamePlayController();
+            gpController = new GamePlayController();
             String end = gpController.endGamePlay(idGP) + "";
-            gpController.finalize();
             return end;
 
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { gpController.finalize(); } catch ( Exception e ) {}
         }
     }
 
@@ -971,13 +1024,13 @@ public class GamePlayResource {
     @Produces(MediaType.TEXT_PLAIN)
     public String endGamePlay(@PathParam("idGP") int idGP, @PathParam("win") String win)
     {
+        GamePlayController gpController = null;
         try
         {
-            GamePlayController gpController = new GamePlayController();
+            gpController = new GamePlayController();
             if (win.equals("end"))
             {
                 String end = gpController.endGamePlay(idGP) + "";
-                gpController.finalize();
                 return end;
             }
             else
@@ -985,7 +1038,6 @@ public class GamePlayResource {
                 Boolean gameWon = win.equals("win");
            
                 String end = gpController.endGamePlay(idGP, gameWon) + "";
-                gpController.finalize();
                 return end;
             }
 
@@ -993,6 +1045,9 @@ public class GamePlayResource {
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try { gpController.finalize(); } catch ( Exception e ) {}
         }
     }
 

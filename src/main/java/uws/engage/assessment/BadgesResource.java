@@ -85,16 +85,19 @@ public class BadgesResource {
     public String getBadges(@PathParam("idSG") int idSeriousGame, @PathParam("version") int version, 
                                         @PathParam("idPlayer") int idPlayer) 
     {
+        BadgesController badgesController = null;
         try
         {
-            BadgesController badgesController = new BadgesController();
+            badgesController = new BadgesController();
             ArrayList<JSONObject> bs = badgesController.getBadges(idSeriousGame, version, idPlayer);
-            badgesController.finalize();
             return bs.toString();
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try{ badgesController.finalize();} catch(Exception e){}
         }
     }
 
@@ -143,16 +146,19 @@ public class BadgesResource {
     public String getAllBadges(@PathParam("idSG") int idSeriousGame, @PathParam("version") int version, 
                                         @PathParam("idPlayer") int idPlayer) 
     {
+        BadgesController badgesController = null;
         try
         {
-            BadgesController badgesController = new BadgesController();
+            badgesController = new BadgesController();
             ArrayList<JSONObject> bs = badgesController.getAllBadges(idSeriousGame, version, idPlayer);
-            badgesController.finalize();
             return bs.toString();
         }
         catch( Exception e )
         {
             return "{ error: \"" + e + "\"}";
+        }
+        finally {
+            try{ badgesController.finalize();} catch(Exception e){}
         }
     }
     

@@ -46,20 +46,23 @@ public class SeriousGameAccessResource {
     @Path("/{idSG}/student/{idStudent}")
     @Produces(MediaType.TEXT_PLAIN)
     public String getVersion(@PathParam("idSG") int idSG, @PathParam("idStudent") int idStudent) {
+        StudentController stdtController = null;
         try
         {
             if (idStudent == 0)
             {
                 return "0";
             }
-            StudentController stdtController = new StudentController();
+            stdtController = new StudentController();
             String v = stdtController.getStudentVersionOfSG(idSG, idStudent) + "";
-            stdtController.finalize();
             return v;
         }
         catch( Exception e )
         {
             return "error: " + e;
+        }
+        finally {
+            try { stdtController.finalize(); } catch (Exception e) {}
         }
     }    
 
@@ -158,6 +161,9 @@ public class SeriousGameAccessResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String logonAndGetVersion(String loginParams) {
+        SeriousGameController sgController = null;
+        PlayerController playerController = null;
+        StudentController stdtController = null;
         try
         {
             String headers = loginParams.split("\\{")[0];
@@ -167,7 +173,7 @@ public class SeriousGameAccessResource {
                 loginParams = loginParams.replace(headers, " ");
             }
 
-            SeriousGameController sgController = new SeriousGameController();
+            sgController = new SeriousGameController();
 
             JSONObject returnData = new JSONObject();
             JSONObject loginParamsJson=(JSONObject) JSONValue.parse(loginParams);
@@ -194,11 +200,11 @@ public class SeriousGameAccessResource {
                 return "{ \"error\": \"idSG nnot found in the database\" }";                
             }
 
-            PlayerController playerController = new PlayerController();
+            playerController = new PlayerController();
             ArrayList<JSONObject> params = new ArrayList<JSONObject>();
           
 
-            StudentController stdtController = new StudentController();
+            stdtController = new StudentController();
             JSONObject student = stdtController.checkStudentUsernameAndPassword(username, password);
 
             if (student != null)
@@ -262,9 +268,6 @@ public class SeriousGameAccessResource {
                 }
             }
 
-            sgController.finalize();
-            playerController.finalize();
-            stdtController.finalize();
             return returnData.toString();
 
         }
@@ -274,6 +277,11 @@ public class SeriousGameAccessResource {
             JSONObject error = new JSONObject();
             error.put("error", e);
             return error.toString();
+        }
+        finally {
+            try { sgController.finalize(); } catch ( Exception e ){}
+            try { playerController.finalize(); } catch ( Exception e ){}
+            try { stdtController.finalize(); } catch ( Exception e ){}
         }
     }    
 }

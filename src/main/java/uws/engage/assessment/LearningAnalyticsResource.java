@@ -169,6 +169,14 @@ public class LearningAnalyticsResource {
     public String getLAinfo(@PathParam("idSG") int idSeriousGame, 
                                         @PathParam("version") int version) 
     {
+        SeriousGameController sgController = null;
+        ActionLogController actionLogController = null;
+        LearningOutcomeController loController = null;
+        GamePlayController gpController = null;
+        PlayerController playerController = null;
+        StudentController studentController = null;
+        BadgesController badgesController = null;
+        FeedbackLogController feedbackLogController = null;
         try
         {
             General g = new General();
@@ -182,14 +190,14 @@ public class LearningAnalyticsResource {
 
             // ------------------------- Controllers ----------------------- //
 
-            SeriousGameController sgController = new SeriousGameController();
-            ActionLogController actionLogController = new ActionLogController();
-            LearningOutcomeController loController = new LearningOutcomeController();
-            GamePlayController gpController = new GamePlayController();
-            PlayerController playerController = new PlayerController();
-            StudentController studentController = new StudentController();            
-            BadgesController badgesController = new BadgesController();
-            FeedbackLogController feedbackLogController = new FeedbackLogController();
+            sgController = new SeriousGameController();
+            actionLogController = new ActionLogController();
+            loController = new LearningOutcomeController();
+            gpController = new GamePlayController();
+            playerController = new PlayerController();
+            studentController = new StudentController();            
+            badgesController = new BadgesController();
+            feedbackLogController = new FeedbackLogController();
 
             /*
             System.out.println("one connection passed to each controller");
@@ -365,25 +373,21 @@ public class LearningAnalyticsResource {
 
             infoLA.put("gameplays", gameplays);
 
-            //conn.close();
-            //if (g.DEBUG)
-            //{
-            //    System.out.println("*** connection closed ***");
-            //}
-            actionLogController.finalize();
-            loController.finalize();
-            gpController.finalize();
-            playerController.finalize();
-            studentController.finalize();
-            sgController.finalize();
-            badgesController.finalize();
-            feedbackLogController.finalize();
-
             return infoLA.toString();
         }
         catch( Exception e )
         {
             return "{'error':'"+e+"'}";
+        }
+        finally {
+            try { actionLogController.finalize(); } catch ( Exception e ){}
+            try { loController.finalize(); } catch ( Exception e ){}
+            try { gpController.finalize(); } catch ( Exception e ){}
+            try { playerController.finalize(); } catch ( Exception e ){}
+            try { studentController.finalize(); } catch ( Exception e ){}
+            try { sgController.finalize(); } catch ( Exception e ){}
+            try { badgesController.finalize(); } catch ( Exception e ){}
+            try { feedbackLogController.finalize(); } catch ( Exception e ){}
         }
     }
 
@@ -492,20 +496,28 @@ public class LearningAnalyticsResource {
     public String getLAinfo(@PathParam("idSG") int idSeriousGame, 
                                         @PathParam("version") int version, @PathParam("idTeacher") int idTeacher) 
     {
+        SeriousGameController sgController = null;
+        ActionLogController actionLogController = null;
+        LearningOutcomeController loController = null;
+        GamePlayController gpController = null;
+        PlayerController playerController = null;
+        StudentController studentController = null;
+        BadgesController badgesController = null;
+        FeedbackLogController feedbackLogController = null;
         try
         {
             General g = new General();
             JSONObject infoLA = new JSONObject();
 
             // ------------------------- Controllers ----------------------- //
-            SeriousGameController sgController = new SeriousGameController();
-            ActionLogController actionLogController = new ActionLogController();
-            LearningOutcomeController loController = new LearningOutcomeController();
-            GamePlayController gpController = new GamePlayController();
-            PlayerController playerController = new PlayerController();
-            StudentController studentController = new StudentController();            
-            BadgesController badgesController = new BadgesController();
-            FeedbackLogController feedbackLogController = new FeedbackLogController();
+            sgController = new SeriousGameController();
+            actionLogController = new ActionLogController();
+            loController = new LearningOutcomeController();
+            gpController = new GamePlayController();
+            playerController = new PlayerController();
+            studentController = new StudentController();            
+            badgesController = new BadgesController();
+            feedbackLogController = new FeedbackLogController();
 
             // ---------------------------- GAME ---------------------------- //
             
@@ -674,21 +686,21 @@ public class LearningAnalyticsResource {
             }
 
             infoLA.put("gameplays", gameplays);
-
-            actionLogController.finalize();
-            loController.finalize();
-            gpController.finalize();
-            playerController.finalize();
-            studentController.finalize();
-            sgController.finalize();
-            badgesController.finalize();
-            feedbackLogController.finalize();
-
             return infoLA.toString();
         }
         catch( Exception e )
         {
             return "{'error':'"+e+"'}";
+        }
+        finally {
+            try { actionLogController.finalize(); } catch (Exception e){}
+            try { loController.finalize(); } catch (Exception e){}
+            try { gpController.finalize(); } catch (Exception e){}
+            try { playerController.finalize(); } catch (Exception e){}
+            try { studentController.finalize(); } catch (Exception e){}
+            try { sgController.finalize(); } catch (Exception e){}
+            try { badgesController.finalize(); } catch (Exception e){}
+            try { feedbackLogController.finalize(); } catch (Exception e){}
         }
     }
 
@@ -773,12 +785,18 @@ public class LearningAnalyticsResource {
 
     private JSONObject getLeaderboard(int idSeriousGame, int version, int limit) throws Exception
     {
-        JSONObject infoLeaderboard = new JSONObject();
+        LearningOutcomeController loController = null;
+        GamePlayController gpController = null;
+        PlayerController playerController = null;
+        StudentController studentController = null;
+        try{
 
-            LearningOutcomeController loController = new LearningOutcomeController();
-            GamePlayController gpController = new GamePlayController();
-            PlayerController playerController = new PlayerController();
-            StudentController studentController = new StudentController();
+            JSONObject infoLeaderboard = new JSONObject();
+
+            loController = new LearningOutcomeController();
+            gpController = new GamePlayController();
+            playerController = new PlayerController();
+            studentController = new StudentController();
 
             // ************** Get learning Outcomes ************** //
 
@@ -822,95 +840,102 @@ public class LearningAnalyticsResource {
 
                 infoLeaderboard.put("longestGameplays", listLongestPlayers);
 
-            // get shortest gameplays
-            ArrayList<JSONObject> gpsShortestTime = gpController.getBestTimeGameplaysByGame(idSeriousGame, version, limit, false);
-            ArrayList<JSONObject> listShortestPlayers = new ArrayList<JSONObject>();
-            for (JSONObject gp : gpsShortestTime) {
+                // get shortest gameplays
+                ArrayList<JSONObject> gpsShortestTime = gpController.getBestTimeGameplaysByGame(idSeriousGame, version, limit, false);
+                ArrayList<JSONObject> listShortestPlayers = new ArrayList<JSONObject>();
+                for (JSONObject gp : gpsShortestTime) {
 
-                    int idPlayer = Integer.parseInt(gp.get("idPlayer").toString());
-                    String playerName = "Anonymous";
-                    JSONObject leader = new JSONObject();
-                    if (idPlayer > 0)
-                    {
-                        JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
+                        int idPlayer = Integer.parseInt(gp.get("idPlayer").toString());
+                        String playerName = "Anonymous";
+                        JSONObject leader = new JSONObject();
+                        if (idPlayer > 0)
+                        {
+                            JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
 
-                        // get player's name
-                        if (player.get("idStudent") != 0)
-                        {
-                            JSONObject student = studentController.getStudentsByID(Integer.parseInt(player.get("idStudent").toString()));
-                            playerName = student.get("username").toString();
-                        }
-                        else
-                        {
-                            if (player.get("name") != null)
+                            // get player's name
+                            if (player.get("idStudent") != 0)
                             {
-                                playerName = player.get("name").toString();
+                                JSONObject student = studentController.getStudentsByID(Integer.parseInt(player.get("idStudent").toString()));
+                                playerName = student.get("username").toString();
                             }
-                            else if (player.get("username") != null)
+                            else
                             {
-                                playerName = player.get("username").toString();
-                            }
-                        }
-                    }
-                    leader.put("name", playerName);
-                    leader.put("score", gp.get("value"));
-                                        
-                    listShortestPlayers.add(leader);
-                    
-                }
-
-                infoLeaderboard.put("shortestGameplays", listShortestPlayers);
-
-            // get each score
-            for (JSONObject lo : los ) {
-                ArrayList<JSONObject> listPlayers = new ArrayList<JSONObject>();
-
-                ArrayList<JSONObject> gps = gpController.getBestGameplaysByGameAndOutcome(idSeriousGame, version, 
-                                                                                        limit, lo.get("name").toString(), true);
-
-                for (JSONObject gp : gps) {
-
-                    int idPlayer = Integer.parseInt(gp.get("idPlayer").toString());
-                    String playerName = "Anonymous";
-                    JSONObject leader = new JSONObject();
-                    if (idPlayer > 0)
-                    {
-                        JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
-
-                        // get player's name
-                        if (player.get("idStudent") != 0)
-                        {
-                            JSONObject student = studentController.getStudentsByID(Integer.parseInt(player.get("idStudent").toString()));
-                            playerName = student.get("username").toString();
-                        }
-                        else
-                        {
-                            if (player.get("name") != null)
-                            {
-                                playerName = player.get("name").toString();
-                            }
-                            else if (player.get("username") != null)
-                            {
-                                playerName = player.get("username").toString();
+                                if (player.get("name") != null)
+                                {
+                                    playerName = player.get("name").toString();
+                                }
+                                else if (player.get("username") != null)
+                                {
+                                    playerName = player.get("username").toString();
+                                }
                             }
                         }
+                        leader.put("name", playerName);
+                        leader.put("score", gp.get("value"));
+                                            
+                        listShortestPlayers.add(leader);
+                        
                     }
 
-                    leader.put("name", playerName);
-                    leader.put("score", gp.get("value"));
-                                        
-                    listPlayers.add(leader);
-                    
+                    infoLeaderboard.put("shortestGameplays", listShortestPlayers);
+
+                // get each score
+                for (JSONObject lo : los ) {
+                    ArrayList<JSONObject> listPlayers = new ArrayList<JSONObject>();
+
+                    ArrayList<JSONObject> gps = gpController.getBestGameplaysByGameAndOutcome(idSeriousGame, version, 
+                                                                                            limit, lo.get("name").toString(), true);
+
+                    for (JSONObject gp : gps) {
+
+                        int idPlayer = Integer.parseInt(gp.get("idPlayer").toString());
+                        String playerName = "Anonymous";
+                        JSONObject leader = new JSONObject();
+                        if (idPlayer > 0)
+                        {
+                            JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
+
+                            // get player's name
+                            if (player.get("idStudent") != 0)
+                            {
+                                JSONObject student = studentController.getStudentsByID(Integer.parseInt(player.get("idStudent").toString()));
+                                playerName = student.get("username").toString();
+                            }
+                            else
+                            {
+                                if (player.get("name") != null)
+                                {
+                                    playerName = player.get("name").toString();
+                                }
+                                else if (player.get("username") != null)
+                                {
+                                    playerName = player.get("username").toString();
+                                }
+                            }
+                        }
+
+                        leader.put("name", playerName);
+                        leader.put("score", gp.get("value"));
+                                            
+                        listPlayers.add(leader);
+                        
+                    }
+
+
+                    infoLeaderboard.put(lo.get("name"), listPlayers);
                 }
-
-
-                infoLeaderboard.put(lo.get("name"), listPlayers);
+                return infoLeaderboard;
             }
-            loController.finalize();
-            gpController.finalize();
-            playerController.finalize();
-            studentController.finalize();
-            return infoLeaderboard;
+            catch (Exception e){
+                throw e; 
+            }
+            finally
+            {
+                try { loController.finalize(); } catch (Exception e){}
+                try { gpController.finalize(); } catch (Exception e){}
+                try { playerController.finalize(); } catch (Exception e){}
+                try { studentController.finalize(); } catch (Exception e){}
+            }       
     }
 
     /**
