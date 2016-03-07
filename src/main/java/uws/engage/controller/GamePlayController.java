@@ -383,7 +383,7 @@ public class GamePlayController {
 					for (JSONObject updateScore : updateScores)
 					{
 						String outcome = updateScore.get("learningOutcome").toString();
-						System.out.println("Reset: " + updateScore.get("reset"));
+						//System.out.println("Reset: " + updateScore.get("reset"));
 						Boolean reset = (updateScore.get("reset") != null);
 						
 						// get mark to be added / reset in LO 
@@ -468,7 +468,7 @@ public class GamePlayController {
 				for (JSONObject updateScore : updateScores)
 				{
 					// get learning outcome to update
-					System.out.println("Reset: " + updateScore.get("reset"));
+					//System.out.println("Reset: " + updateScore.get("reset"));
 					Boolean reset = (updateScore.get("reset") != null);
 					String outcome = updateScore.get("learningOutcome").toString();
 
