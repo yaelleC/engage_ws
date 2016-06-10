@@ -23,9 +23,9 @@ public class DataSource {
         ds.setUrl(g.DB_NAME);
        
      // the settings below are optional -- dbcp can work with defaults
-        ds.setMaxActive(-1);
-        // ds.setMinIdle(5);
-        // ds.setMaxIdle(20);
+        ds.setMaxActive(1000);
+        ds.setMinIdle(0);
+        ds.setMaxIdle(10);
         // ds.setMaxOpenPreparedStatements(180);
 
     }
