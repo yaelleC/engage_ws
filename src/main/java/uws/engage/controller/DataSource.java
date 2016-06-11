@@ -26,6 +26,7 @@ public class DataSource {
         ds.setMaxActive(1000);
         ds.setMinIdle(0);
         ds.setMaxIdle(10);
+        ds.setValidationQuery("SELECT NOW()");
         // ds.setMaxOpenPreparedStatements(180);
 
     }
