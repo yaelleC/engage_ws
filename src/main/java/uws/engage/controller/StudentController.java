@@ -583,7 +583,8 @@ public class StudentController {
 				return g.CST_RETURN_SQL_ERROR;
 			}
 		}
-		
+
+		// TODO: check with LDAP instead
 		public JSONObject checkStudentUsernameAndPassword(String username, String password)
 		{
 			if (g.DEBUG)

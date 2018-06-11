@@ -877,7 +877,7 @@ public class GamePlayResource {
      * @return the list of feedback messages to trigger (JSON object)
      */
      /**
-     * @api {post} /gameplay/:idGameplay/AssessAndScore Assess
+     * @api {post} /gameplay/:idGameplay/assessAndScore Assess
      * @apiDescription During the gameplay, you will want to assess every player's action, 
      * you can do so by invoking the <code>assess</code> web service as follows.
      *
@@ -1050,5 +1050,4 @@ public class GamePlayResource {
             try { gpController.finalize(); } catch ( Exception e ) {}
         }
     }
-
 }

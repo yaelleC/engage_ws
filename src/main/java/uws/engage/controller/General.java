@@ -13,7 +13,7 @@ public class General {
 		public boolean DEBUG_SQL = false;
 	
 		// --------------------------- Database codes --------------------------- //
-		public String DB_NAME = (System.getenv("DATABASE_URL") != null)? "jdbc:" + System.getenv("DATABASE_URL") : "jdbc:mysql://mysql:3306/engage_dev";
+		public String DB_NAME = (System.getenv("DATABASE_URL") != null)? "jdbc:" + System.getenv("DATABASE_URL") : "jdbc:mysql://mysql:3306/engage";
 		public String DB_USERNAME = (System.getenv("DATABASE_USERNAME") != null)? System.getenv("DATABASE_USERNAME") : "root";
 		public String DB_PASSWD = (System.getenv("DATABASE_USER_PASSWORD") != null)? System.getenv("DATABASE_USER_PASSWORD") : "123";
 	

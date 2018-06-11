@@ -3,3 +3,9 @@ pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.next
 release.properties
+src/main/java/uws/engage/controller/SyncController.java
+src/main/java/uws/engage/assessment/SyncResource.java
+.idea/workspace.xml
+.idea/vcs.xml
+.idea/modules.xml
+.idea/engage_ws.iml
