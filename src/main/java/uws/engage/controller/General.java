@@ -9,13 +9,13 @@ public class General {
 	
 	// ********************************** Parameters ********************************** //
 	
-		public boolean DEBUG = false;
+		public boolean DEBUG = true;
 		public boolean DEBUG_SQL = false;
 	
 		// --------------------------- Database codes --------------------------- //
 		public String DB_NAME = (System.getenv("DATABASE_URL") != null)? "jdbc:" + System.getenv("DATABASE_URL") : "jdbc:mysql://mysql:3306/engage";
 		public String DB_USERNAME = (System.getenv("DATABASE_USERNAME") != null)? System.getenv("DATABASE_USERNAME") : "root";
-		public String DB_PASSWD = (System.getenv("DATABASE_USER_PASSWORD") != null)? System.getenv("DATABASE_USER_PASSWORD") : "123";
+		public String DB_PASSWD = (System.getenv("DATABASE_USER_PASSWORD") != null)? System.getenv("DATABASE_USER_PASSWORD") : "engage4ever";
 	
 		// --------------------------- Table feedback --------------------------- //
 		public String TABLE_FEEDBACK = "feedback";
@@ -213,6 +213,8 @@ public class General {
 		public int CST_RETURN_WRONG_ID = -1;
 		public int CST_RETURN_SQL_ERROR = -2;
 		public int CST_RETURN_ALREADY_ENDED = -0;
+
+		public int CST_RETURN_LDAP_AUTH_ERROR = -3;
 		
 		public int CST_RETURN_ERROR_PROTOCOL = 400;
 
@@ -221,4 +223,13 @@ public class General {
 		public String CST_SEPARATOR = ",,,";
 		public String CST_ATTRIBUTION = "===";
 		public String CST_END = "///";
+
+		// ----------------------------- LDAP Auth ---------------------------------------- //
+
+		public String LDAP_USER = "read-only-admin@example.com";
+		//public String LDAP_USER = "read-only-admin@forumsys.com";
+		public String LDAP_PASSWORD = "password";
+		public String LDAP_INITIAL_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
+		public String LDAP_SECURITY_AUTHENTICATION = "simple";
+		public String LDAP_PROVIDER_URL = "ldap://ldap.forumsys.com:389";
 }

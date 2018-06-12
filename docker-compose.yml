@@ -1,3 +1,4 @@
+---
 ws:
   build: .
   links: 
@@ -7,12 +8,17 @@ ws:
   volumes:
   - .:/opt/WebService
   # - /PATH_TO_GIT_REPO/settings.xml:/root/.m2/settings.xml
-
+  environment:
+    DATABASE_URL: mysql://mysql:3306/engage
+    DATABASE_USERNAME: root
+    DATABASE_USER_PASSWORD: engage4ever
+  restart: always
 mysql:
-  image: mysql
+  image: mysql:5.7
   volumes:
   - /var/lib/mysql:/var/lib/mysql
   ports:
     - "3306:3306"
   environment:
-    MYSQL_ROOT_PASSWORD: 123
+    MYSQL_ROOT_PASSWORD: engage4ever
+  restart: always

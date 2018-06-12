@@ -7,9 +7,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.lang.*;
 
 import org.eclipse.xtext.serializer.diagnostic.ISerializationDiagnostic.StdErrAcceptor;
 import org.json.simple.JSONObject;
+
+import javax.naming.Context;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchResult;
+import javax.naming.directory.SearchControls;
+import javax.naming.NamingEnumeration;
 
 /**
  * This class allows access to the student table of the database
@@ -593,6 +602,83 @@ public class StudentController {
 			}
 			try
 			{
+				Hashtable<String, String> env = new Hashtable<String, String>();
+
+				env.put(Context.INITIAL_CONTEXT_FACTORY, g.LDAP_INITIAL_CONTEXT_FACTORY);
+				env.put(Context.SECURITY_AUTHENTICATION, g.LDAP_SECURITY_AUTHENTICATION);
+				env.put(Context.PROVIDER_URL, g.LDAP_PROVIDER_URL);
+
+				// The value of Context.SECURITY_PRINCIPAL must be the logon username with the domain name
+				//env.put(Context.SECURITY_PRINCIPAL, g.LDAP_USER);
+				env.put(Context.SECURITY_PRINCIPAL, "cn=read-only-admin,dc=example,dc=com");
+
+				// The value of the Context.SECURITY_CREDENTIALS should be the user's password
+				env.put(Context.SECURITY_CREDENTIALS, g.LDAP_PASSWORD);
+
+				System.out.println(env);
+
+				DirContext ctx;
+
+				try {
+					// Authenticate the logon user
+					ctx = new InitialDirContext(env);
+					/**
+					 * Once the above line was executed successfully, the user is said to be
+					 * authenticated and the InitialDirContext object will be created.
+					 */
+					System.out.println("ctx: ");
+					System.out.println(ctx);
+
+					//Start checking if the user is within the organization unit(s)
+					// ou=scientists,dc=example,dc=com
+					// String searchBase = "OU=scientists,OU=mathematicians,DC=example,DC=com";
+					String searchBase = "DC=example,DC=com";
+					String searchFilter = "(&(objectClass=person)(sAMAccountName=read-only-admin)(userPrincipalName=read-only-admin@example.com))";
+					SearchControls sCtrl = new SearchControls();
+					sCtrl.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+
+					NamingEnumeration answer = ctx.search(searchBase, searchFilter, sCtrl);
+
+					boolean pass = false;
+					if (answer.hasMoreElements()) {
+						pass = true;
+					}
+
+					if (pass) {
+						System.out.println("*** user found ***");
+						// The user belongs to the specified OU(s), do something...
+						//SearchResult next = getLDAPInformation(ctx, username).nextElement();
+						//String studentID = next.getAttributes().get("id").get().toString();
+						JSONObject student = getStudentsByID(Integer.parseInt(username));
+
+						if (student == null)
+						{
+							student.put(g.STDT_FIELD_USERNAME, username);
+							student.put(g.STDT_FIELD_AGE, 0);
+							student.put(g.STDT_FIELD_GENDER, 0);
+							student.put(g.STDT_FIELD_ID_SCHOOL, 404);
+							student.put(g.STDT_FIELD_PASSWORD, "NO_LDAP");
+							createStudent(student);
+						}
+
+						ctx.close();
+						return student;
+					} else {
+						// The user doesn't belong to the specified OU(s)
+
+						System.out.println("*** user not found ***");
+						return null;
+					}
+
+
+
+				} catch (Exception ex) {
+					// Authentication failed, just check on the exception and do something about it.
+					System.err.println("ERROR (giveSGaccessToStudent): ");
+					System.err.println(ex);
+					return null;
+				}
+				/*
 				PreparedStatement stGetStudent = 
 						conn.prepareStatement("SELECT "+ g.STDT_FIELD_ID + ", " + g.STDT_FIELD_AGE + ", "+ g.STDT_FIELD_GENDER + ", " +
 												g.STDT_FIELD_ID_SCHOOL + " FROM " + g.TABLE_STUDENT + 
@@ -630,7 +716,8 @@ public class StudentController {
 					
 					return student;
 				}
-				return null;						
+				return null;*/
+
 			}
 			catch (Exception e)
 			{		
