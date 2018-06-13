@@ -80,14 +80,24 @@ public class StudentController {
 
 				stCreateStudent.setString(1, student.get(g.STDT_FIELD_USERNAME).toString());
 				stCreateStudent.setString(2, student.get(g.STDT_FIELD_PASSWORD).toString());
-				
-				String studentBirthDate = student.get(g.STDT_FIELD_AGE).toString();
-				java.util.Date utilDate = new SimpleDateFormat("yyyy-MM-dd").parse(studentBirthDate);
-				java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
-				stCreateStudent.setDate(3, sqlDate);
-				
-				stCreateStudent.setString(4, student.get(g.STDT_FIELD_GENDER).toString());
+
+				if (student.get(g.STDT_FIELD_AGE) != null) {
+					String studentBirthDate = student.get(g.STDT_FIELD_AGE).toString();
+					java.util.Date utilDate = new SimpleDateFormat("yyyy-MM-dd").parse(studentBirthDate);
+					java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+					stCreateStudent.setDate(3, sqlDate);
+				} else {
+					stCreateStudent.setDate(3, null);
+				}
+
+				if (student.get(g.STDT_FIELD_GENDER) != null) {
+					stCreateStudent.setString(4, student.get(g.STDT_FIELD_GENDER).toString());
+				} else {
+					stCreateStudent.setString(4, null);
+				}
+
 				stCreateStudent.setInt(5, Integer.parseInt(student.get(g.STDT_FIELD_ID_SCHOOL).toString()));
+
 				
 				if (g.DEBUG_SQL)
 				{
@@ -262,7 +272,73 @@ public class StudentController {
 				return null;
 			}
 		}
-		
+
+		public JSONObject getStudentsByUsername(String username)
+		{
+			if (g.DEBUG)
+			{
+				System.out.println("*** getStudentsByUsername ***");
+			}
+			try
+			{
+				String[] dbURL = g.DB_NAME.split("/");
+				String dbName = g.DB_NAME.split("/")[dbURL.length-1];
+
+				//String dbName = "engage_dev";
+
+				PreparedStatement stGetStudent =
+						conn.prepareStatement("SELECT "+ g.STDT_FIELD_ID + ", " + g.STDT_FIELD_AGE + ", "+ g.STDT_FIELD_GENDER + ", " +
+								g.STDT_FIELD_ID_SCHOOL + ", " + g.STDT_FIELD_PASSWORD + ", " +
+								"GROUP_CONCAT(" + g.TABLE_STDT_TEACHER + "." + g.ST_FIELD_ID_TEACHER + ")" +
+								" FROM " + g.TABLE_STUDENT + ", "+ dbName +"." + g.TABLE_STDT_TEACHER +
+								" WHERE " + g.TABLE_STUDENT + "." + g.STDT_FIELD_USERNAME + " = ? AND " +
+								g.TABLE_STUDENT + "." + g.STDT_FIELD_ID + " = " +
+								g.TABLE_STDT_TEACHER + "." + g.ST_FIELD_ID_STDT +
+								" GROUP BY " + g.STDT_FIELD_ID);
+
+				stGetStudent.setString(1, username);
+
+				if (g.DEBUG_SQL)
+				{
+					System.out.println(stGetStudent.toString());
+				}
+
+				ResultSet results = stGetStudent.executeQuery();
+
+				if (results.next())
+				{
+					if (g.DEBUG_SQL)
+					{
+						System.out.println();
+					}
+
+					JSONObject student = new JSONObject();
+					student.put(g.STDT_FIELD_ID, results.getInt(1));
+					student.put(g.STDT_FIELD_USERNAME, username);
+					SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+					//student.put(g.STDT_FIELD_AGE, formatter.parse(results.getString(2).toString()));
+					student.put(g.STDT_FIELD_AGE, results.getString(2));
+					student.put(g.STDT_FIELD_GENDER, results.getString(3));
+					student.put(g.STDT_FIELD_ID_SCHOOL, results.getInt(4));
+					student.put(g.STDT_FIELD_PASSWORD, results.getString(5));
+					student.put("teachers", results.getString(6));
+
+					if (g.DEBUG_SQL)
+					{
+						System.out.println(student.toJSONString());
+					}
+
+					return student;
+				}
+				return null;
+			}
+			catch (Exception e)
+			{
+				System.err.println("ERROR (getStudentsByUsername): " + e.getMessage());
+				return null;
+			}
+		}
+
 		public int addStudentToTeacher(int idStudent, int idTeacher)
 		{
 			if (g.DEBUG)
@@ -609,13 +685,10 @@ public class StudentController {
 				env.put(Context.PROVIDER_URL, g.LDAP_PROVIDER_URL);
 
 				// The value of Context.SECURITY_PRINCIPAL must be the logon username with the domain name
-				//env.put(Context.SECURITY_PRINCIPAL, g.LDAP_USER);
-				env.put(Context.SECURITY_PRINCIPAL, "cn=read-only-admin,dc=example,dc=com");
+				env.put(Context.SECURITY_PRINCIPAL, "cn="+username+",dc=example,dc=com");
 
 				// The value of the Context.SECURITY_CREDENTIALS should be the user's password
-				env.put(Context.SECURITY_CREDENTIALS, g.LDAP_PASSWORD);
-
-				System.out.println(env);
+				env.put(Context.SECURITY_CREDENTIALS, "password");
 
 				DirContext ctx;
 
@@ -626,18 +699,48 @@ public class StudentController {
 					 * Once the above line was executed successfully, the user is said to be
 					 * authenticated and the InitialDirContext object will be created.
 					 */
-					System.out.println("ctx: ");
-					System.out.println(ctx);
+					if (g.DEBUG)
+					{
+						System.out.println("*** user "+username+" found ***");
+					}
+					// The user belongs to the specified OU(s), do something...
+					//SearchResult next = getLDAPInformation(ctx, username).nextElement();
+					//String studentID = next.getAttributes().get("id").get().toString();
+					JSONObject student = getStudentsByUsername(username);
+					if (g.DEBUG)
+					{
+						System.out.println("student:");
+						System.out.println(student);
+					}
 
-					//Start checking if the user is within the organization unit(s)
-					// ou=scientists,dc=example,dc=com
+					ctx.close();
+
+					if (student != null)
+					{
+						return student;
+					}
+					else
+					{
+						// if the student logs in for the first time, create an EngAGe account
+						student = new JSONObject();
+						student.put(g.STDT_FIELD_USERNAME, username);
+						student.put(g.STDT_FIELD_ID_SCHOOL, 2);
+						student.put(g.STDT_FIELD_PASSWORD, "NO_LDAP");
+						createStudent(student);
+						student = getStudentsByUsername(username);
+						return student;
+					}
+
+					//TODO: Start checking if the user is within the organization unit(s)
+					/*
+					ou=scientists,dc=example,dc=com
 					// String searchBase = "OU=scientists,OU=mathematicians,DC=example,DC=com";
-					String searchBase = "DC=example,DC=com";
-					String searchFilter = "(&(objectClass=person)(sAMAccountName=read-only-admin)(userPrincipalName=read-only-admin@example.com))";
-					SearchControls sCtrl = new SearchControls();
-					sCtrl.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+					//String searchBase = "DC=example,DC=com";
+					//String searchFilter = "(&(objectClass=person)(sAMAccountName=read-only-admin)(userPrincipalName=read-only-admin@example.com))";
+					//SearchControls sCtrl = new SearchControls();
+					//sCtrl.setSearchScope(SearchControls.ONELEVEL_SCOPE);
 
-					NamingEnumeration answer = ctx.search(searchBase, searchFilter, sCtrl);
+					//NamingEnumeration answer = ctx.search(searchBase, searchFilter, sCtrl);
 
 					boolean pass = false;
 					if (answer.hasMoreElements()) {
@@ -645,24 +748,7 @@ public class StudentController {
 					}
 
 					if (pass) {
-						System.out.println("*** user found ***");
-						// The user belongs to the specified OU(s), do something...
-						//SearchResult next = getLDAPInformation(ctx, username).nextElement();
-						//String studentID = next.getAttributes().get("id").get().toString();
-						JSONObject student = getStudentsByID(Integer.parseInt(username));
 
-						if (student == null)
-						{
-							student.put(g.STDT_FIELD_USERNAME, username);
-							student.put(g.STDT_FIELD_AGE, 0);
-							student.put(g.STDT_FIELD_GENDER, 0);
-							student.put(g.STDT_FIELD_ID_SCHOOL, 404);
-							student.put(g.STDT_FIELD_PASSWORD, "NO_LDAP");
-							createStudent(student);
-						}
-
-						ctx.close();
-						return student;
 					} else {
 						// The user doesn't belong to the specified OU(s)
 
@@ -670,11 +756,11 @@ public class StudentController {
 						return null;
 					}
 
-
+					*/
 
 				} catch (Exception ex) {
 					// Authentication failed, just check on the exception and do something about it.
-					System.err.println("ERROR (giveSGaccessToStudent): ");
+					System.err.println("ERROR (checkStudentUsernameAndPassword): ");
 					System.err.println(ex);
 					return null;
 				}
@@ -715,9 +801,7 @@ public class StudentController {
 					}
 					
 					return student;
-				}
-				return null;*/
-
+				}*/
 			}
 			catch (Exception e)
 			{		

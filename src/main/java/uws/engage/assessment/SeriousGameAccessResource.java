@@ -209,7 +209,8 @@ public class SeriousGameAccessResource {
 
             if (student != null)
             {
-
+                System.out.println("student:");
+                System.out.println(student);
                 int idStudent = Integer.parseInt(student.get("id").toString());
                 int version = stdtController.getStudentVersionOfSG(idSG, idStudent);
 
