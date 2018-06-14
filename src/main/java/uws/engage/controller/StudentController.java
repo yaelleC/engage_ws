@@ -680,10 +680,11 @@ public class StudentController {
 				env.put(Context.PROVIDER_URL, g.LDAP_PROVIDER_URL);
 
 				// The value of Context.SECURITY_PRINCIPAL must be the logon username with the domain name
-				env.put(Context.SECURITY_PRINCIPAL, "cn="+username+",dc=example,dc=com");
+				//env.put(Context.SECURITY_PRINCIPAL, "cn="+username+",dc=example,dc=com");
+				env.put(Context.SECURITY_PRINCIPAL, "uid="+username+",dc=example,dc=com",);
 
 				// The value of the Context.SECURITY_CREDENTIALS should be the user's password
-				env.put(Context.SECURITY_CREDENTIALS, "password");
+				env.put(Context.SECURITY_CREDENTIALS, password);
 
 				DirContext ctx;
 

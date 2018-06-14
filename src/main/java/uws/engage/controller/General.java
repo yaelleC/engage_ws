@@ -10,7 +10,7 @@ public class General {
 	// ********************************** Parameters ********************************** //
 	
 		public boolean DEBUG = true;
-		public boolean DEBUG_SQL = false;
+		public boolean DEBUG_SQL = true;
 	
 		// --------------------------- Database codes --------------------------- //
 		public String DB_NAME = (System.getenv("DATABASE_URL") != null)? "jdbc:" + System.getenv("DATABASE_URL") : "jdbc:mysql://mysql:3306/engage";
