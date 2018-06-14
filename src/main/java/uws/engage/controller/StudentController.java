@@ -288,13 +288,9 @@ public class StudentController {
 
 				PreparedStatement stGetStudent =
 						conn.prepareStatement("SELECT "+ g.STDT_FIELD_ID + ", " + g.STDT_FIELD_AGE + ", "+ g.STDT_FIELD_GENDER + ", " +
-								g.STDT_FIELD_ID_SCHOOL + ", " + g.STDT_FIELD_PASSWORD + ", " +
-								"GROUP_CONCAT(" + g.TABLE_STDT_TEACHER + "." + g.ST_FIELD_ID_TEACHER + ")" +
-								" FROM " + g.TABLE_STUDENT + ", "+ dbName +"." + g.TABLE_STDT_TEACHER +
-								" WHERE " + g.TABLE_STUDENT + "." + g.STDT_FIELD_USERNAME + " = ? AND " +
-								g.TABLE_STUDENT + "." + g.STDT_FIELD_ID + " = " +
-								g.TABLE_STDT_TEACHER + "." + g.ST_FIELD_ID_STDT +
-								" GROUP BY " + g.STDT_FIELD_ID);
+								g.STDT_FIELD_ID_SCHOOL + ", " + g.STDT_FIELD_PASSWORD +
+								" FROM " + g.TABLE_STUDENT +
+								" WHERE " + g.TABLE_STUDENT + "." + g.STDT_FIELD_USERNAME + " = ? ");
 
 				stGetStudent.setString(1, username);
 
@@ -321,7 +317,6 @@ public class StudentController {
 					student.put(g.STDT_FIELD_GENDER, results.getString(3));
 					student.put(g.STDT_FIELD_ID_SCHOOL, results.getInt(4));
 					student.put(g.STDT_FIELD_PASSWORD, results.getString(5));
-					student.put("teachers", results.getString(6));
 
 					if (g.DEBUG_SQL)
 					{
