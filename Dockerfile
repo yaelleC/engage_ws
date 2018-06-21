@@ -13,7 +13,7 @@ MAINTAINER yaelle.chaudy@uws.ac.uk
 
 # Set JAVA HOME
 #ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
-RUN apt-get update && apt-get install -y maven
+RUN apt-get update && apt-get install -y maven ca-certificates
 # Install maven dependencies
 ADD lib /opt/WebService/lib
 ADD install.sh /opt/WebService/install.sh
@@ -26,10 +26,10 @@ RUN cd /opt/WebService; ./install.sh
 # Add code inside the container
 ADD . /opt/WebService
 
-RUN cd /opt/WebService; mvn clean install
+RUN cd /opt/WebService; mvn clean install -Dhttps.protocols=TLSv1.2
 
 # open ports
 EXPOSE 8080
 WORKDIR /opt/WebService
 
-CMD mvn clean install exec:exec
+CMD mvn clean install exec:exec -Dhttps.protocols=TLSv1.2

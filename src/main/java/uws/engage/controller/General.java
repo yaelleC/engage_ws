@@ -226,10 +226,14 @@ public class General {
 
 		// ----------------------------- LDAP Auth ---------------------------------------- //
 
-		public String LDAP_USER = "read-only-admin@example.com";
-		//public String LDAP_USER = "read-only-admin@forumsys.com";
-		public String LDAP_PASSWORD = "password";
+		//public String LDAP_USER = "read-only-admin@example.com";
+		public String LDAP_USER = "srvNursingVR@napier.ac.uk";
+		public String LDAP_PASSWORD = "hyg78.bv";
+		//public String LDAP_PASSWORD = "password";
 		public String LDAP_INITIAL_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
 		public String LDAP_SECURITY_AUTHENTICATION = "simple";
-		public String LDAP_PROVIDER_URL = "ldap://ldap.forumsys.com:389";
+		//public String LDAP_PROVIDER_URL = "ldap://ldap.forumsys.com:389";
+		//public String LDAP_PROVIDER_URL = "ldaps://192.168.1.11:636";
+		public String LDAP_PROVIDER_URL = "ldaps://10.16.2.163:636";
+		//public String LDAP_PROVIDER_URL = "ldaps://ldaps.napier.ac.uk:636";
 }
