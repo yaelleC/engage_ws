@@ -5,7 +5,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.Path;
+import javax.ws.rs.Path; 
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import uws.engage.controller.StudentController;
 import uws.engage.controller.PlayerController;
 import uws.engage.controller.SeriousGameController;
+import uws.engage.controller.LDAPController;
 /**
  * Root resource (exposed at "SGaccess" path)
  */
@@ -285,4 +286,67 @@ public class SeriousGameAccessResource {
             try { stdtController.finalize(); } catch ( Exception e ){}
         }
     }    
+
+
+/**
+     * @api {post} /SGaccess/interface Login Teacher to LA interface
+     * @apiDescription Teacher login using LDAP connect to the EngAGe learning analytics interface
+     *     *
+     * @apiVersion 2.0.0
+     *
+     * @apiParam {json} loginData JSON with two key/value: <ul>
+     * </li><li><i>username </i>: string, username of player, empty for guest login
+     * </li><li><i>password </i>: string, password of player, empty for guest login </li></ul>
+     *
+     * @apiParamExample {json} player login
+     *   {
+     *     "username": "yaelle",
+     *     "password": "password"
+     *   }
+     *
+     * @apiSuccess {Boolean} true if teacher successfully logged, false otherwise
+     */
+    @POST
+    @Path("/interface")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public boolean logTeacher(String loginParams) {
+        try
+        {
+            LDAPController ldapC;
+            String headers = loginParams.split("\\{")[0];
+           
+            if (headers.trim().length() > 0)
+            {
+                loginParams = loginParams.replace(headers, " ");
+            }
+
+            JSONObject returnData = new JSONObject();
+            JSONObject loginParamsJson=(JSONObject) JSONValue.parse(loginParams);
+
+            String username = loginParamsJson.get("username").toString();
+            String password = loginParamsJson.get("password").toString();
+
+            if (username == null )
+            {
+                username = "";
+            }
+            if ( password == null)
+            {
+                password = "";
+            }
+
+            ldapC = new LDAPController();
+            return (ldapC.checkLDAPUsernameAndPassword(username, password));
+        }
+        catch( Exception e )
+        {
+            System.out.println("error : " + e);
+            JSONObject error = new JSONObject();
+            error.put("error", e);
+            return false;
+        }
+    }    
+
+
 }
