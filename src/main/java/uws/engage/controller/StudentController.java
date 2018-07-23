@@ -683,6 +683,7 @@ public class StudentController {
 				//env.put(Context.SECURITY_PRINCIPAL, "cn="+username+",dc=localhost");
 				//env.put(Context.SECURITY_PRINCIPAL, "uid="+username+",dc=example,dc=com");
 				//env.put(Context.SECURITY_PRINCIPAL, "uid="+username+",dc=localhost");
+				//env.put(Context.SECURITY_PRINCIPAL, "ou=users,ou=napier,dc=napier-mail,dc=napier,dc=ac,dc=uk");
 				env.put(Context.SECURITY_PRINCIPAL, username);
 
 				// The value of the Context.SECURITY_CREDENTIALS should be the user's password
