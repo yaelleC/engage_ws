@@ -221,14 +221,9 @@ public class StudentController {
 				//String dbName = "engage_dev";
 
 				PreparedStatement stGetStudent = 
-						conn.prepareStatement("SELECT "+ g.STDT_FIELD_USERNAME + ", " + g.STDT_FIELD_AGE + ", "+ g.STDT_FIELD_GENDER + ", " +
-												g.STDT_FIELD_ID_SCHOOL + ", " + g.STDT_FIELD_PASSWORD + ", " + 
-												"GROUP_CONCAT(" + g.TABLE_STDT_TEACHER + "." + g.ST_FIELD_ID_TEACHER + ")" +
-												" FROM " + g.TABLE_STUDENT + ", "+ dbName +"." + g.TABLE_STDT_TEACHER + 
-												" WHERE " + g.TABLE_STUDENT + "." + g.STDT_FIELD_ID + " = ? AND " + 
-												g.TABLE_STUDENT + "." + g.STDT_FIELD_ID + " = " + 
-												g.TABLE_STDT_TEACHER + "." + g.ST_FIELD_ID_STDT + 
-												" GROUP BY " + g.STDT_FIELD_USERNAME);
+						conn.prepareStatement("SELECT "+ g.STDT_FIELD_USERNAME + ", " + g.STDT_FIELD_ID_SCHOOL +
+								" FROM " + g.TABLE_STUDENT +
+								" WHERE " + g.TABLE_STUDENT + "." + g.STDT_FIELD_ID + " = ? ");
 
 				stGetStudent.setInt(1, idStudent);
 				
@@ -238,10 +233,16 @@ public class StudentController {
 				}
 				
 				ResultSet results = stGetStudent.executeQuery();
+
+				if (g.DEBUG)
+				{
+					System.out.println("Results:");
+					System.out.println(results);
+				}
 				
 				if (results.next())
 				{
-					if (g.DEBUG_SQL)
+					if (g.DEBUG)
 					{
 						System.out.println();
 					}
@@ -249,15 +250,14 @@ public class StudentController {
 					JSONObject student = new JSONObject();
 					student.put(g.STDT_FIELD_ID, idStudent);
 					student.put(g.STDT_FIELD_USERNAME, results.getString(1));
-					SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+					//SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 					//student.put(g.STDT_FIELD_AGE, formatter.parse(results.getString(2).toString()));
-					student.put(g.STDT_FIELD_AGE, results.getString(2));
-					student.put(g.STDT_FIELD_GENDER, results.getString(3));
-					student.put(g.STDT_FIELD_ID_SCHOOL, results.getInt(4));
-					student.put(g.STDT_FIELD_PASSWORD, results.getString(5));
-					student.put("teachers", results.getString(6));
+					//student.put(g.STDT_FIELD_AGE, results.getString(2));
+					//student.put(g.STDT_FIELD_GENDER, results.getString(3));
+					student.put(g.STDT_FIELD_ID_SCHOOL, results.getInt(2));
+					//student.put(g.STDT_FIELD_PASSWORD, results.getString(5));
 					
-					if (g.DEBUG_SQL)
+					if (g.DEBUG)
 					{
 						System.out.println(student.toJSONString());
 					}
@@ -678,134 +678,92 @@ public class StudentController {
 				env.put(Context.INITIAL_CONTEXT_FACTORY, g.LDAP_INITIAL_CONTEXT_FACTORY);
 				env.put(Context.SECURITY_AUTHENTICATION, g.LDAP_SECURITY_AUTHENTICATION);
 				env.put(Context.PROVIDER_URL, g.LDAP_PROVIDER_URL);
+				env.put(Context.SECURITY_PRINCIPAL, g.LDAP_USER);
+				env.put(Context.SECURITY_CREDENTIALS, g.LDAP_PASSWORD);
 
-				// The value of Context.SECURITY_PRINCIPAL must be the logon username with the domain name
-				//env.put(Context.SECURITY_PRINCIPAL, "cn="+username+",dc=localhost");
-				//env.put(Context.SECURITY_PRINCIPAL, "uid="+username+",dc=example,dc=com");
-				//env.put(Context.SECURITY_PRINCIPAL, "uid="+username+",dc=localhost");
-				//env.put(Context.SECURITY_PRINCIPAL, "ou=users,ou=napier,dc=napier-mail,dc=napier,dc=ac,dc=uk");
-				env.put(Context.SECURITY_PRINCIPAL, username);
-
-				// The value of the Context.SECURITY_CREDENTIALS should be the user's password
-				env.put(Context.SECURITY_CREDENTIALS, password);
-
-				DirContext ctx;
+				DirContext ctx = null;
 
 				try {
 					// Authenticate the logon user
 					ctx = new InitialDirContext(env);
-					/**
-					 * Once the above line was executed successfully, the user is said to be
-					 * authenticated and the InitialDirContext object will be created.
-					 */
-					if (g.DEBUG)
-					{
-						System.out.println("*** user "+username+" found ***");
+
+					// we don't need all attributes, just let it get the identifying one
+			        String[] attributeFilter = { "sAMAccountName" };
+			        SearchControls sc = new SearchControls();
+			        sc.setReturningAttributes(attributeFilter);
+			        sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+
+			        // use a search filter to find only the user we want to authenticate
+        			String searchFilter = "(sAMAccountName=" + username + ")";
+       				NamingEnumeration<SearchResult> results = ctx.search(g.LDAP_BASE_DN, searchFilter, sc);
+
+					if (results.hasMore()) {
+			            // get the users DN (distinguishedName) from the result
+			            SearchResult result = results.next();
+			            String distinguishedName = result.getNameInNamespace();
+
+			            // attempt another authentication, now with the user
+			            Hashtable<String, String> authEnv = new Hashtable<String, String>();
+			            authEnv.put(Context.INITIAL_CONTEXT_FACTORY, g.LDAP_INITIAL_CONTEXT_FACTORY);
+			            authEnv.put(Context.PROVIDER_URL, g.LDAP_PROVIDER_URL);
+			            authEnv.put(Context.SECURITY_PRINCIPAL, distinguishedName);
+			            authEnv.put(Context.SECURITY_CREDENTIALS, password);
+			            new InitialDirContext(authEnv);
+
+			            System.out.println("Authentication successful");
+			            
+
+						if (g.DEBUG)
+						{
+							System.out.println("*** user "+username+" exists and password is correct ***");
+						}
+
+						JSONObject student = getStudentsByUsername(username);
+						if (g.DEBUG)
+						{
+							System.out.println("student:");
+							System.out.println(student);
+						}
+
+						ctx.close();
+
+						if (student != null)
+						{
+							return student;
+						}
+						else
+						{
+							// if the student logs in for the first time, create an EngaGe account
+							student = new JSONObject();
+							student.put(g.STDT_FIELD_USERNAME, username);
+							student.put(g.STDT_FIELD_ID_SCHOOL, 2);
+							student.put(g.STDT_FIELD_PASSWORD, "NO_LDAP");
+							createStudent(student);
+							student = getStudentsByUsername(username);
+							return student;
+						}
 					}
-					// The user belongs to the specified OU(s), do something...
-					//SearchResult next = getLDAPInformation(ctx, username).nextElement();
-					//String studentID = next.getAttributes().get("id").get().toString();
-					JSONObject student = getStudentsByUsername(username);
-					if (g.DEBUG)
-					{
-						System.out.println("student:");
-						System.out.println(student);
-					}
-
-					ctx.close();
-
-					if (student != null)
-					{
-						return student;
-					}
-					else
-					{
-						// if the student logs in for the first time, create an EngAGe account
-						student = new JSONObject();
-						student.put(g.STDT_FIELD_USERNAME, username);
-						student.put(g.STDT_FIELD_ID_SCHOOL, 2);
-						student.put(g.STDT_FIELD_PASSWORD, "NO_LDAP");
-						createStudent(student);
-						student = getStudentsByUsername(username);
-						return student;
-					}
-
-					//TODO: Start checking if the user is within the organization unit(s)
-					/*
-					ou=scientists,dc=example,dc=com
-					// String searchBase = "OU=scientists,OU=mathematicians,DC=example,DC=com";
-					//String searchBase = "DC=example,DC=com";
-					//String searchFilter = "(&(objectClass=person)(sAMAccountName=read-only-admin)(userPrincipalName=read-only-admin@example.com))";
-					//SearchControls sCtrl = new SearchControls();
-					//sCtrl.setSearchScope(SearchControls.ONELEVEL_SCOPE);
-
-					//NamingEnumeration answer = ctx.search(searchBase, searchFilter, sCtrl);
-
-					boolean pass = false;
-					if (answer.hasMoreElements()) {
-						pass = true;
-					}
-
-					if (pass) {
-
-					} else {
-						// The user doesn't belong to the specified OU(s)
-
-						System.out.println("*** user not found ***");
-						return null;
-					}
-
-					*/
-
+					
 				} catch (Exception ex) {
 					// Authentication failed, just check on the exception and do something about it.
 					System.err.println("ERROR (checkStudentUsernameAndPassword): ");
 					System.err.println(ex);
 					return null;
-				}
-				/*
-				PreparedStatement stGetStudent = 
-						conn.prepareStatement("SELECT "+ g.STDT_FIELD_ID + ", " + g.STDT_FIELD_AGE + ", "+ g.STDT_FIELD_GENDER + ", " +
-												g.STDT_FIELD_ID_SCHOOL + " FROM " + g.TABLE_STUDENT + 
-												" WHERE " + g.STDT_FIELD_USERNAME + " = ? AND " + g.STDT_FIELD_PASSWORD + " = ?");
-
-				stGetStudent.setString(1, username);
-				stGetStudent.setString(2, password);
-				
-				if (g.DEBUG_SQL)
-				{
-					System.out.println(stGetStudent.toString());
-				}
-				
-				ResultSet results = stGetStudent.executeQuery();
-				
-				if (results.next())
-				{
-					if (g.DEBUG_SQL)
-					{
-						System.out.println();
-					}
-					
-					JSONObject student = new JSONObject();
-					student.put(g.STDT_FIELD_ID, results.getInt(1));
-					student.put(g.STDT_FIELD_USERNAME, username);
-					student.put(g.STDT_FIELD_AGE, results.getString(2));
-					student.put(g.STDT_FIELD_GENDER, results.getString(3));
-					student.put(g.STDT_FIELD_ID_SCHOOL, results.getInt(4));
-					//student.put(g.STDT_FIELD_PASSWORD, password);
-					
-					if (g.DEBUG_SQL)
-					{
-						System.out.println(student.toJSONString());
-					}
-					
-					return student;
-				}*/
+				} finally {
+			        if (ctx != null) {
+			            try {
+			                ctx.close();
+			            } catch (Exception e) {
+			                e.printStackTrace();
+			            }
+			        }
+			    }
 			}
 			catch (Exception e)
 			{		
 				System.err.println("ERROR (checkStudentUsernameAndPassword): " + e.getMessage());
 				return null;
 			}
+			return null;
 		}
 }

@@ -10,7 +10,7 @@ public class General {
 	// ********************************** Parameters ********************************** //
 	
 		public boolean DEBUG = true;
-		public boolean DEBUG_SQL = true;
+		public boolean DEBUG_SQL = false;
 	
 		// --------------------------- Database codes --------------------------- //
 		public String DB_NAME = (System.getenv("DATABASE_URL") != null)? "jdbc:" + System.getenv("DATABASE_URL") : "jdbc:mysql://mysql:3306/engage";
@@ -227,13 +227,11 @@ public class General {
 		// ----------------------------- LDAP Auth ---------------------------------------- //
 
 		//public String LDAP_USER = "read-only-admin@example.com";
-		public String LDAP_USER = "srvNursingVR@napier.ac.uk";
+		public String LDAP_USER = "srvNursingVR";
 		public String LDAP_PASSWORD = "hyg78.bv";
-		//public String LDAP_PASSWORD = "password";
 		public String LDAP_INITIAL_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
 		public String LDAP_SECURITY_AUTHENTICATION = "simple";
-		//public String LDAP_PROVIDER_URL = "ldap://ldap.forumsys.com:389";
-		//public String LDAP_PROVIDER_URL = "ldaps://192.168.1.11:636";
-		//public String LDAP_PROVIDER_URL = "ldaps://10.16.2.163:636";
-		public String LDAP_PROVIDER_URL = "ldaps://ldaps.napier.ac.uk:636";
+		//public String LDAP_PROVIDER_URL = "ldaps://ldaps.napier.ac.uk:636";
+		public String LDAP_PROVIDER_URL = "ldaps://192.168.1.11:636";
+		public String LDAP_BASE_DN = "ou=users,ou=napier,dc=napier-mail,dc=napier,dc=ac,dc=uk";
 }
