@@ -814,7 +814,7 @@ public class LearningAnalyticsResource {
                     {
                         JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
                         // get player's name
-                        if (player.get("idStudent") != 0)
+                        if (Integer.parseInt(player.get("idStudent").toString()) != 0)
                         {
                             JSONObject student = studentController.getStudentsByID(Integer.parseInt(player.get("idStudent").toString()));
                             playerName = student.get("username").toString();
@@ -853,7 +853,7 @@ public class LearningAnalyticsResource {
                             JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
 
                             // get player's name
-                            if (player.get("idStudent") != 0)
+                            if (Integer.parseInt(player.get("idStudent").toString()) != 0)
                             {
                                 JSONObject student = studentController.getStudentsByID(Integer.parseInt(player.get("idStudent").toString()));
                                 playerName = student.get("username").toString();
@@ -896,7 +896,7 @@ public class LearningAnalyticsResource {
                             JSONObject player = playerController.getPlayerFromId(idPlayer, idSeriousGame, version);
 
                             // get player's name
-                            if (player.get("idStudent") != 0)
+                            if (Integer.parseInt(player.get("idStudent").toString()) != 0)
                             {
                                 JSONObject student = studentController.getStudentsByID(Integer.parseInt(player.get("idStudent").toString()));
                                 playerName = student.get("username").toString();

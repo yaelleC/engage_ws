@@ -9,12 +9,13 @@ public class General {
 	
 	// ********************************** Parameters ********************************** //
 	
-		public boolean DEBUG = true;
+		public boolean DEBUG = false;
 		public boolean DEBUG_SQL = false;
 	
 		// --------------------------- Database codes --------------------------- //
-		public String DB_NAME = (System.getenv("DATABASE_URL") != null)? "jdbc:" + System.getenv("DATABASE_URL") : "jdbc:mysql://mysql:3306/engage";
-		public String DB_USERNAME = (System.getenv("DATABASE_USERNAME") != null)? System.getenv("DATABASE_USERNAME") : "root";
+		//public String DB_NAME = (System.getenv("DATABASE_URL") != null)? "jdbc:" + System.getenv("DATABASE_URL") : "jdbc:mysql://mysql:3306/engage";
+		public String DB_NAME = (System.getenv("DATABASE_URL") != null)? "jdbc:" + System.getenv("DATABASE_URL") : "jdbc:mysql://localhost:3306/engage";
+		public String DB_USERNAME = (System.getenv("DATABASE_USERNAME") != null)? System.getenv("DATABASE_USERNAME") : "engage";
 		public String DB_PASSWD = (System.getenv("DATABASE_USER_PASSWORD") != null)? System.getenv("DATABASE_USER_PASSWORD") : "engage4ever";
 	
 		// --------------------------- Table feedback --------------------------- //
@@ -231,7 +232,7 @@ public class General {
 		public String LDAP_PASSWORD = "hyg78.bv";
 		public String LDAP_INITIAL_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
 		public String LDAP_SECURITY_AUTHENTICATION = "simple";
-		//public String LDAP_PROVIDER_URL = "ldaps://ldaps.napier.ac.uk:636";
-		public String LDAP_PROVIDER_URL = "ldaps://192.168.1.11:636";
+		public String LDAP_PROVIDER_URL = "ldaps://ldaps.napier.ac.uk:636";
+		//public String LDAP_PROVIDER_URL = "ldaps://192.168.1.11:636";
 		public String LDAP_BASE_DN = "ou=users,ou=napier,dc=napier-mail,dc=napier,dc=ac,dc=uk";
 }
